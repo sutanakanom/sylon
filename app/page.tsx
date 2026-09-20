@@ -1,8 +1,11 @@
 import { getPublicItems } from "@/lib/data";
 import { ItemCard } from "@/components/ItemCard";
+import { ProfileChip } from "@/components/ProfileChip";
+import { getCurrentMember } from "@/lib/current-member";
+import { signOut } from "@/app/actions/auth";
 
 export default async function Home() {
-  const items = await getPublicItems();
+  const [items, member] = await Promise.all([getPublicItems(), getCurrentMember()]);
   const upcomingCount = items.filter(
     (i) => i.kind === "trip" && (i.status === "confirmed" || i.status === "planning")
   ).length;
@@ -17,12 +20,26 @@ export default async function Home() {
             See You Later (or not)
           </span>
         </div>
-        <a
-          href="/sign-in"
-          className="mono-label border-[1.5px] border-ink px-4 py-2 text-[0.7rem] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ink)]"
-        >
-          Sign in
-        </a>
+        {member ? (
+          <div className="flex items-center gap-4">
+            <ProfileChip member={member} />
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="mono-label text-[0.65rem] text-muted underline underline-offset-2"
+              >
+                Sign out
+              </button>
+            </form>
+          </div>
+        ) : (
+          <a
+            href="/sign-in"
+            className="mono-label border-[1.5px] border-ink px-4 py-2 text-[0.7rem] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ink)]"
+          >
+            Sign in
+          </a>
+        )}
       </header>
 
       {/* Hero */}
