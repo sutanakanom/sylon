@@ -130,3 +130,69 @@ export async function toggleFollow(
   revalidatePath(`/${itemType}/${slug}`);
   return { ok: true, following: true };
 }
+
+export interface Participant {
+  id: string;
+  name: string;
+}
+
+// No approval needed to join, per the requirements doc's decided open
+// question. Returns the real joined-members list for the detail page's
+// Members block.
+export async function getParticipants(itemType: ItemType, itemId: string): Promise<Participant[]> {
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) return [];
+
+  const { data, error } = await supabaseAdmin
+    .from("participants")
+    .select("member_id, members(display_name, email)")
+    .eq("item_type", itemType)
+    .eq("item_id", itemId);
+
+  if (error || !data) return [];
+  return (
+    data as unknown as { member_id: string; members: { display_name: string | null; email: string } | null }[]
+  ).map((row) => ({
+    id: row.member_id,
+    name: row.members?.display_name || row.members?.email.split("@")[0] || "Someone",
+  }));
+}
+
+export async function isJoined(itemType: ItemType, itemId: string): Promise<boolean> {
+  const member = await getCurrentMember();
+  if (!member || !isSupabaseAdminConfigured || !supabaseAdmin) return false;
+
+  const { data } = await supabaseAdmin
+    .from("participants")
+    .select("id")
+    .eq("item_type", itemType)
+    .eq("item_id", itemId)
+    .eq("member_id", member.id)
+    .maybeSingle();
+
+  return Boolean(data);
+}
+
+export type JoinResult = { ok: true } | { ok: false; error: string };
+
+export async function joinItem(itemType: ItemType, itemId: string, slug: string): Promise<JoinResult> {
+  const member = await getCurrentMember();
+  if (!member) return { ok: false, error: "Sign in to join." };
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return { ok: false, error: "Joining isn't wired up on this environment yet." };
+  }
+
+  const { error } = await supabaseAdmin
+    .from("participants")
+    .upsert(
+      { item_type: itemType, item_id: itemId, member_id: member.id },
+      { onConflict: "item_type,item_id,member_id" }
+    );
+
+  if (error) {
+    console.error("joinItem failed", error);
+    return { ok: false, error: "Couldn't join. Try again." };
+  }
+
+  revalidatePath(`/${itemType}/${slug}`);
+  return { ok: true };
+}

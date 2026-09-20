@@ -2,11 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getItemBySlug } from "@/lib/data";
 import { getCurrentMember } from "@/lib/current-member";
-import { getComments, isFollowing } from "@/app/actions/interactions";
+import { getComments, isFollowing, getParticipants, isJoined } from "@/app/actions/interactions";
+import { getMySurveyResponse } from "@/app/actions/survey";
 import { labelFor, StatusStamp } from "@/components/StatusStamp";
 import { ProfileChip } from "@/components/ProfileChip";
 import { CommentThread } from "@/components/CommentThread";
 import { FollowButton } from "@/components/FollowButton";
+import { JoinButton } from "@/components/JoinButton";
+import { SurveyForm } from "@/components/SurveyForm";
 import { signOut } from "@/app/actions/auth";
 
 export default async function TripDetailPage({
@@ -42,9 +45,12 @@ export default async function TripDetailPage({
     );
   }
 
-  const [comments, following] = await Promise.all([
+  const [comments, following, participants, joined, mySurvey] = await Promise.all([
     getComments("trip", item.id),
     isFollowing("trip", item.id),
+    getParticipants("trip", item.id),
+    isJoined("trip", item.id),
+    member ? getMySurveyResponse(item.id) : Promise.resolve(null),
   ]);
 
   const label = labelFor(item);
@@ -107,13 +113,42 @@ export default async function TripDetailPage({
         </div>
         <div className="border-[1.5px] border-ink p-5">
           <span className="mono-label text-[0.65rem] text-muted">Members</span>
-          <p className="mt-3 text-sm">{item.memberCount} going</p>
+          {participants.length === 0 ? (
+            <p className="mt-3 text-sm text-muted">Nobody&apos;s joined yet — be the first.</p>
+          ) : (
+            <ul className="mt-3 flex flex-col gap-1">
+              {participants.map((p) => (
+                <li key={p.id} className="text-sm font-bold uppercase">
+                  {p.name}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         <div className="border-[1.5px] border-ink p-5">
           <span className="mono-label text-[0.65rem] text-muted">Status</span>
           <p className="mt-3 text-sm">{label}</p>
         </div>
       </section>
+
+      {/* Join */}
+      <section className="flex items-center justify-center border-b-[1.5px] border-ink px-6 py-8 md:px-10">
+        <JoinButton
+          itemType="trip"
+          itemId={item.id}
+          slug={item.slug}
+          initialJoined={joined}
+          signedIn={Boolean(member)}
+        />
+      </section>
+
+      {/* Survey — only once you've joined */}
+      {joined && (
+        <section className="mx-auto w-full max-w-2xl px-6 py-10 md:px-10">
+          <h2 className="mb-4 text-lg font-extrabold uppercase">A couple of questions</h2>
+          <SurveyForm tripId={item.id} slug={item.slug} initialAnswers={mySurvey} />
+        </section>
+      )}
 
       {/* Follow + comments */}
       <section className="mx-auto w-full max-w-2xl flex-1 px-6 py-10 md:px-10">
