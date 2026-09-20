@@ -54,3 +54,13 @@ export interface Manifest {
 }
 
 export type Item = Trip | Manifest;
+
+export interface Comment {
+  id: string;
+  itemType: "trip" | "manifest";
+  itemId: string;
+  memberId: string;
+  memberName: string;
+  body: string;
+  createdAt: string;
+}

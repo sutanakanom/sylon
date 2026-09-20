@@ -1,6 +1,7 @@
 import { Item, Trip, Manifest, Leg } from "./types";
 import { seedItems } from "./seed-data";
 import { isSupabaseConfigured, supabase } from "./supabase";
+import { supabaseAdmin, isSupabaseAdminConfigured } from "./supabase-admin";
 
 // Supabase/Postgres returns snake_case column names (rough_date,
 // country_votes, member_count); the rest of the app uses camelCase.
@@ -81,4 +82,30 @@ export async function getPublicItems(): Promise<Item[]> {
   );
 
   return [...tripItems, ...manifestItems];
+}
+
+// Fetches one Trip or Manifest by slug regardless of visibility — the
+// page that calls this decides what a visitor is allowed to see (public
+// items show full detail to anyone; invite-only items require a signed-in
+// member for now, until per-item invite access is built).
+export async function getItemBySlug(slug: string): Promise<Item | null> {
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return seedItems.find((item) => item.slug === slug) ?? null;
+  }
+
+  const { data: tripRow } = await supabaseAdmin
+    .from("trips")
+    .select("*")
+    .eq("slug", slug)
+    .maybeSingle();
+  if (tripRow) return tripFromRow(tripRow as TripRow);
+
+  const { data: manifestRow } = await supabaseAdmin
+    .from("manifests")
+    .select("*")
+    .eq("slug", slug)
+    .maybeSingle();
+  if (manifestRow) return manifestFromRow(manifestRow as ManifestRow);
+
+  return null;
 }
