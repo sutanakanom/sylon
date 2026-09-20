@@ -1,0 +1,92 @@
+import { Item } from "./types";
+
+// Placeholder content so the site works before Supabase is connected.
+// Once NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY are set
+// (see supabase/schema.sql), getItems() in lib/data.ts reads from the
+// database instead and this file stops being used.
+export const seedItems: Item[] = [
+  {
+    id: "1",
+    slug: "hk-disney-run",
+    kind: "trip",
+    title: "HK Disney Run",
+    status: "confirmed",
+    visibility: "public",
+    roughDate: "Late Nov – early Dec",
+    countries: ["Hong Kong", "China"],
+    legs: [
+      { place: "Hong Kong", startDate: "2026-11-28", endDate: "2026-12-02" },
+      { place: "Shenzhen", startDate: "2026-12-02", endDate: "2026-12-04" },
+    ],
+    summary: "Hong Kong, then Shenzhen.",
+    memberCount: 2,
+  },
+  {
+    id: "2",
+    slug: "limp-bizkit-kl",
+    kind: "trip",
+    title: "Limp Bizkit, KL",
+    status: "confirmed",
+    visibility: "public",
+    roughDate: "9 Dec",
+    countries: ["Malaysia"],
+    legs: [{ place: "Kuala Lumpur", startDate: "2026-12-09", endDate: "2026-12-09" }],
+    summary: "One loud night.",
+    memberCount: 1,
+  },
+  {
+    id: "3",
+    slug: "xian",
+    kind: "trip",
+    title: "Xi'an",
+    status: "planning",
+    visibility: "public",
+    roughDate: "January",
+    countries: ["China"],
+    legs: [{ place: "Xi'an", startDate: "2027-01-01", endDate: "2027-01-07" }],
+    summary: "Sometime in Jan '27.",
+    memberCount: 1,
+  },
+  {
+    id: "4",
+    slug: "radiohead-2027",
+    kind: "manifest",
+    title: "Radiohead, 2027",
+    status: "open",
+    visibility: "public",
+    roughDate: "2027",
+    countryVotes: [
+      { country: "Japan", votes: 3 },
+      { country: "Australia", votes: 2 },
+    ],
+    summary: "Japan or Australia, not decided.",
+    memberCount: 5,
+  },
+  {
+    id: "5",
+    slug: "la-olympics-2028",
+    kind: "manifest",
+    title: "LA Olympics",
+    status: "open",
+    visibility: "public",
+    roughDate: "2028",
+    countryVotes: [{ country: "United States", votes: 2 }],
+    summary: "Very far off, very tempting.",
+    memberCount: 2,
+  },
+  {
+    id: "6",
+    slug: "spain-italy-2027",
+    kind: "manifest",
+    title: "Spain × Italy",
+    status: "open",
+    visibility: "public",
+    roughDate: "2027",
+    countryVotes: [
+      { country: "Spain", votes: 1 },
+      { country: "Italy", votes: 1 },
+    ],
+    summary: "Two countries, one maybe.",
+    memberCount: 2,
+  },
+];
