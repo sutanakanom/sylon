@@ -31,3 +31,34 @@ export async function sendInviteCodeEmail(email: string, code: string) {
 
   return { sent: true };
 }
+
+export async function sendInviteRequestNotification(
+  adminEmails: string[],
+  request: { name: string; email: string; reason: string }
+) {
+  if (!resend || adminEmails.length === 0) {
+    console.warn(
+      `RESEND_API_KEY or ADMIN_EMAILS not set — would have notified admins of invite request from ${request.email}`
+    );
+    return { sent: false };
+  }
+
+  await resend.emails.send({
+    from: FROM,
+    to: adminEmails,
+    replyTo: request.email,
+    subject: `SYLON: ${request.name} wants an invite`,
+    text: `${request.name} (${request.email}) asked for an invite.\n\nReason: ${request.reason}\n\nHead to sylater.app/admin to send them a code.`,
+    html: `
+      <div style="font-family: monospace; background:#F3F0E8; color:#11110F; padding: 32px;">
+        <p style="text-transform:uppercase; letter-spacing:0.08em; font-size:12px; color:#716F68;">New invite request</p>
+        <p style="font-size:20px; font-weight:700; margin: 8px 0 4px;">${request.name}</p>
+        <p style="font-size:14px; color:#716F68; margin: 0 0 16px;">${request.email}</p>
+        <p style="font-size:14px; margin: 0 0 24px;">${request.reason}</p>
+        <p style="font-size:14px; color:#716F68;">Send them a code from sylater.app/admin</p>
+      </div>
+    `,
+  });
+
+  return { sent: true };
+}

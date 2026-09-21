@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCurrentMember } from "@/lib/current-member";
-import { listMembers } from "@/app/actions/admin";
+import { listMembers, listInviteRequests } from "@/app/actions/admin";
 import { AdminPanel } from "./AdminPanel";
 
 export default async function AdminPage() {
   const member = await getCurrentMember();
   if (!member?.isAdmin) notFound();
 
-  const members = await listMembers();
+  const [members, requests] = await Promise.all([listMembers(), listInviteRequests()]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -24,7 +24,7 @@ export default async function AdminPage() {
         <p className="mb-10 text-sm leading-snug text-muted">
           Invite someone by email, send a fresh code, or turn off an account&apos;s access.
         </p>
-        <AdminPanel initialMembers={members} />
+        <AdminPanel initialMembers={members} initialRequests={requests} />
       </div>
     </div>
   );

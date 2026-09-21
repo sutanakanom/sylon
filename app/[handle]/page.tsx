@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublicItems, handleExists } from "@/lib/data";
-import { ItemCard } from "@/components/ItemCard";
-import { ProfileChip } from "@/components/ProfileChip";
-import { ShareOverallButton } from "@/components/ShareOverallButton";
 import { getCurrentMember } from "@/lib/current-member";
 import { signOut } from "@/app/actions/auth";
+import { PlansSection } from "./PlansSection";
+import styles from "./PersonalPage.module.css";
 
 export default async function PersonalPage({
   params,
@@ -26,122 +25,127 @@ export default async function PersonalPage({
   const upcomingCount = items.filter(
     (i) => i.kind === "trip" && (i.status === "confirmed" || i.status === "planning")
   ).length;
+  const name = member?.displayName || member?.email.split("@")[0] || null;
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className={styles.page}>
       {/* Nav */}
-      <header className="flex items-center justify-between border-b-[1.5px] border-ink px-6 py-5 md:px-10">
-        <Link href="/">
-          <span className="text-lg font-extrabold tracking-tight uppercase">SYLON</span>
-          <span className="mono-label ml-3 hidden text-[0.65rem] text-muted sm:inline">
-            See You Later (or not)
-          </span>
+      <nav>
+        <Link href="/" className={styles.brand}>
+          <span className={styles.brandDot} />
+          SYLON
         </Link>
-        {member ? (
-          <div className="flex items-center gap-4">
-            {member.isAdmin && (
-              <Link
-                href="/admin"
-                className="mono-label text-[0.65rem] text-muted underline underline-offset-2"
-              >
-                Admin
+        <span className={`${styles.navLine} mono`}>See you later — or not.</span>
+        <div className={styles.navActions}>
+          {member ? (
+            <>
+              {member.isAdmin && (
+                <Link href="/admin" className={`${styles.signout} mono`}>
+                  Admin
+                </Link>
+              )}
+              <Link href="/profile" className={styles.profileChip} aria-label={`${name}'s profile`}>
+                {member.photoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={member.photoUrl} alt={name ?? ""} className={styles.avatar} />
+                ) : (
+                  <span className={styles.avatar} aria-hidden="true">
+                    {(name ?? "?").charAt(0).toUpperCase()}
+                  </span>
+                )}
+                <span className={styles.profileText}>
+                  <strong>{name}</strong>
+                  {member.instagramHandle && <span>@{member.instagramHandle}</span>}
+                </span>
               </Link>
-            )}
-            <Link href="/profile">
-              <ProfileChip member={member} />
-            </Link>
-            <form action={signOut}>
-              <button
-                type="submit"
-                className="mono-label text-[0.65rem] text-muted underline underline-offset-2"
-              >
-                Sign out
-              </button>
-            </form>
-          </div>
-        ) : (
-          <a
-            href="/sign-in"
-            className="mono-label border-[1.5px] border-ink px-4 py-2 text-[0.7rem] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ink)]"
-          >
-            What is our password?
-          </a>
-        )}
-      </header>
+              <form action={signOut}>
+                <button type="submit" className={styles.signout}>
+                  Sign out
+                </button>
+              </form>
+            </>
+          ) : (
+            <a href="/sign-in" className={styles.signIn}>
+              What is our password?
+            </a>
+          )}
+        </div>
+      </nav>
 
-      {/* Hero */}
-      <section className="grid gap-6 border-b-[1.5px] border-ink px-6 py-14 md:grid-cols-[1fr_320px] md:px-10 md:py-20">
-        <div>
-          <h1 className="text-5xl font-extrabold leading-[0.95] tracking-tight uppercase md:text-7xl">
-            See you
+      <main id="top">
+        {/* Hero */}
+        <section className={styles.profileHero}>
+          <div>
+            <div className={`${styles.kicker} mono`}>{displayName}&apos;s future atlas</div>
+            <h1>
+              See you
+              <span className={styles.outline}>somewhere.</span>
+            </h1>
+            <div className={styles.intro}>
+              <span className={`${styles.introNumber} mono`}>01</span>
+              <p>
+                {displayName}&apos;s trips and travel ideas — some booked, some still just a
+                maybe. Public plans below; the rest need a little help from{" "}
+                <mark>an invite.</mark>
+              </p>
+            </div>
+          </div>
+          <aside className={styles.passport} aria-label="Profile summary">
+            <span className={`${styles.passportLabel} mono`}>Departures on my mind</span>
+            <span className={styles.passportCount}>
+              {String(upcomingCount).padStart(2, "0")}
+            </span>
+            <span className={styles.passportCopy}>public possibilities currently in motion</span>
+            <div className={`${styles.passportMeta} mono`}>
+              <span>{items.length} public plans</span>
+              <span>@{handle}</span>
+            </div>
+          </aside>
+        </section>
+
+        {/* Ticker */}
+        {items.length > 0 && (
+          <div className={styles.ticker} aria-hidden="true">
+            <div className={`${styles.tickerTrack} mono`}>
+              {Array(2)
+                .fill(
+                  items
+                    .map((i) => `${i.title.toUpperCase()} — ${i.status.toUpperCase()}`)
+                    .join(" / ") + " / "
+                )
+                .join("")}
+            </div>
+          </div>
+        )}
+
+        <PlansSection
+          items={items}
+          displayName={displayName}
+          isAdmin={Boolean(member?.isAdmin)}
+          showInviteCta={!member}
+        />
+
+        {/* Manifesto */}
+        <section className={styles.manifesto}>
+          <span className={`${styles.manifestoLabel} mono`}>
+            A note from future {displayName}
             <br />
-            later.
-          </h1>
-          <p className="mt-6 max-w-md text-lg leading-snug text-muted">
-            {displayName}&apos;s trips and travel ideas — some solid, some still just a maybe.
-            Public plans below; ask for an invite to see the rest.
-          </p>
-          <div className="mt-6">
-            <ShareOverallButton displayName={displayName} items={items} />
-          </div>
-        </div>
-        <div className="flex flex-col justify-between border-[1.5px] border-ink bg-acid p-5 text-ink">
-          <span className="mono-label text-[0.65rem]">Right now</span>
-          <span className="text-6xl font-extrabold leading-none">{upcomingCount}</span>
-          <span className="mono-label text-[0.65rem]">upcoming, publicly</span>
-        </div>
-      </section>
+            No. 01
+          </span>
+          <blockquote>
+            Not every plan is a promise. Some are just a place we haven&apos;t been yet — and
+            an <em>open invitation.</em>
+          </blockquote>
+        </section>
+      </main>
 
-      {/* Ticker */}
-      {items.length > 0 && (
-        <div className="mono-label overflow-hidden border-b-[1.5px] border-ink bg-ink py-2 text-[0.7rem] text-paper">
-          <div className="whitespace-nowrap">
-            {Array(2)
-              .fill(
-                items
-                  .map((i) => `${i.title.toUpperCase()} — ${i.status.toUpperCase()}`)
-                  .join(" · ") + " · "
-              )
-              .join("")}
-          </div>
+      <footer>
+        <div className={styles.footerBrand}>SYLON</div>
+        <div className={`${styles.footerMeta} mono`}>
+          See you later (or not)
+          <br />
+          @{handle}
         </div>
-      )}
-
-      {/* Grid */}
-      <section className="grid grid-cols-1 gap-4 px-6 py-10 sm:grid-cols-2 md:px-10 lg:grid-cols-3">
-        {member?.isAdmin && (
-          <Link
-            href="/new"
-            className="flex min-h-[300px] flex-col items-center justify-center gap-2 border-[1.5px] border-dashed border-ink p-5 text-center transition-transform hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0_var(--ink)]"
-          >
-            <span className="text-4xl leading-none">+</span>
-            <span className="mono-label text-[0.7rem]">Add a Trip or Manifest</span>
-          </Link>
-        )}
-        {items.map((item, index) => (
-          <ItemCard key={item.id} item={item} index={index} />
-        ))}
-        <div className="flex min-h-[300px] flex-col justify-center border-[1.5px] border-dashed border-muted p-5 text-center text-muted">
-          <p className="text-sm leading-snug">
-            A couple more plans are visible only to people {displayName} has invited.
-          </p>
-        </div>
-      </section>
-
-      {/* Manifesto */}
-      <section className="border-y-[1.5px] border-ink bg-ink px-6 py-16 text-paper md:px-10">
-        <p className="mx-auto max-w-2xl text-center text-2xl font-medium leading-snug md:text-3xl">
-          Not every plan is a promise. Some are just a place we haven&apos;t been yet —
-          and an open invitation to whoever wants to help make it real.
-        </p>
-      </section>
-
-      {/* Footer */}
-      <footer className="mt-auto flex flex-col items-center gap-1 px-6 py-8 text-center">
-        <span className="mono-label text-[0.65rem] text-footer-grey">
-          SYLON — See You Later (or not)
-        </span>
-        <span className="mono-label text-[0.65rem] text-footer-grey">@{handle}</span>
       </footer>
     </div>
   );

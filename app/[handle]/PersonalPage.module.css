@@ -1,0 +1,754 @@
+/* Ported from the design-agent bundle (SYLON-personal-bundle). Scoped
+   under .page so nothing here leaks onto other routes — this file is a
+   CSS Module, so every class below is already uniquely hashed by Next.js,
+   but the handful of bare element selectors (nav, h1, main, footer,
+   button, dialog) are NOT auto-scoped by CSS Modules, so each of those is
+   nested under .page explicitly. Color tokens (--ink, --paper, --acid,
+   --orange, --muted) already exist on :root in app/globals.css — reused
+   here as-is rather than redefined. */
+
+.page {
+  --line: rgba(17, 17, 15, 0.2);
+  --white: #fff;
+  --gutter: clamp(20px, 3.2vw, 52px);
+}
+
+.page :global(.mono) {
+  font-family: "DM Mono", ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.page button {
+  font: inherit;
+}
+
+/* Nav */
+.page nav {
+  height: 76px;
+  padding: 0 var(--gutter);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  border-bottom: 1.5px solid var(--ink);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(243, 240, 232, 0.9);
+  backdrop-filter: blur(14px);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  text-decoration: none;
+  color: inherit;
+}
+.brandDot {
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--acid);
+}
+.navLine {
+  font-size: 0.66rem;
+  color: var(--muted);
+  justify-self: center;
+}
+.navActions {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.profileChip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+.avatar {
+  width: 38px;
+  height: 38px;
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+  background: var(--ink);
+  color: var(--paper);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  transform: rotate(-2deg);
+  box-shadow: 3px 3px 0 var(--acid);
+  overflow: hidden;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.profileText {
+  display: grid;
+  line-height: 1.15;
+}
+.profileText strong {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+.profileText span {
+  font-size: 0.61rem;
+  color: var(--muted);
+}
+.signout {
+  border: 0;
+  background: none;
+  padding: 7px 0;
+  font-size: 0.62rem;
+  color: var(--muted);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.signIn {
+  border: 1.5px solid var(--ink);
+  padding: 10px 16px;
+  font-size: 0.68rem;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.signIn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+/* Main / hero */
+.page main {
+  padding: 0 var(--gutter) 80px;
+}
+.profileHero {
+  min-height: 510px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
+  gap: clamp(24px, 5vw, 80px);
+  align-items: end;
+  padding: clamp(54px, 9vh, 110px) 0 48px;
+  border-bottom: 1px solid var(--line);
+  position: relative;
+  overflow: hidden;
+}
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 0.68rem;
+}
+.kicker:before {
+  content: "";
+  width: 34px;
+  height: 2px;
+  background: var(--ink);
+}
+.page h1 {
+  margin: 24px 0 26px;
+  font-size: clamp(4.3rem, 10vw, 10rem);
+  line-height: 0.78;
+  letter-spacing: -0.085em;
+  text-transform: uppercase;
+}
+.outline {
+  display: block;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--ink);
+  margin-left: 8vw;
+}
+.intro {
+  display: grid;
+  grid-template-columns: auto minmax(0, 560px);
+  gap: 20px;
+  align-items: start;
+}
+.introNumber {
+  font-size: 0.65rem;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+}
+.intro p {
+  margin: 0;
+  font-size: clamp(1rem, 1.5vw, 1.3rem);
+  line-height: 1.48;
+}
+.intro mark {
+  background: var(--acid);
+  color: inherit;
+  padding: 0 0.16em;
+}
+.passport {
+  background: var(--acid);
+  border: 1.5px solid var(--ink);
+  padding: 22px;
+  min-height: 330px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 10px 10px 0 var(--ink);
+  transform: rotate(1.5deg);
+  position: relative;
+}
+.passport:after {
+  content: "OPEN TO\A DETOURS";
+  white-space: pre;
+  position: absolute;
+  right: 20px;
+  top: 88px;
+  width: 96px;
+  height: 96px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font: 500 0.62rem/1.4 "DM Mono";
+  transform: rotate(13deg);
+  opacity: 0.68;
+}
+.passportLabel {
+  font-size: 0.64rem;
+}
+.passportCount {
+  font-size: clamp(5rem, 9vw, 8rem);
+  font-weight: 800;
+  letter-spacing: -0.1em;
+  line-height: 0.75;
+}
+.passportCopy {
+  font-weight: 700;
+  max-width: 190px;
+  line-height: 1.2;
+}
+.passportMeta {
+  border-top: 1px solid var(--ink);
+  padding-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.58rem;
+}
+
+/* Ticker */
+.ticker {
+  margin: 0 calc(var(--gutter) * -1);
+  background: var(--ink);
+  color: var(--acid);
+  border-bottom: 1.5px solid var(--ink);
+  padding: 12px 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.tickerTrack {
+  display: inline-block;
+  font-size: 0.67rem;
+  animation: sylonTicker 30s linear infinite;
+}
+@keyframes sylonTicker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Collection head + tools */
+.collectionHead {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: end;
+  padding: 70px 0 26px;
+}
+.collectionHead h2 {
+  font-size: clamp(2.5rem, 6vw, 5.5rem);
+  line-height: 0.88;
+  letter-spacing: -0.07em;
+  margin: 0;
+}
+.collectionHead p {
+  max-width: 330px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.tools {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 26px;
+  flex-wrap: wrap;
+}
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.filter {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 14px;
+  background: transparent;
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+.filter:hover,
+.filterActive {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.share {
+  border: 1.5px solid var(--ink);
+  padding: 10px 14px;
+  background: transparent;
+  font-size: 0.68rem;
+  cursor: pointer;
+}
+.share:hover {
+  background: var(--acid);
+  box-shadow: 4px 4px 0 var(--ink);
+  transform: translate(-2px, -2px);
+}
+
+/* Plan cards */
+.plans {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 18px;
+}
+.plan {
+  grid-column: span 4;
+  min-height: 360px;
+  border: 1.5px solid var(--ink);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: var(--ink);
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background: var(--paper);
+}
+.wide {
+  grid-column: span 8;
+}
+.dark {
+  background: var(--ink);
+  color: var(--paper);
+}
+.acid {
+  background: var(--acid);
+}
+.orange {
+  background: var(--orange);
+}
+.plan:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: 8px 8px 0 var(--ink);
+}
+.planTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+}
+.badge {
+  font-size: 0.62rem;
+  padding: 6px 9px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+}
+.planDate {
+  text-align: right;
+  font-size: 0.62rem;
+  line-height: 1.5;
+}
+.plan h3 {
+  font-size: clamp(2rem, 4vw, 4.2rem);
+  line-height: 0.88;
+  letter-spacing: -0.06em;
+  text-transform: uppercase;
+  margin: auto 0 28px;
+  max-width: 95%;
+}
+.wide h3 {
+  font-size: clamp(3.2rem, 7vw, 7rem);
+}
+.planBottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+.planCopy {
+  max-width: 280px;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.42;
+}
+.arrow {
+  font-size: 2.3rem;
+  line-height: 0.8;
+  transition: transform 0.2s;
+}
+.plan:hover .arrow {
+  transform: translate(5px, -5px);
+}
+.location {
+  border-top: 1px solid currentColor;
+  margin-top: 15px;
+  padding-top: 10px;
+  font-size: 0.61rem;
+  opacity: 0.78;
+}
+.vote {
+  margin-top: 15px;
+}
+.voteTrack {
+  height: 8px;
+  border: 1px solid currentColor;
+  padding: 1px;
+}
+.voteFill {
+  height: 100%;
+  width: var(--vote);
+  background: currentColor;
+}
+
+/* Private / teaser card */
+.private {
+  grid-column: span 4;
+  min-height: 360px;
+  border: 1.5px dashed var(--muted);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: var(--muted);
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 9px,
+    rgba(17, 17, 15, 0.035) 9px,
+    rgba(17, 17, 15, 0.035) 10px
+  );
+}
+.lock {
+  width: 42px;
+  height: 42px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+}
+.private h3 {
+  font-size: 2.2rem;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  margin: 0;
+  color: var(--ink);
+}
+.private p {
+  line-height: 1.45;
+  margin: 12px 0 20px;
+}
+.invite {
+  align-self: flex-start;
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+  padding: 10px 13px;
+  font-size: 0.66rem;
+  cursor: pointer;
+}
+.invite:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* Add-a-plan card (host only) */
+.addPlan {
+  grid-column: span 4;
+  min-height: 360px;
+  border: 1.5px dashed var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.addPlan:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: 8px 8px 0 var(--ink);
+}
+.addPlanPlus {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+/* Manifesto */
+.manifesto {
+  margin: 76px 0 0;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1.5px solid var(--ink);
+  padding: clamp(30px, 5vw, 70px);
+  display: grid;
+  grid-template-columns: 0.55fr 1.45fr;
+  gap: 5vw;
+}
+.manifestoLabel {
+  font-size: 0.64rem;
+  color: var(--acid);
+}
+.manifesto blockquote {
+  font-size: clamp(2.1rem, 4.8vw, 5rem);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+  margin: 0;
+}
+.manifesto em {
+  font-style: normal;
+  color: var(--acid);
+}
+
+/* Footer */
+.page footer {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 34px var(--gutter);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+.footerBrand {
+  font-size: clamp(3.2rem, 8vw, 7.5rem);
+  font-weight: 800;
+  letter-spacing: -0.09em;
+  line-height: 0.75;
+}
+.footerMeta {
+  text-align: right;
+  font-size: 0.61rem;
+  color: #aaa89f;
+  line-height: 1.7;
+}
+
+/* Invite-request dialog */
+.page dialog {
+  border: 0;
+  background: transparent;
+  padding: 20px;
+  max-width: none;
+  width: 100%;
+  height: 100%;
+}
+.page dialog::backdrop {
+  background: rgba(17, 17, 15, 0.74);
+}
+.sheet {
+  width: min(520px, 100%);
+  margin: auto;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  padding: 28px;
+  box-shadow: 12px 12px 0 var(--acid);
+}
+.sheetHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sheet h2 {
+  font-size: 2.8rem;
+  letter-spacing: -0.06em;
+  margin: 28px 0 18px;
+}
+.close {
+  border: 0;
+  background: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+.field {
+  display: grid;
+  gap: 7px;
+  margin: 15px 0;
+}
+.field label {
+  font-size: 0.63rem;
+}
+.field input,
+.field select {
+  width: 100%;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--white);
+  padding: 13px;
+  font: inherit;
+  font-size: 1rem;
+}
+.submit {
+  width: 100%;
+  border: 1.5px solid var(--ink);
+  background: var(--acid);
+  padding: 14px;
+  font-weight: 800;
+  margin-top: 8px;
+  cursor: pointer;
+}
+.submit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.formError {
+  color: var(--orange);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid var(--paper);
+  padding: 13px 16px;
+  font-size: 0.68rem;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: 0.25s;
+  z-index: 60;
+}
+.toastShow {
+  transform: none;
+  opacity: 1;
+}
+
+@media (max-width: 900px) {
+  .page nav {
+    grid-template-columns: 1fr auto;
+  }
+  .navLine {
+    display: none;
+  }
+  .profileHero {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  .passport {
+    width: min(100%, 390px);
+    min-height: 260px;
+  }
+  .plans {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .plan,
+  .wide,
+  .private,
+  .addPlan {
+    grid-column: span 1;
+  }
+  .wide h3 {
+    font-size: clamp(2.5rem, 8vw, 5rem);
+  }
+  .manifesto {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .page nav {
+    height: 68px;
+  }
+  .profileText,
+  .signout {
+    display: none;
+  }
+  .avatar {
+    width: 36px;
+    height: 36px;
+  }
+  .profileHero {
+    min-height: auto;
+    padding: 56px 0 38px;
+  }
+  .page h1 {
+    font-size: clamp(4rem, 22vw, 7rem);
+  }
+  .outline {
+    margin-left: 0;
+  }
+  .intro {
+    grid-template-columns: 1fr;
+  }
+  .introNumber {
+    display: none;
+  }
+  .passport {
+    transform: rotate(1deg);
+    box-shadow: 7px 7px 0 var(--ink);
+  }
+  .collectionHead {
+    grid-template-columns: 1fr;
+    padding-top: 55px;
+  }
+  .tools {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .plans {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 0 0 16px;
+  }
+  .plan,
+  .wide,
+  .private,
+  .addPlan {
+    min-width: 84vw;
+    min-height: 420px;
+    scroll-snap-align: start;
+  }
+  .plan h3,
+  .wide h3 {
+    font-size: clamp(2.7rem, 14vw, 5rem);
+  }
+  .manifesto {
+    margin-top: 54px;
+  }
+  .footerMeta {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page * {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}

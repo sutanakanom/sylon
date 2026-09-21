@@ -3,19 +3,66 @@
 import { useState, useTransition } from "react";
 import {
   AdminMemberRow,
+  AdminInviteRequestRow,
   inviteMember,
   regenerateCode,
   deactivateMember,
   reactivateMember,
+  approveInviteRequest,
+  dismissInviteRequest,
 } from "@/app/actions/admin";
 
-export function AdminPanel({ initialMembers }: { initialMembers: AdminMemberRow[] }) {
+export function AdminPanel({
+  initialMembers,
+  initialRequests,
+}: {
+  initialMembers: AdminMemberRow[];
+  initialRequests: AdminInviteRequestRow[];
+}) {
   const [members, setMembers] = useState(initialMembers);
+  const [requests, setRequests] = useState(initialRequests);
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [busyId, setBusyId] = useState<string | null>(null);
+
+  function handleApprove(request: AdminInviteRequestRow) {
+    setError(null);
+    setStatus(null);
+    setBusyId(request.id);
+    startTransition(async () => {
+      const result = await approveInviteRequest(request.id, request.email);
+      setBusyId(null);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      setRequests((prev) => prev.filter((r) => r.id !== request.id));
+      setStatus(`Invite sent to ${request.email}.`);
+      if (!members.some((m) => m.email === request.email)) {
+        setMembers((prev) => [
+          {
+            id: `pending-${request.email}`,
+            email: request.email,
+            displayName: null,
+            deactivated: false,
+            createdAt: new Date().toISOString(),
+          },
+          ...prev,
+        ]);
+      }
+    });
+  }
+
+  function handleDismiss(request: AdminInviteRequestRow) {
+    setBusyId(request.id);
+    startTransition(async () => {
+      await dismissInviteRequest(request.id);
+      setBusyId(null);
+      setRequests((prev) => prev.filter((r) => r.id !== request.id));
+    });
+  }
 
   function handleInvite(e: React.FormEvent) {
     e.preventDefault();
@@ -79,6 +126,47 @@ export function AdminPanel({ initialMembers }: { initialMembers: AdminMemberRow[
 
   return (
     <div className="flex flex-col gap-10">
+      {requests.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <span className="mono-label text-[0.7rem] text-muted">
+            Requests ({requests.length})
+          </span>
+          {requests.map((r) => (
+            <div
+              key={r.id}
+              className="flex flex-col gap-3 border-[1.5px] border-ink bg-acid p-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <p className="font-medium">
+                  {r.name} · <span className="text-sm">{r.email}</span>
+                </p>
+                {r.reason && (
+                  <p className="mono-label text-[0.65rem] opacity-70">{r.reason}</p>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={isPending && busyId === r.id}
+                  onClick={() => handleApprove(r)}
+                  className="mono-label border-[1.5px] border-ink bg-paper px-3 py-2 text-[0.65rem] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0_var(--ink)] disabled:opacity-50"
+                >
+                  {busyId === r.id && isPending ? "…" : "Send invite"}
+                </button>
+                <button
+                  type="button"
+                  disabled={isPending && busyId === r.id}
+                  onClick={() => handleDismiss(r)}
+                  className="mono-label border-[1.5px] border-ink px-3 py-2 text-[0.65rem] disabled:opacity-50"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <form
         onSubmit={handleInvite}
         className="flex flex-col gap-4 border-[1.5px] border-ink bg-paper p-6 shadow-[6px_6px_0_var(--ink)]"

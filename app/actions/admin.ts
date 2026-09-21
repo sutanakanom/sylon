@@ -20,6 +20,59 @@ export interface AdminMemberRow {
   createdAt: string;
 }
 
+export interface AdminInviteRequestRow {
+  id: string;
+  name: string;
+  email: string;
+  reason: string | null;
+  createdAt: string;
+}
+
+export async function listInviteRequests(): Promise<AdminInviteRequestRow[]> {
+  await requireAdmin();
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) return [];
+
+  const { data } = await supabaseAdmin
+    .from("invite_requests")
+    .select("id, name, email, reason, created_at")
+    .eq("handled", false)
+    .order("created_at", { ascending: false });
+
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    name: r.name,
+    email: r.email,
+    reason: r.reason,
+    createdAt: r.created_at,
+  }));
+}
+
+// Sends the invite and marks the request handled in one step — the point
+// of surfacing requests in /admin is a single "approve" click.
+export async function approveInviteRequest(requestId: string, email: string): Promise<AdminActionResult> {
+  await requireAdmin();
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return { ok: false, error: "Not configured." };
+  }
+
+  const result = await generateAndSendInviteCode(email.trim().toLowerCase());
+  if (result.ok) {
+    await supabaseAdmin.from("invite_requests").update({ handled: true }).eq("id", requestId);
+  }
+  revalidatePath("/admin");
+  return result;
+}
+
+export async function dismissInviteRequest(requestId: string): Promise<AdminActionResult> {
+  await requireAdmin();
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return { ok: false, error: "Not configured." };
+  }
+  await supabaseAdmin.from("invite_requests").update({ handled: true }).eq("id", requestId);
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
 export async function listMembers(): Promise<AdminMemberRow[]> {
   await requireAdmin();
   if (!isSupabaseAdminConfigured || !supabaseAdmin) return [];

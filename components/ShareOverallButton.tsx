@@ -110,9 +110,13 @@ function wrapTextLeft(
 export function ShareOverallButton({
   displayName,
   items,
+  className,
+  label = "Share overall plan to IG Story ↗",
 }: {
   displayName: string;
   items: Item[];
+  className?: string;
+  label?: string;
 }) {
   const [status, setStatus] = useState<"idle" | "working" | "done">("idle");
 
@@ -156,9 +160,12 @@ export function ShareOverallButton({
       <button
         onClick={handleShare}
         disabled={status === "working"}
-        className="mono-label border-[1.5px] border-ink px-4 py-2 text-[0.7rem] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ink)] disabled:opacity-50"
+        className={
+          className ??
+          "mono-label border-[1.5px] border-ink px-4 py-2 text-[0.7rem] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ink)] disabled:opacity-50"
+        }
       >
-        {status === "working" ? "Making card…" : "Share overall plan to IG Story ↗"}
+        {status === "working" ? "Making card…" : label}
       </button>
       {status === "done" && (
         <span className="mono-label text-[0.6rem] text-muted">

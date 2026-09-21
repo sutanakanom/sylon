@@ -2,7 +2,7 @@
 // flag. v1 only ever has one admin (Kanom); this avoids a chicken-and-egg
 // bootstrap problem — a DB flag would need an admin to grant the first
 // admin. Add ADMIN_EMAILS=you@example.com to Vercel's env vars.
-function adminEmails(): string[] {
+export function adminEmails(): string[] {
   return (process.env.ADMIN_EMAILS ?? "")
     .split(",")
     .map((e) => e.trim().toLowerCase())
