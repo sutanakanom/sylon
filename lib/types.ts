@@ -64,3 +64,27 @@ export interface Comment {
   body: string;
   createdAt: string;
 }
+
+export type ChatTag = "date_idea" | "place_idea" | "im_in" | "note";
+
+export const CHAT_TAG_LABEL: Record<ChatTag, string> = {
+  date_idea: "Date idea",
+  place_idea: "Place idea",
+  im_in: "I'm in",
+  note: "Note",
+};
+
+export interface ChatMessage {
+  id: string;
+  manifestId: string;
+  memberId: string;
+  memberName: string;
+  tag: ChatTag;
+  body: string;
+  createdAt: string;
+}
+
+export interface Manifestor {
+  id: string; // member id
+  name: string;
+}
