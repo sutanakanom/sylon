@@ -26,9 +26,14 @@ export function SiteNav({
         {member ? (
           <>
             {member.isAdmin && (
-              <Link href="/admin" className={`${styles.signout} mono`}>
-                Admin
-              </Link>
+              <>
+                <Link href="/new" className={`${styles.signout} mono`}>
+                  + Add a plan
+                </Link>
+                <Link href="/admin" className={`${styles.signout} mono`}>
+                  Admin
+                </Link>
+              </>
             )}
             <Link href="/profile" className={styles.profileChip} aria-label={`${name}'s profile`}>
               {member.photoUrl ? (
