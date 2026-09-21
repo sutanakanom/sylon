@@ -13,6 +13,6 @@ alter table members add column if not exists handle text unique;
 -- current /kanom links and the existing owner_handle="kanom" rows on
 -- trips/manifests keep working without needing to touch those tables.
 update members set handle = 'kanom'
-  where email = 'callmekanom555@gmail.com' and handle is null;
+  where email = 'sutana.kanom@gmail.com' and handle is null;
 
 create index if not exists members_handle_idx on members (handle);
