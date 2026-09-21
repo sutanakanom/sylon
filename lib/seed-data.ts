@@ -12,6 +12,7 @@ export const seedItems: Item[] = [
     title: "HK Disney Run",
     status: "confirmed",
     visibility: "public",
+    ownerHandle: "kanom",
     roughDate: "Late Nov – early Dec",
     countries: ["Hong Kong", "China"],
     legs: [
@@ -28,6 +29,7 @@ export const seedItems: Item[] = [
     title: "Limp Bizkit, KL",
     status: "confirmed",
     visibility: "public",
+    ownerHandle: "kanom",
     roughDate: "9 Dec",
     countries: ["Malaysia"],
     legs: [{ place: "Kuala Lumpur", startDate: "2026-12-09", endDate: "2026-12-09" }],
@@ -41,6 +43,7 @@ export const seedItems: Item[] = [
     title: "Xi'an",
     status: "planning",
     visibility: "public",
+    ownerHandle: "kanom",
     roughDate: "January",
     countries: ["China"],
     legs: [{ place: "Xi'an", startDate: "2027-01-01", endDate: "2027-01-07" }],
@@ -54,6 +57,7 @@ export const seedItems: Item[] = [
     title: "Radiohead, 2027",
     status: "open",
     visibility: "public",
+    ownerHandle: "kanom",
     roughDate: "2027",
     countryVotes: [
       { country: "Japan", votes: 3 },
@@ -69,6 +73,7 @@ export const seedItems: Item[] = [
     title: "LA Olympics",
     status: "open",
     visibility: "public",
+    ownerHandle: "kanom",
     roughDate: "2028",
     countryVotes: [{ country: "United States", votes: 2 }],
     summary: "Very far off, very tempting.",
@@ -81,6 +86,7 @@ export const seedItems: Item[] = [
     title: "Spain × Italy",
     status: "open",
     visibility: "public",
+    ownerHandle: "kanom",
     roughDate: "2027",
     countryVotes: [
       { country: "Spain", votes: 1 },

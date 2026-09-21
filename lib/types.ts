@@ -33,6 +33,7 @@ export interface Trip {
   title: string;
   status: TripStatus;
   visibility: Visibility;
+  ownerHandle: string;
   roughDate: string; // shown to visitors, e.g. "Late Nov – early Dec"
   countries: string[];
   legs: Leg[];
@@ -47,6 +48,7 @@ export interface Manifest {
   title: string;
   status: ManifestStatus;
   visibility: Visibility;
+  ownerHandle: string;
   roughDate: string;
   countryVotes: { country: string; votes: number }[];
   summary: string;
