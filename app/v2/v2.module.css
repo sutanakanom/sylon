@@ -1,0 +1,472 @@
+/* SYLON V2 — "dark street-scrapbook / alternative fashion editorial"
+   visual experiment. Entirely self-contained: every class here is scoped
+   under .root (and this file is only imported by files under app/v2/), so
+   none of it touches the V1 design system in app/SylonDesign.module.css.
+   V1 stays exactly as it was. */
+
+.root {
+  --black: #0b0b0b;
+  --charcoal: #171717;
+  --bone: #f1efe7;
+  --ash: #b8b6ae;
+  --line: #363636;
+  --red: #ff3b30;
+  --lime: #c9ff35;
+  --tan: #b98a51;
+
+  background: var(--black);
+  color: var(--bone);
+  min-height: 100vh;
+  font-family: "Manrope", ui-sans-serif, sans-serif;
+  position: relative;
+  overflow-x: clip;
+}
+
+.root a {
+  color: inherit;
+}
+
+.root ::selection {
+  background: var(--red);
+  color: var(--bone);
+}
+
+/* --- Layout shell -------------------------------------------------- */
+
+.shell {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.gutter {
+  padding: 0 clamp(20px, 4vw, 56px);
+}
+
+/* --- Top nav --------------------------------------------------------
+   Small, utilitarian — a boarding-pass header bar, not a marketing nav. */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px clamp(20px, 4vw, 56px);
+  border-bottom: 1px solid var(--line);
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.navBrand {
+  font-family: "Manrope", ui-sans-serif, sans-serif;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.03em;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.navBack {
+  color: var(--ash);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.navBack:hover {
+  color: var(--bone);
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.v2Badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--lime);
+  color: var(--lime);
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 0.62rem;
+}
+.v2Badge::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--lime);
+}
+
+.v1Link {
+  border: 1px solid var(--line);
+  color: var(--ash);
+  padding: 6px 10px;
+  border-radius: 2px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.v1Link:hover {
+  border-color: var(--bone);
+  color: var(--bone);
+}
+
+/* --- Typography ------------------------------------------------------ */
+
+.kicker {
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ash);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.kicker::before {
+  content: "";
+  width: 22px;
+  height: 1px;
+  background: var(--red);
+}
+
+.headline {
+  margin: 18px 0 0;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 0.8;
+  letter-spacing: -0.04em;
+  font-size: clamp(4rem, 9vw, 10rem);
+}
+@media (max-width: 640px) {
+  .headline {
+    font-size: clamp(3.5rem, 13vw, 5rem);
+  }
+}
+
+.outline {
+  color: transparent;
+  -webkit-text-stroke: 2px var(--bone);
+}
+
+.sectionHeading {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 0.92;
+  font-size: clamp(2rem, 4.4vw, 4.5rem);
+  margin: 0 0 20px;
+}
+
+.cardTitle {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  line-height: 1.02;
+}
+
+.body {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--ash);
+}
+
+.meta {
+  font-family: "DM Mono", ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.72rem;
+  color: var(--ash);
+}
+
+/* --- Buttons ----------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Manrope", ui-sans-serif, sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 13px 22px;
+  border-radius: 3px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  min-height: 46px;
+}
+
+.btnPrimary {
+  composes: btn;
+  background: var(--bone);
+  color: var(--black);
+  border-color: var(--bone);
+  box-shadow: 6px 6px 0 var(--red);
+}
+.btnPrimary:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 var(--red);
+}
+.btnPrimary:active {
+  transform: translate(1px, 1px);
+  box-shadow: 3px 3px 0 var(--red);
+}
+
+.btnDark {
+  composes: btn;
+  background: var(--black);
+  color: var(--bone);
+  border-color: var(--bone);
+  box-shadow: 6px 6px 0 var(--lime);
+}
+.btnDark:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 var(--lime);
+}
+.btnDark:active {
+  transform: translate(1px, 1px);
+  box-shadow: 3px 3px 0 var(--lime);
+}
+
+.btnSecondary {
+  composes: btn;
+  background: transparent;
+  color: var(--bone);
+  border-color: var(--line);
+  box-shadow: none;
+}
+.btnSecondary:hover {
+  border-color: var(--bone);
+}
+
+/* --- Tags / stamps / pills --------------------------------------------- */
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--ash);
+}
+
+.tagRed {
+  border-color: var(--red);
+  color: var(--red);
+}
+.tagLime {
+  border-color: var(--lime);
+  color: var(--lime);
+}
+.tagBone {
+  border-color: var(--bone);
+  color: var(--bone);
+}
+
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1.5px solid currentColor;
+  border-radius: 2px;
+  padding: 4px 8px;
+  transform: rotate(-2deg);
+}
+
+/* --- Cards --------------------------------------------------------------
+   The core "ticket" treatment: square-ish corners, thin border, an offset
+   shadow, and a light rotation on a minority of cards for the scrapbook
+   feel. Rotation utility classes are applied selectively from the page,
+   never on body copy. */
+
+.card {
+  position: relative;
+  border: 1.5px solid var(--line);
+  border-radius: 3px;
+  background: var(--charcoal);
+  padding: clamp(20px, 3vw, 32px);
+}
+
+.cardBone {
+  composes: card;
+  background: var(--bone);
+  color: var(--black);
+  border-color: var(--black);
+}
+
+.cardDashed {
+  composes: card;
+  border-style: dashed;
+}
+
+.shadowRed {
+  box-shadow: 8px 8px 0 var(--red);
+}
+.shadowLime {
+  box-shadow: 6px 6px 0 var(--lime);
+}
+.shadowBlack {
+  box-shadow: 8px 8px 0 var(--black);
+}
+
+.rotateNeg {
+  transform: rotate(-1.6deg);
+}
+.rotatePos {
+  transform: rotate(1.4deg);
+}
+
+/* Perforated ticket divider — a dashed vertical rule with a "notch" cut on
+   either edge, for the boarding-pass style stat rows. */
+.perforated {
+  position: relative;
+  border-left: 1px dashed var(--line);
+}
+.perforated::before,
+.perforated::after {
+  content: "";
+  position: absolute;
+  left: -7px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--black);
+  border: 1.5px solid var(--line);
+}
+.perforated::before {
+  top: -7px;
+}
+.perforated::after {
+  bottom: -7px;
+}
+
+/* Taped-paper corner accent */
+.tape {
+  position: absolute;
+  top: -10px;
+  left: 28px;
+  width: 64px;
+  height: 22px;
+  background: rgba(241, 239, 231, 0.85);
+  transform: rotate(-3deg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* Small decorative barcode made of bars, no meaning encoded */
+.barcode {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 26px;
+  opacity: 0.8;
+}
+.barcode span {
+  display: block;
+  width: 2px;
+  background: currentColor;
+}
+
+/* --- Progress / meter --------------------------------------------------- */
+
+.meterTrack {
+  height: 10px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--black);
+  overflow: hidden;
+}
+.meterFill {
+  height: 100%;
+  background: var(--red);
+}
+
+/* --- Leopard texture — used once, sparingly ----------------------------- */
+.leopard {
+  background-color: var(--tan);
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(11,11,11,0.55) 0 6px, transparent 7px),
+    radial-gradient(circle at 60% 15%, rgba(11,11,11,0.5) 0 5px, transparent 6px),
+    radial-gradient(circle at 80% 55%, rgba(11,11,11,0.55) 0 7px, transparent 8px),
+    radial-gradient(circle at 35% 70%, rgba(11,11,11,0.5) 0 6px, transparent 7px),
+    radial-gradient(circle at 10% 85%, rgba(11,11,11,0.5) 0 5px, transparent 6px),
+    radial-gradient(circle at 90% 90%, rgba(11,11,11,0.5) 0 6px, transparent 7px),
+    radial-gradient(circle at 50% 45%, rgba(11,11,11,0.45) 0 5px, transparent 6px);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+/* --- Footer -------------------------------------------------------------- */
+
+.footer {
+  border-top: 1px solid var(--line);
+  padding: 48px clamp(20px, 4vw, 56px) 40px;
+  margin-top: 80px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.footerBrand {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  line-height: 0.85;
+}
+
+/* --- Grid utilities -------------------------------------------------- */
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(16px, 2.4vw, 24px);
+}
+@media (max-width: 720px) {
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(240px, 0.7fr);
+  gap: clamp(20px, 4vw, 40px);
+  margin-top: 36px;
+  align-items: start;
+}
+@media (max-width: 720px) {
+  .heroGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 8px;
+}
