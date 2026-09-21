@@ -5,8 +5,9 @@ import Link from "next/link";
 import { Item } from "@/lib/types";
 import { labelFor } from "@/components/StatusStamp";
 import { ShareOverallButton } from "@/components/ShareOverallButton";
+import { CaptureCardButton } from "./CaptureCardButton";
 import { requestInviteAccess } from "@/app/actions/invite-request";
-import { whereText, activitySummary } from "@/lib/item-display";
+import { whereText, whereOnly, activitySummary } from "@/lib/item-display";
 import styles from "../SylonDesign.module.css";
 
 // The personal page's interactive body: the shareable trip carousel, the
@@ -107,25 +108,9 @@ export function PersonalPageBody({
     toastTimer.current = setTimeout(() => setToast(null), 2600);
   }
 
-  async function handleSharePage() {
-    const shareData = {
-      title: `${displayName}'s Future Atlas`,
-      text: `See where ${displayName} might be going next.`,
-      url: typeof location !== "undefined" ? location.href : "",
-    };
-    try {
-      if (typeof navigator.share === "function") {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(shareData.url);
-        showToast("Atlas link copied");
-      }
-    } catch (err) {
-      if (err instanceof Error && err.name !== "AbortError") {
-        showToast("Copy the link from your browser");
-      }
-    }
-  }
+  // The item behind the carousel's currently active slide — slide 0 is the
+  // summary card (no single item), everything after maps to items[i-1].
+  const activeItem = activeSlide === 0 ? null : items[activeSlide - 1] ?? null;
 
   // --- Invite-request dialog -------------------------------------------
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -171,9 +156,14 @@ export function PersonalPageBody({
           </div>
           {items.length > 0 && (
             <div className={`${styles.sharePrompt} ${styles.desktopShare}`}>
-              <button type="button" className={`${styles.share} mono`} onClick={handleSharePage}>
-                Screenshot or share ↗
-              </button>
+              <CaptureCardButton
+                activeItem={activeItem}
+                displayName={displayName}
+                items={items}
+                className={`${styles.share} mono`}
+                label="Capture or share this on story ↗"
+                onToast={showToast}
+              />
               <span className="mono">Capture this card or send the link to a friend.</span>
             </div>
           )}
@@ -227,7 +217,7 @@ export function PersonalPageBody({
                   <h2>{item.title}</h2>
                   <p>{item.summary}</p>
                   <div className={`${styles.snapshotFoot} mono`}>
-                    <span>{whereText(item)}</span>
+                    <span>{whereOnly(item)}</span>
                     <span>{activitySummary(item)}</span>
                   </div>
                 </article>
@@ -270,9 +260,14 @@ export function PersonalPageBody({
       <section aria-labelledby="plans-heading">
         {items.length > 0 && (
           <div className={styles.mobileShare}>
-            <button type="button" className={`${styles.share} mono`} onClick={handleSharePage}>
-              Screenshot or share this card ↗
-            </button>
+            <CaptureCardButton
+              activeItem={activeItem}
+              displayName={displayName}
+              items={items}
+              className={`${styles.share} mono`}
+              label="Capture or share this on story ↗"
+              onToast={showToast}
+            />
             <span className="mono">Swipe above to choose what your friend will see.</span>
           </div>
         )}

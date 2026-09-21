@@ -4,12 +4,26 @@
 
 import { Item } from "./types";
 
+// Full "where" line, including the vote count for a manifest — for a
+// single-line slot (the board banner's <em>, the story board's rows) that
+// has nowhere else to show the vote count.
 export function whereText(item: Item): string {
   if (item.kind === "trip") return item.countries.join(" + ");
   const total = item.countryVotes.reduce((sum, v) => sum + v.votes, 0);
   if (total === 0) return item.countryVotes.map((v) => v.country).join(" or ");
   const leader = item.countryVotes.slice().sort((a, b) => b.votes - a.votes)[0];
   return `${leader.country} leading · ${total} vote${total === 1 ? "" : "s"} so far`;
+}
+
+// Just the place, no vote count — for a two-column layout (the carousel's
+// snapshot-foot) that already shows the vote count in its own slot via
+// activitySummary(), so whereText() there would repeat it.
+export function whereOnly(item: Item): string {
+  if (item.kind === "trip") return item.countries.join(" + ");
+  const total = item.countryVotes.reduce((sum, v) => sum + v.votes, 0);
+  if (total === 0) return item.countryVotes.map((v) => v.country).join(" or ");
+  const leader = item.countryVotes.slice().sort((a, b) => b.votes - a.votes)[0];
+  return `${leader.country} leading`;
 }
 
 export function totalVotes(item: Item): number {
