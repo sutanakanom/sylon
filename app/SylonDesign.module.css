@@ -272,7 +272,7 @@
   }
 }
 
-/* Collection head + tools */
+/* Collection head */
 .collectionHead {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -291,33 +291,6 @@
   margin: 0;
   color: var(--muted);
   line-height: 1.5;
-}
-.tools {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 26px;
-  flex-wrap: wrap;
-}
-.filters {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.filter {
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 9px 14px;
-  background: transparent;
-  font-size: 0.76rem;
-  cursor: pointer;
-}
-.filter:hover,
-.filterActive {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--paper);
 }
 .share {
   border: 1.5px solid var(--ink);
@@ -349,186 +322,296 @@
   box-shadow: 6px 6px 0 var(--ink);
 }
 
-/* Plan cards */
-.plans {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 18px;
+/* Personal-page hero: same .profileHero box as the landing page's, but
+   with a shareable carousel on the right instead of the static passport
+   card. Its own modifier class (not a bare override of .profileHero)
+   so the landing page's passport layout is untouched. */
+.profileHeroCarousel {
+  grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+  min-height: 540px;
 }
-.plan {
-  grid-column: span 4;
-  min-height: 360px;
+.heroCopy {
+  max-width: 820px;
+}
+.sharePrompt {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 28px;
+}
+.sharePrompt span {
+  max-width: 230px;
+  font-size: 0.58rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.mobileShare {
+  display: none;
+}
+
+/* Carousel of shareable trip snapshots */
+.shareCarousel {
+  min-width: 0;
+}
+.carouselTrack {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
   border: 1.5px solid var(--ink);
-  padding: 20px;
+  box-shadow: 10px 10px 0 var(--ink);
+}
+.carouselTrack::-webkit-scrollbar {
+  display: none;
+}
+.snapshotCard {
+  min-width: 100%;
+  height: 360px;
+  padding: 22px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  color: var(--ink);
-  text-decoration: none;
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
   background: var(--paper);
 }
-.wide {
-  grid-column: span 8;
-}
-.dark {
-  background: var(--ink);
-  color: var(--paper);
-}
-.acid {
+.summaryCard,
+.acidCard {
   background: var(--acid);
 }
-.orange {
-  background: var(--orange);
-}
-.plan:hover {
-  transform: translate(-4px, -4px);
-  box-shadow: 8px 8px 0 var(--ink);
-}
-.planTop {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 15px;
-}
-.badge {
-  font-size: 0.62rem;
-  padding: 6px 9px;
-  border: 1px solid currentColor;
-  border-radius: 999px;
-}
-.planDate {
-  text-align: right;
-  font-size: 0.62rem;
-  line-height: 1.5;
-}
-.plan h3 {
-  font-size: clamp(2rem, 4vw, 4.2rem);
-  line-height: 0.88;
-  letter-spacing: -0.06em;
-  text-transform: uppercase;
-  margin: auto 0 28px;
-  max-width: 95%;
-}
-.wide h3 {
-  font-size: clamp(3.2rem, 7vw, 7rem);
-}
-.planBottom {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 20px;
-}
-.planCopy {
-  max-width: 280px;
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.42;
-}
-.arrow {
-  font-size: 2.3rem;
-  line-height: 0.8;
-  transition: transform 0.2s;
-}
-.plan:hover .arrow {
-  transform: translate(5px, -5px);
-}
-.location {
-  border-top: 1px solid currentColor;
-  margin-top: 15px;
-  padding-top: 10px;
-  font-size: 0.61rem;
-  opacity: 0.78;
-}
-.vote {
-  margin-top: 15px;
-}
-.voteTrack {
-  height: 8px;
-  border: 1px solid currentColor;
-  padding: 1px;
-}
-.voteFill {
-  height: 100%;
-  width: var(--vote);
-  background: currentColor;
-}
-
-/* Private / teaser card */
-.private {
-  grid-column: span 4;
-  min-height: 360px;
-  border: 1.5px dashed var(--muted);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  color: var(--muted);
-  background: repeating-linear-gradient(
-    -45deg,
-    transparent,
-    transparent 9px,
-    rgba(17, 17, 15, 0.035) 9px,
-    rgba(17, 17, 15, 0.035) 10px
-  );
-}
-.lock {
-  width: 42px;
-  height: 42px;
-  border: 1.5px solid currentColor;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 1rem;
-}
-.private h3 {
-  font-size: 2.2rem;
-  line-height: 0.95;
-  letter-spacing: -0.05em;
-  text-transform: uppercase;
-  margin: 0;
-  color: var(--ink);
-}
-.private p {
-  line-height: 1.45;
-  margin: 12px 0 20px;
-}
-.invite {
-  align-self: flex-start;
-  border: 1.5px solid var(--ink);
-  background: var(--paper);
-  padding: 10px 13px;
-  font-size: 0.66rem;
-  cursor: pointer;
-}
-.invite:hover {
+.darkCard {
   background: var(--ink);
   color: var(--paper);
 }
-
-/* Add-a-plan card (host only) */
-.addPlan {
-  grid-column: span 4;
-  min-height: 360px;
-  border: 1.5px dashed var(--ink);
+.orangeCard {
+  background: var(--orange);
+}
+.paperCard {
+  background: var(--paper);
+}
+.snapshotTop,
+.snapshotFoot {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  font-size: 0.62rem;
+}
+.snapshotDate {
+  margin-top: auto;
+  font-size: 0.65rem;
+}
+.snapshotCard h2 {
+  font-size: clamp(2.7rem, 4.7vw, 5.2rem);
+  line-height: 0.82;
+  letter-spacing: -0.065em;
+  text-transform: uppercase;
+  margin: 13px 0;
+}
+.snapshotCard p {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 20px;
+}
+.snapshotFoot {
+  border-top: 1px solid currentColor;
+  padding-top: 11px;
+}
+.summaryCount {
+  font-size: clamp(5rem, 8vw, 8rem);
+  font-weight: 800;
+  letter-spacing: -0.1em;
+  line-height: 0.8;
+  margin-top: auto;
+}
+.summaryCard h2 {
+  font-size: clamp(2.5rem, 4.4vw, 4.7rem);
+  margin: 6px 0 18px;
+}
+.summaryStats {
+  display: flex;
+  gap: 22px;
+  border-top: 1px solid var(--ink);
+  padding-top: 12px;
+  font-size: 0.62rem;
+}
+.summaryStats b {
+  font: 800 1.2rem Manrope;
+}
+.carouselUi {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  text-align: center;
+  margin-top: 18px;
+}
+.swipeHint {
+  font-size: 0.58rem;
+  color: var(--muted);
+}
+.carouselDots {
+  display: flex;
+  gap: 6px;
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+.dotActive {
+  background: var(--ink);
+}
+
+/* Board — the whole plan, banner-style */
+.boardShell {
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+  padding: 18px;
+  box-shadow: 9px 9px 0 var(--ink);
+}
+.boardTop,
+.boardSignoff {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  font-size: 0.61rem;
+}
+.boardTop {
+  padding: 2px 2px 15px;
+}
+.boardSignoff {
+  padding: 15px 2px 2px;
+  color: var(--muted);
+}
+.planBoard {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.planBanner {
+  min-height: 118px;
+  border: 1.5px solid var(--ink);
+  padding: 13px 15px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  color: var(--ink);
   text-decoration: none;
-  color: inherit;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.18s, box-shadow 0.18s;
 }
-.addPlan:hover {
-  transform: translate(-4px, -4px);
-  box-shadow: 8px 8px 0 var(--ink);
+.planBanner:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 5px 5px 0 var(--ink);
 }
-.addPlanPlus {
-  font-size: 2.5rem;
+.bannerDark {
+  background: var(--ink);
+  color: var(--paper);
+}
+.bannerAcid {
+  background: var(--acid);
+}
+.bannerOrange {
+  background: var(--orange);
+}
+.bannerPaper {
+  background: var(--paper);
+}
+.bannerNo {
+  font-size: 0.62rem;
+  align-self: start;
+  padding-top: 2px;
+}
+.bannerMain {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.bannerMain small {
+  font-size: 0.57rem;
+  opacity: 0.72;
+}
+.bannerMain strong {
+  font-size: clamp(1.25rem, 2.1vw, 2rem);
+  line-height: 1;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+}
+.bannerMain em {
+  font-style: normal;
+  font-size: 0.72rem;
+  opacity: 0.78;
+}
+.bannerArrow {
+  font-size: 1.7rem;
+}
+.quietBanner {
+  width: 100%;
+  margin-top: 10px;
+  border: 1.5px dashed var(--muted);
+  background: transparent;
+  padding: 15px;
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  gap: 18px;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--muted);
+}
+.quietBanner strong {
+  color: var(--ink);
+}
+.quietBanner .mono {
+  font-size: 0.59rem;
+}
+.quietBanner:hover {
+  border-style: solid;
+  background: var(--ink);
+  color: var(--paper);
+}
+.quietBanner:hover strong {
+  color: var(--paper);
+}
+.storyAction {
+  margin-top: 28px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 14px;
+}
+.storyNote {
+  font-size: 0.58rem;
+  color: var(--muted);
+}
+.storyButton {
+  width: auto;
+  margin: 0;
+  border: 1.5px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  padding: 12px 16px;
+  display: inline-flex;
+  gap: 22px;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.68rem;
+  box-shadow: 4px 4px 0 var(--acid);
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.storyButton:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--acid);
+}
+.storyButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.storyArrow {
+  font-size: 1rem;
   line-height: 1;
 }
 
@@ -688,17 +771,11 @@
     width: min(100%, 390px);
     min-height: 260px;
   }
-  .plans {
-    grid-template-columns: repeat(2, 1fr);
+  .shareCarousel {
+    width: min(100%, 520px);
   }
-  .plan,
-  .wide,
-  .private,
-  .addPlan {
-    grid-column: span 1;
-  }
-  .wide h3 {
-    font-size: clamp(2.5rem, 8vw, 5rem);
+  .planBoard {
+    grid-template-columns: 1fr;
   }
   .manifesto {
     grid-template-columns: 1fr;
@@ -737,34 +814,123 @@
     transform: rotate(1deg);
     box-shadow: 7px 7px 0 var(--ink);
   }
+  .heroCopy {
+    max-width: none;
+  }
+  .desktopShare {
+    display: none;
+  }
+  .shareCarousel {
+    width: 100%;
+  }
+  .carouselTrack {
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+  .snapshotCard {
+    height: 315px;
+    padding: 17px;
+  }
+  .snapshotCard h2 {
+    font-size: clamp(2.75rem, 14.5vw, 4.3rem);
+    margin: 9px 0;
+  }
+  .snapshotCard p {
+    margin-bottom: 13px;
+  }
+  .summaryCount {
+    font-size: 5.5rem;
+  }
+  .summaryCard h2 {
+    font-size: clamp(2.6rem, 13vw, 3.9rem);
+    margin: 3px 0 12px;
+  }
+  .carouselUi {
+    margin-top: 13px;
+  }
+  .swipeHint {
+    font-size: 0.55rem;
+  }
+  .ticker {
+    margin-top: 0;
+  }
+  .mobileShare {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 24px 0 0;
+  }
+  .mobileShare .share {
+    background: var(--ink);
+    color: var(--paper);
+    width: 100%;
+    padding: 13px 14px;
+  }
+  .mobileShare span {
+    font-size: 0.55rem;
+    color: var(--muted);
+  }
   .collectionHead {
     grid-template-columns: 1fr;
     padding-top: 55px;
   }
-  .tools {
-    align-items: flex-start;
-    flex-direction: column;
+  .boardShell {
+    padding: 10px;
+    box-shadow: 6px 6px 0 var(--ink);
   }
-  .plans {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    padding: 0 0 16px;
+  .boardTop,
+  .boardSignoff {
+    font-size: 0.52rem;
   }
-  .plan,
-  .wide,
-  .private,
-  .addPlan {
-    min-width: 84vw;
-    min-height: 420px;
-    scroll-snap-align: start;
+  .planBoard {
+    gap: 7px;
   }
-  .plan h3,
-  .wide h3 {
-    font-size: clamp(2.7rem, 14vw, 5rem);
+  .planBanner {
+    min-height: 88px;
+    padding: 10px;
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+  .bannerMain small {
+    font-size: 0.5rem;
+  }
+  .bannerMain strong {
+    font-size: 1.18rem;
+  }
+  .bannerMain em {
+    font-size: 0.63rem;
+  }
+  .bannerArrow {
+    font-size: 1.35rem;
+  }
+  .quietBanner {
+    grid-template-columns: 1fr auto;
+    padding: 12px;
+    gap: 6px;
+  }
+  .quietBanner strong {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+  .quietBanner .mono:first-child {
+    grid-row: 2;
+  }
+  .quietBanner .mono:last-child {
+    grid-row: 2;
+  }
+  .storyAction {
+    margin-top: 24px;
+    display: grid;
+    gap: 10px;
+  }
+  .storyNote {
+    font-size: 0.55rem;
+  }
+  .storyButton {
+    width: 100%;
+    padding: 13px 14px;
   }
   .manifesto {
-    margin-top: 54px;
+    margin-top: 30px;
   }
   .footerMeta {
     display: none;

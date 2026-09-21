@@ -2,176 +2,187 @@
 
 import { useState } from "react";
 import { Item } from "@/lib/types";
+import { labelFor } from "./StatusStamp";
+import { whereText } from "@/lib/item-display";
 
-// Same idea as ShareStoryButton, but for the personal page as a whole:
-// a summary card listing every public plan instead of one item's detail.
-// Rough info only, same as the per-item card (titles + rough dates — no
-// exact dates, no member names).
+// The personal page's "Generate IG Story" button — a 1080x1920 board-style
+// summary of every public plan, matching the board section's own banner
+// look. Rough info only, same as the per-item card (titles + rough dates —
+// no exact dates, no member names). Uses labelFor() for status text, same
+// as every other status badge on the site.
 
 const WIDTH = 1080;
 const HEIGHT = 1920;
 const MAX_ITEMS = 6;
+const ROW_COLORS: { bg: string; fg: string }[] = [
+  { bg: "#11110f", fg: "#f3f0e8" },
+  { bg: "#d8ff43", fg: "#11110f" },
+  { bg: "#ff6b35", fg: "#11110f" },
+  { bg: "#f3f0e8", fg: "#11110f" },
+];
 
-async function drawSummaryCard(displayName: string, items: Item[]): Promise<Blob | null> {
+function storyText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  size: number,
+  weight = "500",
+  color = "#11110f",
+  family = "Manrope"
+) {
+  ctx.fillStyle = color;
+  ctx.font = `${weight} ${size}px ${family}`;
+  ctx.fillText(text, x, y);
+}
+
+async function drawWholePlanCard(displayName: string, items: Item[]): Promise<Blob | null> {
   const canvas = document.createElement("canvas");
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
 
-  await Promise.all([
-    document.fonts.load("800 64px Manrope"),
-    document.fonts.load("700 36px Manrope"),
-    document.fonts.load("500 28px 'DM Mono'"),
-  ]);
+  await document.fonts.ready;
 
-  const ink = "#11110F";
-  const paper = "#F3F0E8";
-  const acid = "#D8FF43";
-  const orange = "#FF6B35";
-  const muted = "#716F68";
+  const ink = "#11110f";
+  const paper = "#f3f0e8";
+  const acid = "#d8ff43";
+  const muted = "#716f68";
 
   ctx.fillStyle = paper;
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
-  ctx.strokeStyle = ink;
-  ctx.lineWidth = 6;
-  ctx.strokeRect(24, 24, WIDTH - 48, HEIGHT - 48);
 
   // Wordmark
-  ctx.fillStyle = ink;
-  ctx.font = "700 40px Manrope";
-  ctx.fillText("SYLON", 80, 150);
-  ctx.font = "500 22px 'DM Mono'";
-  ctx.fillStyle = muted;
-  ctx.fillText("SEE YOU LATER (OR NOT)", 80, 185);
+  ctx.fillStyle = acid;
+  ctx.beginPath();
+  ctx.arc(90, 92, 14, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 4;
+  ctx.stroke();
+  storyText(ctx, "SYLON", 122, 108, 40, "800");
+  storyText(ctx, `${displayName.toUpperCase()}'S FUTURE ATLAS`, 90, 184, 21, "500", muted, "'DM Mono'");
 
   // Title
-  ctx.fillStyle = ink;
-  ctx.font = "800 72px Manrope";
-  wrapTextLeft(ctx, `${displayName.toUpperCase()}'S PLANS`, 80, 320, 920, 76);
+  storyText(ctx, "THE WHOLE", 86, 296, 94, "800");
+  storyText(ctx, "PLAN.", 86, 386, 94, "800");
 
-  // List of items
-  let y = 480;
+  const tripCount = items.filter((i) => i.kind === "trip").length;
+  const manifestCount = items.filter((i) => i.kind === "manifest").length;
+  storyText(
+    ctx,
+    `${tripCount} TRIP${tripCount === 1 ? "" : "S"}  /  ${manifestCount} MANIFEST${manifestCount === 1 ? "" : "S"}`,
+    90,
+    432,
+    19,
+    "500",
+    muted,
+    "'DM Mono'"
+  );
+
+  // Rows
+  const x = 80;
+  const w = 920;
+  const h = 172;
+  const gap = 20;
+  const startY = 488;
   const shown = items.slice(0, MAX_ITEMS);
   shown.forEach((item, i) => {
-    const color = item.kind === "trip" ? acid : orange;
-    ctx.fillStyle = ink;
-    ctx.fillRect(80, y - 34, 14, 44);
-    ctx.fillStyle = color;
-    ctx.font = "700 22px 'DM Mono'";
-    ctx.fillText(item.kind === "trip" ? "TRIP" : "MANIFEST", 114, y - 8);
-    ctx.fillStyle = ink;
-    ctx.font = "800 44px Manrope";
-    wrapTextLeft(ctx, item.title.toUpperCase(), 114, y + 32, 880, 48);
-    ctx.fillStyle = muted;
-    ctx.font = "500 26px 'DM Mono'";
-    ctx.fillText(item.roughDate.toUpperCase(), 114, y + 76);
-    y += 170;
+    const color = ROW_COLORS[i % ROW_COLORS.length];
+    const y = startY + i * (h + gap);
+    ctx.fillStyle = color.bg;
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 4;
+    ctx.strokeRect(x, y, w, h);
+    storyText(ctx, String(i + 1).padStart(2, "0"), x + 24, y + 38, 18, "500", color.fg, "'DM Mono'");
+    storyText(ctx, `${labelFor(item)} · ${item.roughDate}`.toUpperCase(), x + 92, y + 38, 17, "500", color.fg, "'DM Mono'");
+    storyText(ctx, item.title.toUpperCase(), x + 92, y + 101, 43, "800", color.fg);
+    storyText(ctx, whereText(item).toUpperCase(), x + 92, y + 140, 17, "500", color.fg, "'DM Mono'");
+    storyText(ctx, "↗", x + w - 62, y + 102, 40, "500", color.fg);
   });
 
   if (items.length > MAX_ITEMS) {
-    ctx.fillStyle = muted;
-    ctx.font = "500 26px 'DM Mono'";
-    ctx.fillText(`+ ${items.length - MAX_ITEMS} MORE`, 114, y);
+    storyText(
+      ctx,
+      `+ ${items.length - MAX_ITEMS} MORE`,
+      x + 24,
+      startY + shown.length * (h + gap) + 30,
+      19,
+      "500",
+      muted,
+      "'DM Mono'"
+    );
   }
 
   // Footer
-  ctx.fillStyle = muted;
-  ctx.font = "500 26px 'DM Mono'";
-  ctx.fillText("SYLATER.APP", 80, HEIGHT - 100);
+  storyText(ctx, `@${displayName.toLowerCase()}`, 84, HEIGHT - 175, 19, "500", muted, "'DM Mono'");
+  storyText(ctx, "SEE YOU LATER — OR NOT.", 84, HEIGHT - 130, 19, "500", muted, "'DM Mono'");
+  storyText(ctx, "SYLATER.APP", 84, HEIGHT - 80, 19, "500", muted, "'DM Mono'");
 
   return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), "image/png"));
-}
-
-function wrapTextLeft(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  x: number,
-  y: number,
-  maxWidth: number,
-  lineHeight: number
-) {
-  const words = text.split(" ");
-  let line = "";
-  let cy = y;
-  for (const word of words) {
-    const test = line ? `${line} ${word}` : word;
-    if (ctx.measureText(test).width > maxWidth && line) {
-      ctx.fillText(line, x, cy);
-      line = word;
-      cy += lineHeight;
-    } else {
-      line = test;
-    }
-  }
-  if (line) ctx.fillText(line, x, cy);
 }
 
 export function ShareOverallButton({
   displayName,
   items,
   className,
-  label = "Share overall plan to IG Story ↗",
+  label = "Generate IG Story",
+  onToast,
 }: {
   displayName: string;
   items: Item[];
   className?: string;
   label?: string;
+  onToast?: (message: string) => void;
 }) {
-  const [status, setStatus] = useState<"idle" | "working" | "done">("idle");
+  const [working, setWorking] = useState(false);
 
   async function handleShare() {
-    setStatus("working");
-    const blob = await drawSummaryCard(displayName, items);
-    if (!blob) {
-      setStatus("idle");
-      return;
-    }
+    setWorking(true);
+    try {
+      const blob = await drawWholePlanCard(displayName, items);
+      if (!blob) return;
 
-    const file = new File([blob], `${displayName}-sylon-plans.png`, { type: "image/png" });
+      const file = new File([blob], `${displayName.toLowerCase()}-sylon-plans.png`, {
+        type: "image/png",
+      });
 
-    if (
-      typeof navigator.share === "function" &&
-      typeof navigator.canShare === "function" &&
-      navigator.canShare({ files: [file] })
-    ) {
-      try {
-        await navigator.share({ files: [file], title: `${displayName}'s plans` });
-        setStatus("done");
-        return;
-      } catch {
-        // user cancelled the share sheet — fall through to download
+      if (
+        typeof navigator.share === "function" &&
+        typeof navigator.canShare === "function" &&
+        navigator.canShare({ files: [file] })
+      ) {
+        try {
+          await navigator.share({ files: [file], title: `${displayName}'s plans` });
+          return;
+        } catch (err) {
+          if (err instanceof Error && err.name === "AbortError") return;
+          // fall through to download
+        }
       }
-    }
 
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${displayName}-sylon-plans.png`;
-    a.click();
-    URL.revokeObjectURL(url);
-    setStatus("done");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${displayName.toLowerCase()}-sylon-plans.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      onToast?.("IG Story image downloaded");
+    } catch {
+      onToast?.("Could not create the image — please try again");
+    } finally {
+      setWorking(false);
+    }
   }
 
   if (items.length === 0) return null;
 
   return (
-    <div className="flex flex-col items-start gap-1">
-      <button
-        onClick={handleShare}
-        disabled={status === "working"}
-        className={
-          className ??
-          "mono-label border-[1.5px] border-ink px-4 py-2 text-[0.7rem] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ink)] disabled:opacity-50"
-        }
-      >
-        {status === "working" ? "Making card…" : label}
-      </button>
-      {status === "done" && (
-        <span className="mono-label text-[0.6rem] text-muted">
-          Saved — open Instagram and add it to your Story.
-        </span>
-      )}
-    </div>
+    <button onClick={handleShare} disabled={working} className={className}>
+      <strong>{working ? "Creating your story…" : label}</strong>
+      <span aria-hidden="true">↗</span>
+    </button>
   );
 }
