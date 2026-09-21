@@ -8,6 +8,7 @@ import { ProfileChip } from "@/components/ProfileChip";
 import { ManifestorPanel } from "@/components/ManifestorPanel";
 import { ChatFeed } from "@/components/ChatFeed";
 import { FinalizeButton } from "@/components/FinalizeButton";
+import { ShareStoryButton } from "@/components/ShareStoryButton";
 import { signOut } from "@/app/actions/auth";
 
 export default async function ManifestDetailPage({
@@ -89,6 +90,7 @@ export default async function ManifestDetailPage({
         </div>
         <div className="flex items-center gap-4">
           <StatusStamp item={item} size="md" />
+          {member && <ShareStoryButton item={item} />}
           {iAmManifestor && !alreadyConverted && (
             <FinalizeButton manifestId={item.id} slug={item.slug} />
           )}

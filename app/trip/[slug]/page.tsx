@@ -10,6 +10,7 @@ import { CommentThread } from "@/components/CommentThread";
 import { FollowButton } from "@/components/FollowButton";
 import { JoinButton } from "@/components/JoinButton";
 import { SurveyForm } from "@/components/SurveyForm";
+import { ShareStoryButton } from "@/components/ShareStoryButton";
 import { signOut } from "@/app/actions/auth";
 
 export default async function TripDetailPage({
@@ -92,7 +93,10 @@ export default async function TripDetailPage({
             {item.title}
           </h1>
         </div>
-        <StatusStamp item={item} size="md" />
+        <div className="flex items-center gap-4">
+          <StatusStamp item={item} size="md" />
+          {member && <ShareStoryButton item={item} />}
+        </div>
       </section>
 
       {/* Detail blocks */}
