@@ -4,6 +4,24 @@ import { labelFor } from "./StatusStamp";
 
 const BG_BY_INDEX = ["bg-ink text-paper", "bg-acid text-ink", "bg-orange text-ink", "bg-paper text-ink"];
 
+// Fixed, kind-based colors — independent of the card's own rotating
+// background — so a Trip vs. a Manifest reads the same at a glance no
+// matter which background it lands on. Trip = acid (confirmed-leaning,
+// the "real plan" color already used for the confirmed StatusStamp),
+// Manifest = orange (the "still forming" color already used for maybe).
+const KIND_BADGE: Record<Item["kind"], string> = {
+  trip: "bg-acid text-ink border-ink",
+  manifest: "bg-orange text-ink border-ink",
+};
+const KIND_LABEL: Record<Item["kind"], string> = {
+  trip: "Trip",
+  manifest: "Manifest",
+};
+const KIND_ACCENT: Record<Item["kind"], string> = {
+  trip: "border-l-acid",
+  manifest: "border-l-orange",
+};
+
 function whenText(item: Item): string {
   return item.roughDate;
 }
@@ -42,13 +60,20 @@ export function ItemCard({ item, index }: { item: Item; index: number }) {
   return (
     <Link
       href={`/${item.kind === "trip" ? "trip" : "manifest"}/${item.slug}`}
-      className={`group relative flex min-h-[280px] flex-col justify-between border-[1.5px] border-ink p-5 transition-transform duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0_var(--ink)] ${bg}`}
+      className={`group relative flex min-h-[300px] flex-col justify-between border-[1.5px] border-l-[6px] ${KIND_ACCENT[item.kind]} border-ink p-5 transition-transform duration-200 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0_var(--ink)] ${bg}`}
     >
       <div className="flex items-start justify-between">
-        <span className="mono-label rounded-full border border-current px-2.5 py-1.5 text-[0.65rem]">
-          {item.visibility === "public" ? "Public" : "Invite-only"}
+        <span
+          className={`mono-label border px-2.5 py-1.5 text-[0.65rem] ${KIND_BADGE[item.kind]}`}
+        >
+          {KIND_LABEL[item.kind]}
         </span>
-        <span className="mono-label text-[0.7rem]">{whenText(item)}</span>
+        <div className="flex flex-col items-end gap-1">
+          <span className="mono-label text-[0.7rem]">{whenText(item)}</span>
+          <span className="mono-label text-[0.55rem] opacity-60">
+            {item.visibility === "public" ? "Public" : "Invite-only"}
+          </span>
+        </div>
       </div>
 
       <h3 className="my-4 text-3xl leading-[0.95] font-extrabold tracking-tight uppercase max-w-[85%]">
@@ -57,13 +82,18 @@ export function ItemCard({ item, index }: { item: Item; index: number }) {
 
       <div className="flex items-end justify-between gap-4">
         <p className="max-w-[240px] text-sm leading-snug opacity-90">
-          {label}
-          {whereText(item) ? ` · ${whereText(item)}` : ""}. {item.summary}
+          {label}. {item.summary}
         </p>
         <span className="text-2xl leading-none transition-transform duration-200 group-hover:translate-x-1.5 group-hover:-translate-y-1.5">
           ↗
         </span>
       </div>
+
+      {whereText(item) && (
+        <div className="mono-label mt-3 border-t border-current pt-2 text-[0.65rem] opacity-80">
+          {whereText(item)}
+        </div>
+      )}
       {item.kind === "manifest" && <MomentumBar votes={item.countryVotes} />}
     </Link>
   );

@@ -1,28 +1,15 @@
 "use server";
 
-import { randomInt } from "crypto";
 import { supabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabase-admin";
-import { sendInviteCodeEmail } from "@/lib/email";
 import { createSession, destroySession } from "@/lib/session";
-
-const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O/1/I ambiguity
-const CODE_LENGTH = 6;
-const EXPIRY_DAYS = 7;
-
-function generateCode(): string {
-  let code = "";
-  for (let i = 0; i < CODE_LENGTH; i++) {
-    code += CODE_CHARS[randomInt(CODE_CHARS.length)];
-  }
-  return code;
-}
+import { generateAndSendInviteCode } from "@/lib/invite-codes";
 
 export type RequestCodeResult = { ok: true } | { ok: false; error: string };
 
-// Step 1: someone types their email. Whether they're a brand-new visitor
-// or a returning member, the flow is the same — request a code, we email
-// it. (Returning-member login reuses the invite-code flow rather than a
-// separate mechanism; see the requirements doc's open question on this.)
+// Step 1: someone types their email to get a sign-in code. SYLON is
+// invite-only now — this only sends a code to an email that already has
+// an account, or that an admin has invited (a pending invite_codes row).
+// New people are added from /admin, not by typing a random email here.
 export async function requestCode(email: string): Promise<RequestCodeResult> {
   const cleanEmail = email.trim().toLowerCase();
   if (!cleanEmail || !cleanEmail.includes("@")) {
@@ -36,23 +23,30 @@ export async function requestCode(email: string): Promise<RequestCodeResult> {
     };
   }
 
-  const code = generateCode();
-  const expiresAt = new Date(Date.now() + EXPIRY_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  const { data: member } = await supabaseAdmin
+    .from("members")
+    .select("id, deactivated")
+    .eq("email", cleanEmail)
+    .maybeSingle();
 
-  const { error } = await supabaseAdmin.from("invite_codes").insert({
-    email: cleanEmail,
-    code,
-    expires_at: expiresAt,
-  });
-
-  if (error) {
-    console.error("requestCode insert failed", error);
-    return { ok: false, error: "Something went wrong generating a code. Try again." };
+  if (member?.deactivated) {
+    return { ok: false, error: "This account no longer has access." };
   }
 
-  await sendInviteCodeEmail(cleanEmail, code);
+  if (!member) {
+    const { data: invite } = await supabaseAdmin
+      .from("invite_codes")
+      .select("id")
+      .eq("email", cleanEmail)
+      .limit(1)
+      .maybeSingle();
 
-  return { ok: true };
+    if (!invite) {
+      return { ok: false, error: "That email hasn't been invited yet." };
+    }
+  }
+
+  return generateAndSendInviteCode(cleanEmail);
 }
 
 export type VerifyCodeResult = { ok: true } | { ok: false; error: string };
@@ -92,9 +86,13 @@ export async function verifyCode(email: string, code: string): Promise<VerifyCod
 
   const { data: existingMember } = await supabaseAdmin
     .from("members")
-    .select("id")
+    .select("id, deactivated")
     .eq("email", cleanEmail)
     .maybeSingle();
+
+  if (existingMember?.deactivated) {
+    return { ok: false, error: "This account no longer has access." };
+  }
 
   let memberId: string;
 

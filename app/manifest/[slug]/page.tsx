@@ -59,7 +59,9 @@ export default async function ManifestDetailPage({
         <div className="flex items-center gap-4">
           {member ? (
             <>
-              <ProfileChip member={member} />
+              <Link href="/profile">
+                <ProfileChip member={member} />
+              </Link>
               <form action={signOut}>
                 <button
                   type="submit"
@@ -74,7 +76,7 @@ export default async function ManifestDetailPage({
               href="/sign-in"
               className="mono-label border-[1.5px] border-ink px-4 py-2 text-[0.7rem]"
             >
-              Sign in
+              What is our password?
             </a>
           )}
         </div>
@@ -90,7 +92,6 @@ export default async function ManifestDetailPage({
         </div>
         <div className="flex items-center gap-4">
           <StatusStamp item={item} size="md" />
-          {member && <ShareStoryButton item={item} />}
           {iAmManifestor && !alreadyConverted && (
             <FinalizeButton manifestId={item.id} slug={item.slug} />
           )}
@@ -125,6 +126,11 @@ export default async function ManifestDetailPage({
         <div className="border-[1.5px] border-ink p-5">
           <span className="mono-label text-[0.65rem] text-muted">Status</span>
           <p className="mt-3 text-sm">{label}</p>
+          {member && (
+            <div className="mt-4">
+              <ShareStoryButton item={item} variant="subtle" />
+            </div>
+          )}
         </div>
         <ManifestorPanel
           itemId={item.id}

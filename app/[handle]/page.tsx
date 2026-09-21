@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getPublicItems, handleExists } from "@/lib/data";
 import { ItemCard } from "@/components/ItemCard";
 import { ProfileChip } from "@/components/ProfileChip";
+import { ShareOverallButton } from "@/components/ShareOverallButton";
 import { getCurrentMember } from "@/lib/current-member";
 import { signOut } from "@/app/actions/auth";
 
@@ -38,7 +39,17 @@ export default async function PersonalPage({
         </Link>
         {member ? (
           <div className="flex items-center gap-4">
-            <ProfileChip member={member} />
+            {member.isAdmin && (
+              <Link
+                href="/admin"
+                className="mono-label text-[0.65rem] text-muted underline underline-offset-2"
+              >
+                Admin
+              </Link>
+            )}
+            <Link href="/profile">
+              <ProfileChip member={member} />
+            </Link>
             <form action={signOut}>
               <button
                 type="submit"
@@ -53,7 +64,7 @@ export default async function PersonalPage({
             href="/sign-in"
             className="mono-label border-[1.5px] border-ink px-4 py-2 text-[0.7rem] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ink)]"
           >
-            Sign in
+            What is our password?
           </a>
         )}
       </header>
@@ -70,6 +81,9 @@ export default async function PersonalPage({
             {displayName}&apos;s trips and travel ideas — some solid, some still just a maybe.
             Public plans below; ask for an invite to see the rest.
           </p>
+          <div className="mt-6">
+            <ShareOverallButton displayName={displayName} items={items} />
+          </div>
         </div>
         <div className="flex flex-col justify-between border-[1.5px] border-ink bg-acid p-5 text-ink">
           <span className="mono-label text-[0.65rem]">Right now</span>
@@ -95,10 +109,19 @@ export default async function PersonalPage({
 
       {/* Grid */}
       <section className="grid grid-cols-1 gap-4 px-6 py-10 sm:grid-cols-2 md:px-10 lg:grid-cols-3">
+        {member?.isAdmin && (
+          <Link
+            href="/new"
+            className="flex min-h-[300px] flex-col items-center justify-center gap-2 border-[1.5px] border-dashed border-ink p-5 text-center transition-transform hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0_var(--ink)]"
+          >
+            <span className="text-4xl leading-none">+</span>
+            <span className="mono-label text-[0.7rem]">Add a Trip or Manifest</span>
+          </Link>
+        )}
         {items.map((item, index) => (
           <ItemCard key={item.id} item={item} index={index} />
         ))}
-        <div className="flex min-h-[280px] flex-col justify-center border-[1.5px] border-dashed border-muted p-5 text-center text-muted">
+        <div className="flex min-h-[300px] flex-col justify-center border-[1.5px] border-dashed border-muted p-5 text-center text-muted">
           <p className="text-sm leading-snug">
             A couple more plans are visible only to people {displayName} has invited.
           </p>

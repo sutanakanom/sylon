@@ -65,7 +65,9 @@ export default async function TripDetailPage({
         </Link>
         {member ? (
           <div className="flex items-center gap-4">
-            <ProfileChip member={member} />
+            <Link href="/profile">
+              <ProfileChip member={member} />
+            </Link>
             <form action={signOut}>
               <button
                 type="submit"
@@ -80,7 +82,7 @@ export default async function TripDetailPage({
             href="/sign-in"
             className="mono-label border-[1.5px] border-ink px-4 py-2 text-[0.7rem]"
           >
-            Sign in
+            What is our password?
           </a>
         )}
       </header>
@@ -93,10 +95,7 @@ export default async function TripDetailPage({
             {item.title}
           </h1>
         </div>
-        <div className="flex items-center gap-4">
-          <StatusStamp item={item} size="md" />
-          {member && <ShareStoryButton item={item} />}
-        </div>
+        <StatusStamp item={item} size="md" />
       </section>
 
       {/* Detail blocks */}
@@ -132,6 +131,11 @@ export default async function TripDetailPage({
         <div className="border-[1.5px] border-ink p-5">
           <span className="mono-label text-[0.65rem] text-muted">Status</span>
           <p className="mt-3 text-sm">{label}</p>
+          {member && (
+            <div className="mt-4">
+              <ShareStoryButton item={item} variant="subtle" />
+            </div>
+          )}
         </div>
       </section>
 

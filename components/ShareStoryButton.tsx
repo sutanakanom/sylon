@@ -147,7 +147,13 @@ function wrapText(
   lines.forEach((l, i) => ctx.fillText(l, x, startY + i * lineHeight));
 }
 
-export function ShareStoryButton({ item }: { item: Item }) {
+export function ShareStoryButton({
+  item,
+  variant = "default",
+}: {
+  item: Item;
+  variant?: "default" | "subtle";
+}) {
   const [status, setStatus] = useState<"idle" | "working" | "done">("idle");
 
   async function handleShare() {
@@ -185,6 +191,25 @@ export function ShareStoryButton({ item }: { item: Item }) {
     a.click();
     URL.revokeObjectURL(url);
     setStatus("done");
+  }
+
+  if (variant === "subtle") {
+    return (
+      <div className="flex flex-col items-start gap-1">
+        <button
+          onClick={handleShare}
+          disabled={status === "working"}
+          className="mono-label text-[0.65rem] text-muted underline underline-offset-2 disabled:opacity-50"
+        >
+          {status === "working" ? "Making card…" : "Share to IG Story ↗"}
+        </button>
+        {status === "done" && (
+          <span className="mono-label text-[0.6rem] text-muted">
+            Saved — open Instagram and add it to your Story.
+          </span>
+        )}
+      </div>
+    );
   }
 
   return (
