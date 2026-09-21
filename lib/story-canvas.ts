@@ -5,7 +5,7 @@
 
 import { Item } from "./types";
 import { labelFor } from "@/components/StatusStamp";
-import { whereText, activitySummary } from "./item-display";
+import { whereText, activitySummary, kindLabel } from "./item-display";
 
 const WIDTH = 1080;
 const HEIGHT = 1920;
@@ -126,6 +126,10 @@ export async function drawItemStoryCard(item: Item): Promise<Blob | null> {
   ctx.textAlign = "left";
 
   ctx.fillStyle = MUTED;
+  ctx.font = "700 24px 'DM Mono'";
+  ctx.fillText(kindLabel(item), 80, 385);
+
+  ctx.fillStyle = MUTED;
   ctx.font = "500 30px 'DM Mono'";
   ctx.fillText(item.roughDate.toUpperCase(), 80, 420);
 
@@ -187,7 +191,7 @@ export async function drawOverviewStoryCard(displayName: string, items: Item[]):
     ctx.fillRect(80, y - 34, 14, 44);
     ctx.fillStyle = color;
     ctx.font = "700 22px 'DM Mono'";
-    ctx.fillText(labelFor(item).toUpperCase(), 114, y - 8);
+    ctx.fillText(`${kindLabel(item)} · ${labelFor(item)}`.toUpperCase(), 114, y - 8);
     ctx.fillStyle = INK;
     ctx.font = "800 44px Manrope";
     wrapTextLeft(ctx, item.title.toUpperCase(), 114, y + 32, 880, 48);
@@ -280,7 +284,11 @@ export async function drawWholePlanStoryCard(displayName: string, items: Item[])
 
     ctx.fillStyle = INK;
     ctx.font = "700 17px 'DM Mono'";
-    ctx.fillText(`${labelFor(item).toUpperCase()} · ${item.roughDate.toUpperCase()}`, x + 92, y + 38);
+    ctx.fillText(
+      `${kindLabel(item)} · ${labelFor(item).toUpperCase()} · ${item.roughDate.toUpperCase()}`,
+      x + 92,
+      y + 38
+    );
 
     ctx.fillStyle = INK;
     ctx.font = "800 43px Manrope";

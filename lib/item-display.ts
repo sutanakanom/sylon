@@ -39,6 +39,14 @@ export function voteShare(item: Item): number | null {
   return Math.round((leader.votes / total) * 100);
 }
 
+// Plain-text "TRIP" / "MANIFEST" — for contexts where the colorful
+// KindBadge pill would clash with a card's own background (a colored
+// carousel snapshot, board banner, or canvas row). Uses currentColor there
+// instead of a fixed color.
+export function kindLabel(item: Item): string {
+  return item.kind === "trip" ? "TRIP" : "MANIFEST";
+}
+
 // A short "what's happening" line for a snapshot/banner's secondary slot —
 // member count for a trip, vote count for a manifest.
 export function activitySummary(item: Item): string {

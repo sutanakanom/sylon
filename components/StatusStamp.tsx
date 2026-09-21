@@ -4,9 +4,9 @@ export function labelFor(item: Item): string {
   return item.kind === "trip" ? TRIP_LABEL[item.status] : MANIFEST_LABEL[item.status];
 }
 
-const CONFIRMED = new Set(["See you"]);
-const MAYBE = new Set(["See you, maybe"]);
-const OPEN = new Set(["Should we see?"]);
+const CONFIRMED = new Set(["See You", "Became a Trip"]);
+const MAYBE = new Set(["Maybe See You"]);
+const OPEN = new Set(["Manifesting"]);
 
 function stampClasses(label: string): string {
   if (CONFIRMED.has(label)) return "bg-acid text-ink";

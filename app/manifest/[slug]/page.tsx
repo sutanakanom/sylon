@@ -4,6 +4,7 @@ import { getItemBySlug } from "@/lib/data";
 import { getCurrentMember } from "@/lib/current-member";
 import { getManifestors, getChatMessages, isManifestor } from "@/app/actions/manifest";
 import { labelFor, StatusStamp } from "@/components/StatusStamp";
+import { KindBadge } from "@/components/KindBadge";
 import { SiteShell } from "@/components/SiteShell";
 import { ManifestorPanel } from "@/components/ManifestorPanel";
 import { ChatFeed } from "@/components/ChatFeed";
@@ -62,6 +63,7 @@ export default async function ManifestDetailPage({
           </h1>
         </div>
         <div className="flex items-center gap-4">
+          <KindBadge kind={item.kind} />
           <StatusStamp item={item} size="md" />
           {iAmManifestor && !alreadyConverted && (
             <FinalizeButton manifestId={item.id} slug={item.slug} />

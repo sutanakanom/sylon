@@ -5,19 +5,20 @@ export type TripStatus = "planning" | "confirmed" | "completed" | "cancelled";
 export type ManifestStatus = "open" | "converted" | "dropped";
 export type Visibility = "public" | "invite-only";
 
-// The site's playful labels, mapped from status. See the "Wording" section
-// of the requirements doc.
+// The site's playful stage labels, mapped from status. Shown alongside a
+// separate Trip/Manifest type badge (see KindBadge / kindLabel), so these
+// only need to say what stage the plan is at, not what kind it is.
 export const TRIP_LABEL: Record<TripStatus, string> = {
-  planning: "See you, maybe",
-  confirmed: "See you",
-  completed: "Saw you",
-  cancelled: "Not see you",
+  planning: "Maybe See You",
+  confirmed: "See You",
+  completed: "Saw You",
+  cancelled: "Cancelled",
 };
 
 export const MANIFEST_LABEL: Record<ManifestStatus, string> = {
-  open: "Should we see?",
-  converted: "See you",
-  dropped: "Not see you",
+  open: "Manifesting",
+  converted: "Became a Trip",
+  dropped: "Not Manifesting",
 };
 
 export interface Leg {

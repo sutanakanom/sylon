@@ -5,6 +5,7 @@ import { getCurrentMember } from "@/lib/current-member";
 import { getComments, isFollowing, getParticipants, isJoined } from "@/app/actions/interactions";
 import { getMySurveyResponse } from "@/app/actions/survey";
 import { labelFor, StatusStamp } from "@/components/StatusStamp";
+import { KindBadge } from "@/components/KindBadge";
 import { SiteShell } from "@/components/SiteShell";
 import { CommentThread } from "@/components/CommentThread";
 import { FollowButton } from "@/components/FollowButton";
@@ -68,7 +69,10 @@ export default async function TripDetailPage({
             {item.title}
           </h1>
         </div>
-        <StatusStamp item={item} size="md" />
+        <div className="flex items-center gap-3">
+          <KindBadge kind={item.kind} />
+          <StatusStamp item={item} size="md" />
+        </div>
       </section>
 
       {/* Detail blocks */}

@@ -7,7 +7,7 @@ import { labelFor } from "@/components/StatusStamp";
 import { ShareOverallButton } from "@/components/ShareOverallButton";
 import { CaptureCardButton } from "./CaptureCardButton";
 import { requestInviteAccess } from "@/app/actions/invite-request";
-import { whereText, whereOnly, activitySummary } from "@/lib/item-display";
+import { whereText, whereOnly, activitySummary, kindLabel } from "@/lib/item-display";
 import styles from "../SylonDesign.module.css";
 
 // The personal page's interactive body: the shareable trip carousel, the
@@ -208,7 +208,9 @@ export function PersonalPageBody({
                   className={`${styles.snapshotCard} ${SNAPSHOT_COLORS[index % SNAPSHOT_COLORS.length]}`}
                 >
                   <div className={`${styles.snapshotTop} mono`}>
-                    <span>{labelFor(item)}</span>
+                    <span>
+                      {kindLabel(item)} · {labelFor(item)}
+                    </span>
                     <span>
                       {String(index + 2).padStart(2, "0")} / {String(slideCount).padStart(2, "0")}
                     </span>
@@ -297,7 +299,7 @@ export function PersonalPageBody({
                   <span className={`${styles.bannerNo} mono`}>{String(index + 1).padStart(2, "0")}</span>
                   <span className={styles.bannerMain}>
                     <small className="mono">
-                      {labelFor(item)} · {item.roughDate}
+                      {kindLabel(item)} · {labelFor(item)} · {item.roughDate}
                     </small>
                     <strong>{item.title}</strong>
                     <em>{whereText(item)}</em>
