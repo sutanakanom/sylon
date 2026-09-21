@@ -13,6 +13,28 @@ function whereText(item: Item): string {
   return item.countryVotes.map((v) => v.country).join(" or ");
 }
 
+// A small "momentum" bar for Manifests — how lopsided the voting is
+// toward the leading country so far. Gamification style is still an open
+// question in the doc; this is a lightweight, reversible starting point
+// using data that's already public (vote counts, no names).
+function MomentumBar({ votes }: { votes: { country: string; votes: number }[] }) {
+  const total = votes.reduce((sum, v) => sum + v.votes, 0);
+  if (total === 0) return null;
+  const leader = votes.slice().sort((a, b) => b.votes - a.votes)[0];
+  const share = Math.round((leader.votes / total) * 100);
+
+  return (
+    <div className="mt-3 flex flex-col gap-1">
+      <div className="h-2 w-full border border-current opacity-90">
+        <div className="h-full bg-current" style={{ width: `${share}%` }} />
+      </div>
+      <span className="mono-label text-[0.6rem] opacity-75">
+        {leader.country} leading · {total} vote{total === 1 ? "" : "s"} so far
+      </span>
+    </div>
+  );
+}
+
 export function ItemCard({ item, index }: { item: Item; index: number }) {
   const bg = BG_BY_INDEX[index % BG_BY_INDEX.length];
   const label = labelFor(item);
@@ -42,6 +64,7 @@ export function ItemCard({ item, index }: { item: Item; index: number }) {
           ↗
         </span>
       </div>
+      {item.kind === "manifest" && <MomentumBar votes={item.countryVotes} />}
     </Link>
   );
 }
