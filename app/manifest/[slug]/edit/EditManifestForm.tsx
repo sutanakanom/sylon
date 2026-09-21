@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateManifest } from "@/app/actions/items";
 import { Manifest, SignalItem, Visibility } from "@/lib/types";
+import { useT } from "@/components/LocaleProvider";
 
 const inputClass =
   "border-[1.5px] border-ink bg-paper px-4 py-3 text-base outline-none focus:shadow-[4px_4px_0_var(--ink)]";
@@ -11,6 +12,7 @@ const labelClass = "mono-label text-[0.7rem] text-muted";
 
 export function EditManifestForm({ item }: { item: Manifest }) {
   const router = useRouter();
+  const { t } = useT();
 
   const [title, setTitle] = useState(item.title);
   const [purpose, setPurpose] = useState(item.purpose ?? "");
@@ -90,7 +92,7 @@ export function EditManifestForm({ item }: { item: Manifest }) {
         targetEndDate,
         creatorSummaryHeadline: summaryHeadline,
         creatorSummaryBody: summaryBody,
-        creatorSummaryTags: summaryTags.split(",").map((t) => t.trim()),
+        creatorSummaryTags: summaryTags.split(",").map((tag) => tag.trim()),
       });
 
       if (!result.ok) {
@@ -106,7 +108,7 @@ export function EditManifestForm({ item }: { item: Manifest }) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       <label className="flex flex-col gap-2">
-        <span className={labelClass}>Title</span>
+        <span className={labelClass}>{t("manifestEdit.titleField")}</span>
         <input
           type="text"
           required
@@ -117,21 +119,19 @@ export function EditManifestForm({ item }: { item: Manifest }) {
       </label>
 
       <label className="flex flex-col gap-2">
-        <span className={labelClass}>Purpose</span>
+        <span className={labelClass}>{t("manifestEdit.purpose")}</span>
         <input
           type="text"
           value={purpose}
           onChange={(e) => setPurpose(e.target.value)}
-          placeholder="Radiohead concert"
+          placeholder={t("manifestEdit.purposePlaceholder")}
           className={inputClass}
         />
-        <span className="text-xs text-muted">
-          The one thing that&apos;s already certain — shown as &quot;Known&quot; on the page.
-        </span>
+        <span className="text-xs text-muted">{t("manifestEdit.purposeHint")}</span>
       </label>
 
       <label className="flex flex-col gap-2">
-        <span className={labelClass}>Rough timing</span>
+        <span className={labelClass}>{t("manifestEdit.roughTiming")}</span>
         <input
           type="text"
           value={roughDate}
@@ -141,20 +141,18 @@ export function EditManifestForm({ item }: { item: Manifest }) {
       </label>
 
       <label className="flex flex-col gap-2">
-        <span className={labelClass}>Country options people can vote on</span>
+        <span className={labelClass}>{t("manifestEdit.countries")}</span>
         <input
           type="text"
           value={countries}
           onChange={(e) => setCountries(e.target.value)}
           className={inputClass}
         />
-        <span className="text-xs text-muted">
-          Comma-separated. Removing one drops its votes from the tally.
-        </span>
+        <span className="text-xs text-muted">{t("manifestEdit.countriesHint")}</span>
       </label>
 
       <label className="flex flex-col gap-2">
-        <span className={labelClass}>Summary</span>
+        <span className={labelClass}>{t("manifestEdit.summary")}</span>
         <textarea
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
@@ -164,32 +162,29 @@ export function EditManifestForm({ item }: { item: Manifest }) {
       </label>
 
       <label className="flex flex-col gap-2">
-        <span className={labelClass}>Visibility</span>
+        <span className={labelClass}>{t("manifestEdit.visibility")}</span>
         <select
           value={visibility}
           onChange={(e) => setVisibility(e.target.value as Visibility)}
           className={inputClass}
         >
-          <option value="invite-only">Invite-only</option>
-          <option value="public">Public</option>
+          <option value="invite-only">{t("common.inviteOnly")}</option>
+          <option value="public">{t("common.public")}</option>
         </select>
       </label>
 
       <div className="border-t-[1.5px] border-ink pt-6">
-        <h2 className="mb-1 text-lg font-extrabold uppercase">What we know</h2>
-        <p className="mb-4 text-sm text-muted">
-          Decide the location and set target dates once they&apos;re real — that&apos;s what
-          unlocks &quot;Convert to trip.&quot;
-        </p>
+        <h2 className="mb-1 text-lg font-extrabold uppercase">{t("manifestEdit.whatWeKnow")}</h2>
+        <p className="mb-4 text-sm text-muted">{t("manifestEdit.whatWeKnowHint")}</p>
 
         <label className="flex flex-col gap-2">
-          <span className={labelClass}>Decided location</span>
+          <span className={labelClass}>{t("manifestEdit.decidedLocation")}</span>
           <select
             value={decidedCountry}
             onChange={(e) => setDecidedCountry(e.target.value)}
             className={inputClass}
           >
-            <option value="">Not decided yet</option>
+            <option value="">{t("manifestEdit.notDecidedYet")}</option>
             {countries
               .split(",")
               .map((c) => c.trim())
@@ -204,7 +199,7 @@ export function EditManifestForm({ item }: { item: Manifest }) {
 
         <div className="mt-4 flex gap-4">
           <label className="flex flex-1 flex-col gap-2">
-            <span className={labelClass}>Target start date</span>
+            <span className={labelClass}>{t("manifestEdit.targetStartDate")}</span>
             <input
               type="date"
               value={targetStartDate}
@@ -213,7 +208,7 @@ export function EditManifestForm({ item }: { item: Manifest }) {
             />
           </label>
           <label className="flex flex-1 flex-col gap-2">
-            <span className={labelClass}>Target end date</span>
+            <span className={labelClass}>{t("manifestEdit.targetEndDate")}</span>
             <input
               type="date"
               value={targetEndDate}
@@ -224,7 +219,7 @@ export function EditManifestForm({ item }: { item: Manifest }) {
         </div>
 
         <div className="mt-4 flex flex-col gap-3">
-          <span className={labelClass}>Availability windows people can flag</span>
+          <span className={labelClass}>{t("manifestEdit.availabilityWindows")}</span>
           {availabilityWindows.length > 0 && (
             <ul className="flex flex-col gap-2">
               {availabilityWindows.map((w, i) => (
@@ -238,7 +233,7 @@ export function EditManifestForm({ item }: { item: Manifest }) {
                     onClick={() => removeWindow(i)}
                     className="mono-label text-[0.6rem] text-muted underline underline-offset-2"
                   >
-                    Remove
+                    {t("common.remove")}
                   </button>
                 </li>
               ))}
@@ -249,7 +244,7 @@ export function EditManifestForm({ item }: { item: Manifest }) {
               type="text"
               value={windowDraft}
               onChange={(e) => setWindowDraft(e.target.value)}
-              placeholder="May – Aug 2027"
+              placeholder={t("manifestEdit.availabilityPlaceholder")}
               className={`${inputClass} flex-1`}
             />
             <button
@@ -257,27 +252,27 @@ export function EditManifestForm({ item }: { item: Manifest }) {
               onClick={addWindow}
               className="mono-label border-[1.5px] border-ink px-4 text-[0.65rem]"
             >
-              Add
+              {t("common.add")}
             </button>
           </div>
         </div>
       </div>
 
       <div className="border-t-[1.5px] border-ink pt-6">
-        <h2 className="mb-4 text-lg font-extrabold uppercase">Latest summary</h2>
+        <h2 className="mb-4 text-lg font-extrabold uppercase">{t("manifestEdit.latestSummary")}</h2>
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-2">
-            <span className={labelClass}>Headline</span>
+            <span className={labelClass}>{t("manifestEdit.headline")}</span>
             <input
               type="text"
               value={summaryHeadline}
               onChange={(e) => setSummaryHeadline(e.target.value)}
-              placeholder="The idea is leaning toward Japan."
+              placeholder={t("manifestEdit.headlinePlaceholder")}
               className={inputClass}
             />
           </label>
           <label className="flex flex-col gap-2">
-            <span className={labelClass}>Body</span>
+            <span className={labelClass}>{t("manifestEdit.body")}</span>
             <textarea
               value={summaryBody}
               onChange={(e) => setSummaryBody(e.target.value)}
@@ -286,21 +281,21 @@ export function EditManifestForm({ item }: { item: Manifest }) {
             />
           </label>
           <label className="flex flex-col gap-2">
-            <span className={labelClass}>Tags</span>
+            <span className={labelClass}>{t("manifestEdit.tags")}</span>
             <input
               type="text"
               value={summaryTags}
               onChange={(e) => setSummaryTags(e.target.value)}
-              placeholder="Japan leading, Mid-2027, 5 interested"
+              placeholder={t("manifestEdit.tagsPlaceholder")}
               className={inputClass}
             />
-            <span className="text-xs text-muted">Comma-separated.</span>
+            <span className="text-xs text-muted">{t("common.commaSeparated")}</span>
           </label>
         </div>
       </div>
 
       <div className="border-t-[1.5px] border-ink pt-6">
-        <h2 className="mb-4 text-lg font-extrabold uppercase">Signs of life</h2>
+        <h2 className="mb-4 text-lg font-extrabold uppercase">{t("manifestEdit.signsOfLife")}</h2>
         {signals.length > 0 && (
           <ul className="mb-3 flex flex-col gap-2">
             {signals.map((s, i) => (
@@ -312,7 +307,7 @@ export function EditManifestForm({ item }: { item: Manifest }) {
                     onClick={() => removeSignal(i)}
                     className="mono-label shrink-0 text-[0.6rem] text-muted underline underline-offset-2"
                   >
-                    Remove
+                    {t("common.remove")}
                   </button>
                 </div>
                 {s.body && <p className="mt-1 text-muted">{s.body}</p>}
@@ -325,14 +320,14 @@ export function EditManifestForm({ item }: { item: Manifest }) {
             type="text"
             value={signalTitleDraft}
             onChange={(e) => setSignalTitleDraft(e.target.value)}
-            placeholder="The tour exists"
+            placeholder={t("manifestEdit.signalTitlePlaceholder")}
             className={inputClass}
           />
           <input
             type="text"
             value={signalBodyDraft}
             onChange={(e) => setSignalBodyDraft(e.target.value)}
-            placeholder="Any 2027 announcement moves this from delusional to possible."
+            placeholder={t("manifestEdit.signalBodyPlaceholder")}
             className={inputClass}
           />
           <button
@@ -340,16 +335,16 @@ export function EditManifestForm({ item }: { item: Manifest }) {
             onClick={addSignal}
             className="mono-label self-start border-[1.5px] border-ink px-4 py-2 text-[0.65rem]"
           >
-            + Add a signal
+            {t("manifestEdit.addSignal")}
           </button>
         </div>
       </div>
 
       <div className="border-t-[1.5px] border-ink pt-6">
-        <h2 className="mb-4 text-lg font-extrabold uppercase">Reality fund &amp; note</h2>
+        <h2 className="mb-4 text-lg font-extrabold uppercase">{t("manifestEdit.realityFundAndNote")}</h2>
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-2">
-            <span className={labelClass}>Reality fund (0–100)</span>
+            <span className={labelClass}>{t("manifestEdit.realityFund")}</span>
             <input
               type="number"
               min={0}
@@ -361,7 +356,7 @@ export function EditManifestForm({ item }: { item: Manifest }) {
           </label>
           <div className="flex gap-4">
             <label className="flex flex-1 flex-col gap-2">
-              <span className={labelClass}>Note</span>
+              <span className={labelClass}>{t("manifestEdit.note")}</span>
               <input
                 type="text"
                 value={noteQuote}
@@ -370,7 +365,7 @@ export function EditManifestForm({ item }: { item: Manifest }) {
               />
             </label>
             <label className="flex flex-1 flex-col gap-2">
-              <span className={labelClass}>— attributed to</span>
+              <span className={labelClass}>{t("manifestEdit.attributedTo")}</span>
               <input
                 type="text"
                 value={noteAuthor}
@@ -390,14 +385,14 @@ export function EditManifestForm({ item }: { item: Manifest }) {
           disabled={isPending}
           className="mono-label border-[1.5px] border-ink bg-acid px-6 py-3 text-[0.75rem] text-ink transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ink)] disabled:opacity-50"
         >
-          {isPending ? "Saving…" : "Save changes"}
+          {isPending ? t("manifestEdit.saving") : t("manifestEdit.saveChanges")}
         </button>
         <button
           type="button"
           onClick={() => router.push(`/manifest/${item.slug}`)}
           className="mono-label border-[1.5px] border-ink px-6 py-3 text-[0.75rem]"
         >
-          Cancel
+          {t("manifestEdit.cancel")}
         </button>
       </div>
     </form>

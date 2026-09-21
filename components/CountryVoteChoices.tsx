@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { voteCountry } from "@/app/actions/manifest";
+import { useT } from "./LocaleProvider";
 import styles from "@/app/SylonDesign.module.css";
 
 // Real click-to-vote: one vote per signed-in member, changeable any
@@ -20,6 +21,7 @@ export function CountryVoteChoices({
   initialVote: string | null;
   signedIn: boolean;
 }) {
+  const { t, tn } = useT();
   const [votes, setVotes] = useState(options);
   const [myVote, setMyVote] = useState(initialVote);
   const [isPending, startTransition] = useTransition();
@@ -33,7 +35,7 @@ export function CountryVoteChoices({
           <div key={v.country} className={styles.voteChoice}>
             <strong>{v.country}</strong>
             <span className={`${styles.mini} mono`}>
-              {v.votes} vote{v.votes === 1 ? "" : "s"}
+              {tn(v.votes, { one: "vote", other: "votes" }, "โหวต")}
             </span>
             <span className={styles.voteBarTrack}>
               <span
@@ -44,7 +46,7 @@ export function CountryVoteChoices({
           </div>
         ))}
         <a href="/sign-in" className={`${styles.mini} mono underline underline-offset-2`}>
-          Sign in to vote →
+          {t("vote.signInToVote")}
         </a>
       </div>
     );
@@ -80,7 +82,7 @@ export function CountryVoteChoices({
         >
           <strong>{v.country}</strong>
           <span className={`${styles.mini} mono`}>
-            {v.votes} vote{v.votes === 1 ? "" : "s"}
+            {tn(v.votes, { one: "vote", other: "votes" }, "โหวต")}
           </span>
           <span className={styles.voteBarTrack}>
             <span

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { ChatMessage, ChatTag } from "@/lib/types";
 import { postChatMessage, toggleIdeaLike } from "@/app/actions/manifest";
+import { useT } from "./LocaleProvider";
 import styles from "@/app/SylonDesign.module.css";
 
 type LikeInfo = { count: number; likedByMe: boolean };
@@ -24,6 +25,7 @@ export function IdeaBrainstormCard({
   initialLikes: Record<string, LikeInfo>;
   signedIn: boolean;
 }) {
+  const { t } = useT();
   const [ideas, setIdeas] = useState(initialIdeas);
   const [likes, setLikes] = useState(initialLikes);
   const [draft, setDraft] = useState("");
@@ -87,7 +89,7 @@ export function IdeaBrainstormCard({
 
   return (
     <>
-      {ideas.length === 0 && <p className="mt-4 text-sm" style={{ opacity: 0.7 }}>No ideas yet — drop the first one.</p>}
+      {ideas.length === 0 && <p className="mt-4 text-sm" style={{ opacity: 0.7 }}>{t("manifestDetail.noIdeasYet")}</p>}
       {ideas.map((idea) => {
         const like = likes[idea.id] ?? { count: 0, likedByMe: false };
         return (
@@ -95,7 +97,10 @@ export function IdeaBrainstormCard({
             <b className="mono" style={{ fontSize: "0.7rem" }}>{idea.memberName.slice(0, 2).toUpperCase()}</b>
             <div>
               <p>{idea.body}</p>
-              <small>{idea.tag === "date_idea" ? "Date idea" : "Place idea"} · {idea.memberName}</small>
+              <small>
+                {idea.tag === "date_idea" ? t("manifestDetail.dateIdea") : t("manifestDetail.placeIdea")} ·{" "}
+                {idea.memberName}
+              </small>
             </div>
             <button
               type="button"
@@ -118,7 +123,7 @@ export function IdeaBrainstormCard({
               className="mono-label border-[1.5px] border-ink px-2 py-1 text-[0.6rem]"
               style={{ background: tag === "place_idea" ? "var(--ink)" : "transparent", color: tag === "place_idea" ? "var(--paper)" : "inherit" }}
             >
-              Place idea
+              {t("manifestDetail.placeIdea")}
             </button>
             <button
               type="button"
@@ -126,7 +131,7 @@ export function IdeaBrainstormCard({
               className="mono-label border-[1.5px] border-ink px-2 py-1 text-[0.6rem]"
               style={{ background: tag === "date_idea" ? "var(--ink)" : "transparent", color: tag === "date_idea" ? "var(--paper)" : "inherit" }}
             >
-              Date idea
+              {t("manifestDetail.dateIdea")}
             </button>
           </div>
           <div className="flex gap-2">
@@ -134,17 +139,17 @@ export function IdeaBrainstormCard({
               type="text"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="Drop an idea…"
+              placeholder={t("manifestDetail.dropAnIdea")}
               className="flex-1 border-[1.5px] border-ink bg-paper px-2 py-1.5 text-sm outline-none"
             />
             <button type="submit" disabled={isPending || !draft.trim()} className={styles.submitSmall}>
-              Post
+              {t("common.post")}
             </button>
           </div>
         </form>
       ) : (
         <a href="/sign-in" className={styles.submitSmall} style={{ display: "inline-block" }}>
-          Sign in to add an idea
+          {t("manifestDetail.signInToAddIdea")}
         </a>
       )}
     </>

@@ -1703,3 +1703,63 @@
     font-size: 0.43rem;
   }
 }
+
+/* ---------------------------------------------------------------------
+   Language switcher (EN / TH) — lives in the nav next to sign-in/profile.
+   Small pill toggle, matches .signIn's border weight so it doesn't
+   compete with it for attention. --------------------------------------- */
+.langSwitch {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--ink);
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-size: 0.62rem;
+  overflow: hidden;
+}
+.langSwitch button {
+  border: 0;
+  background: none;
+  padding: 7px 10px;
+  cursor: pointer;
+  color: var(--muted);
+}
+.langSwitch button + button {
+  border-left: 1.5px solid var(--ink);
+}
+.langSwitch .langActive {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* --- Thai-script adjustments ------------------------------------------
+   Several big display headings above use very tight line-height (as low
+   as 0.75) and heavy negative letter-spacing — a look tuned for tracked
+   uppercase Latin type. Thai script stacks vowel and tone marks above and
+   below the consonant line, so that same tightness makes Thai headlines
+   collide into unreadable overlap. `app/layout.tsx` sets <html lang="th">
+   whenever the visitor's chosen locale is Thai, so these rules loosen
+   just the classes that render translated heading text, only for Thai,
+   leaving the Latin/English treatment untouched. Classes that only ever
+   hold numerals or the fixed "SYLON" wordmark (.passportCount,
+   .summaryCount, .brand, .footerBrand, .poster:after) are intentionally
+   left out — they never render Thai text. */
+:global(html[lang="th"]) .heroTitle,
+:global(html[lang="th"]) .heroTitleBig,
+:global(html[lang="th"]) .posterTitle,
+:global(html[lang="th"]) .sectionTitle,
+:global(html[lang="th"]) .collectionHead h2,
+:global(html[lang="th"]) .snapshotCard h2,
+:global(html[lang="th"]) .sheet h2,
+:global(html[lang="th"]) .workspaceHeader h2,
+:global(html[lang="th"]) .conversion h2 {
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+:global(html[lang="th"]) .manifesto blockquote {
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+:global(html[lang="th"]) .outline {
+  margin-left: 0;
+  margin-top: 0.15em;
+}

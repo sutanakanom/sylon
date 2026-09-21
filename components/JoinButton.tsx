@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { joinItem } from "@/app/actions/interactions";
+import { useT } from "./LocaleProvider";
 
 export function JoinButton({
   itemType,
@@ -9,8 +10,8 @@ export function JoinButton({
   slug,
   initialJoined,
   signedIn,
-  joinLabel = "Join this trip",
-  joinedLabel = "You're in",
+  joinLabel,
+  joinedLabel,
 }: {
   itemType: "trip" | "manifest";
   itemId: string;
@@ -20,8 +21,12 @@ export function JoinButton({
   joinLabel?: string;
   joinedLabel?: string;
 }) {
+  const { t } = useT();
   const [joined, setJoined] = useState(initialJoined);
   const [isPending, startTransition] = useTransition();
+
+  const resolvedJoinLabel = joinLabel ?? t("tripDetail.joinThisTrip");
+  const resolvedJoinedLabel = joinedLabel ?? t("tripDetail.youreIn");
 
   if (!signedIn) {
     return (
@@ -29,7 +34,7 @@ export function JoinButton({
         href="/sign-in"
         className="mono-label border-[1.5px] border-ink bg-ink px-5 py-3 text-[0.75rem] text-paper"
       >
-        Sign in to join
+        {t("tripDetail.signInToJoin")}
       </a>
     );
   }
@@ -37,7 +42,7 @@ export function JoinButton({
   if (joined) {
     return (
       <span className="mono-label border-[1.5px] border-ink bg-acid px-5 py-3 text-[0.75rem] text-ink">
-        {joinedLabel}
+        {resolvedJoinedLabel}
       </span>
     );
   }
@@ -53,7 +58,7 @@ export function JoinButton({
       disabled={isPending}
       className="mono-label border-[1.5px] border-ink bg-ink px-5 py-3 text-[0.75rem] text-paper transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ink)] disabled:opacity-50"
     >
-      {isPending ? "Joining…" : joinLabel}
+      {isPending ? t("tripDetail.joining") : resolvedJoinLabel}
     </button>
   );
 }

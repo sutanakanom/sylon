@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Manifestor } from "@/lib/types";
 import { becomeManifestor, nominateManifestor, removeManifestor } from "@/app/actions/manifest";
+import { useT } from "./LocaleProvider";
 
 export function ManifestorPanel({
   itemId,
@@ -17,6 +18,7 @@ export function ManifestorPanel({
   currentMemberId: string | null;
   signedIn: boolean;
 }) {
+  const { t } = useT();
   const [manifestors, setManifestors] = useState(initialManifestors);
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -27,8 +29,8 @@ export function ManifestorPanel({
   if (manifestors.length === 0) {
     return (
       <div className="border-[1.5px] border-ink p-5">
-        <span className="mono-label text-[0.65rem] text-muted">Manifestors</span>
-        <p className="mt-3 text-sm text-muted">Nobody&apos;s claimed this one yet.</p>
+        <span className="mono-label text-[0.65rem] text-muted">{t("manifestors.manifestorsLabel")}</span>
+        <p className="mt-3 text-sm text-muted">{t("manifestors.nobodyClaimed")}</p>
         {signedIn && (
           <button
             onClick={() =>
@@ -40,7 +42,7 @@ export function ManifestorPanel({
             disabled={isPending}
             className="mono-label mt-3 border-[1.5px] border-ink bg-acid px-3 py-1.5 text-[0.7rem] text-ink disabled:opacity-50"
           >
-            I&apos;ll manifest this
+            {t("manifestors.illManifestThis")}
           </button>
         )}
         {error && <p className="mt-2 text-sm text-orange">{error}</p>}
@@ -50,9 +52,7 @@ export function ManifestorPanel({
 
   return (
     <div className="border-[1.5px] border-ink p-5">
-      <span className="mono-label text-[0.65rem] text-muted">
-        Manifestors — equal power
-      </span>
+      <span className="mono-label text-[0.65rem] text-muted">{t("manifestors.equalPower")}</span>
       <ul className="mt-3 flex flex-col gap-1.5">
         {manifestors.map((m) => (
           <li key={m.id} className="flex items-center justify-between gap-2">
@@ -72,7 +72,7 @@ export function ManifestorPanel({
                 disabled={isPending}
                 className="mono-label text-[0.6rem] text-muted underline underline-offset-2 disabled:opacity-50"
               >
-                remove
+                {t("manifestors.remove")}
               </button>
             )}
           </li>
@@ -100,7 +100,7 @@ export function ManifestorPanel({
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Nominate by email"
+            placeholder={t("manifestors.nominateByEmail")}
             className="flex-1 border-[1.5px] border-ink bg-paper px-2 py-1.5 text-xs outline-none"
           />
           <button
@@ -108,7 +108,7 @@ export function ManifestorPanel({
             disabled={isPending}
             className="mono-label border-[1.5px] border-ink px-3 py-1.5 text-[0.65rem] disabled:opacity-50"
           >
-            Add
+            {t("manifestors.add")}
           </button>
         </form>
       )}

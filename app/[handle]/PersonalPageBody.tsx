@@ -8,6 +8,7 @@ import { ShareOverallButton } from "@/components/ShareOverallButton";
 import { CaptureCardButton } from "./CaptureCardButton";
 import { requestInviteAccess } from "@/app/actions/invite-request";
 import { whereText, whereOnly, activitySummary, kindLabel } from "@/lib/item-display";
+import { useT } from "@/components/LocaleProvider";
 import styles from "../SylonDesign.module.css";
 
 // The personal page's interactive body: the shareable trip carousel, the
@@ -31,6 +32,7 @@ export function PersonalPageBody({
   isOwner: boolean;
   showInviteCta: boolean;
 }) {
+  const { t, tn, locale } = useT();
   const tripCount = items.filter((i) => i.kind === "trip").length;
   const manifestCount = items.filter((i) => i.kind === "manifest").length;
 
@@ -116,7 +118,7 @@ export function PersonalPageBody({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [reason, setReason] = useState("Just curious");
+  const [reason, setReason] = useState(t("personalPage.reasonCurious"));
   const [formError, setFormError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -132,27 +134,26 @@ export function PersonalPageBody({
       dialogRef.current?.close();
       setName("");
       setEmail("");
-      setReason("Just curious");
-      showToast("Signal sent — maybe see you there");
+      setReason(t("personalPage.reasonCurious"));
+      showToast(t("personalPage.signalSentToast"));
     });
   }
+
+  const captureShareLabel = t("personalPage.captureShare");
 
   return (
     <>
       {/* Hero */}
       <section className={`${styles.profileHero} ${styles.profileHeroCarousel}`}>
         <div className={styles.heroCopy}>
-          <div className={`${styles.kicker} mono`}>{displayName}&apos;s upcoming trips</div>
+          <div className={`${styles.kicker} mono`}>{t("personalPage.upcomingTrips", { name: displayName })}</div>
           <h1 className={styles.heroTitle}>
-            Where I&apos;m
-            <span className={styles.outline}>going next.</span>
+            {t("personalPage.titleLine1")}
+            <span className={styles.outline}>{t("personalPage.titleLine2")}</span>
           </h1>
           <div className={styles.intro}>
             <span className={`${styles.introNumber} mono`}>01</span>
-            <p>
-              Booked trips, possible detours, and the plans {displayName} is still trying to
-              manifest.
-            </p>
+            <p>{t("personalPage.introBody", { name: displayName })}</p>
           </div>
           {items.length > 0 && (
             <div className={`${styles.sharePrompt} ${styles.desktopShare}`}>
@@ -161,10 +162,10 @@ export function PersonalPageBody({
                 displayName={displayName}
                 items={items}
                 className={`${styles.share} mono`}
-                label="Capture or share this on story ↗"
+                label={captureShareLabel}
                 onToast={showToast}
               />
-              <span className="mono">Capture this card or send the link to a friend.</span>
+              <span className="mono">{t("personalPage.captureHintDesktop")}</span>
             </div>
           )}
         </div>
@@ -181,23 +182,23 @@ export function PersonalPageBody({
             >
               <article className={`${styles.snapshotCard} ${styles.summaryCard}`}>
                 <div className={`${styles.snapshotTop} mono`}>
-                  <span>{displayName}&apos;s future atlas</span>
+                  <span>{t("personalPage.futureAtlas", { name: displayName })}</span>
                   <span>
                     01 / {String(slideCount).padStart(2, "0")}
                   </span>
                 </div>
                 <div className={styles.summaryCount}>{String(items.length).padStart(2, "0")}</div>
                 <h2>
-                  {items.length === 1 ? "trip is" : "trips are"}
+                  {items.length === 1 ? t("personalPage.tripsAreOne") : t("personalPage.tripsAreMany")}
                   <br />
-                  waiting.
+                  {t("personalPage.waiting")}
                 </h2>
                 <div className={`${styles.summaryStats} mono`}>
                   <span>
-                    <b>{tripCount}</b> trip{tripCount === 1 ? "" : "s"}
+                    <b>{tripCount}</b> {tn(tripCount, { one: "trip", other: "trips" }, "ทริป")}
                   </span>
                   <span>
-                    <b>{manifestCount}</b> manifest{manifestCount === 1 ? "" : "s"}
+                    <b>{manifestCount}</b> {tn(manifestCount, { one: "manifest", other: "manifests" }, "แมนิเฟสต์")}
                   </span>
                 </div>
               </article>
@@ -209,7 +210,7 @@ export function PersonalPageBody({
                 >
                   <div className={`${styles.snapshotTop} mono`}>
                     <span>
-                      {kindLabel(item)} · {labelFor(item)}
+                      {kindLabel(item, locale)} · {labelFor(item, locale)}
                     </span>
                     <span>
                       {String(index + 2).padStart(2, "0")} / {String(slideCount).padStart(2, "0")}
@@ -219,22 +220,22 @@ export function PersonalPageBody({
                   <h2>{item.title}</h2>
                   <p>{item.summary}</p>
                   <div className={`${styles.snapshotFoot} mono`}>
-                    <span>{whereOnly(item)}</span>
-                    <span>{activitySummary(item)}</span>
+                    <span>{whereOnly(item, locale)}</span>
+                    <span>{activitySummary(item, locale)}</span>
                   </div>
                 </article>
               ))}
             </div>
 
             <div className={styles.carouselUi}>
-              <span className={`${styles.swipeHint} mono`}>Swipe to choose a card</span>
+              <span className={`${styles.swipeHint} mono`}>{t("personalPage.swipeHint")}</span>
               <div className={styles.carouselDots} aria-label="Choose a card">
                 {Array.from({ length: slideCount }).map((_, i) => (
                   <button
                     key={i}
                     type="button"
                     className={`${styles.dot} ${i === activeSlide ? styles.dotActive : ""}`}
-                    aria-label={i === 0 ? "Summary card" : `${items[i - 1]?.title} card`}
+                    aria-label={i === 0 ? t("personalPage.summaryCard") : `${items[i - 1]?.title} card`}
                     onClick={() => {
                       showSlide(i);
                       userInteracted();
@@ -252,7 +253,10 @@ export function PersonalPageBody({
         <div className={styles.ticker} aria-hidden="true">
           <div className={`${styles.tickerTrack} mono`}>
             {Array(2)
-              .fill(items.map((i) => `${i.title.toUpperCase()} — ${labelFor(i).toUpperCase()}`).join(" / ") + " / ")
+              .fill(
+                items.map((i) => `${i.title.toUpperCase()} — ${labelFor(i, locale).toUpperCase()}`).join(" / ") +
+                  " / "
+              )
               .join("")}
           </div>
         </div>
@@ -267,27 +271,27 @@ export function PersonalPageBody({
               displayName={displayName}
               items={items}
               className={`${styles.share} mono`}
-              label="Capture or share this on story ↗"
+              label={captureShareLabel}
               onToast={showToast}
             />
-            <span className="mono">Swipe above to choose what your friend will see.</span>
+            <span className="mono">{t("personalPage.captureHintMobile")}</span>
           </div>
         )}
 
         <header className={styles.collectionHead}>
-          <h2 id="plans-heading">The whole plan.</h2>
-          <p>One screen, every maybe. Made to save, send, or drop into an IG Story.</p>
+          <h2 id="plans-heading">{t("personalPage.theWholePlan")}</h2>
+          <p>{t("personalPage.boardSubtitle")}</p>
         </header>
 
         {items.length === 0 ? (
           <p className="mono" style={{ color: "var(--muted)" }}>
-            Nothing public yet — check back soon.
+            {t("personalPage.nothingPublicYet")}
           </p>
         ) : (
           <div className={styles.boardShell}>
             <div className={`${styles.boardTop} mono`}>
-              <span>{displayName}&apos;s departures</span>
-              <span>Bangkok → wherever</span>
+              <span>{t("personalPage.departures", { name: displayName })}</span>
+              <span>{t("personalPage.bangkokWherever")}</span>
             </div>
             <div className={styles.planBoard}>
               {items.map((item, index) => (
@@ -299,10 +303,10 @@ export function PersonalPageBody({
                   <span className={`${styles.bannerNo} mono`}>{String(index + 1).padStart(2, "0")}</span>
                   <span className={styles.bannerMain}>
                     <small className="mono">
-                      {kindLabel(item)} · {labelFor(item)} · {item.roughDate}
+                      {kindLabel(item, locale)} · {labelFor(item, locale)} · {item.roughDate}
                     </small>
                     <strong>{item.title}</strong>
-                    <em>{whereText(item)}</em>
+                    <em>{whereText(item, locale)}</em>
                   </span>
                   <span className={styles.bannerArrow} aria-hidden="true">
                     ↗
@@ -313,9 +317,9 @@ export function PersonalPageBody({
 
             {isOwner ? (
               <Link href="/new" className={styles.quietBanner}>
-                <span className="mono">+ Add a plan</span>
-                <strong>Something else on your mind?</strong>
-                <span className="mono">Trip or manifest ↗</span>
+                <span className="mono">{t("personalPage.addPlan")}</span>
+                <strong>{t("personalPage.addPlanQuestion")}</strong>
+                <span className="mono">{t("personalPage.addPlanCta")}</span>
               </Link>
             ) : (
               showInviteCta && (
@@ -324,23 +328,23 @@ export function PersonalPageBody({
                   className={styles.quietBanner}
                   onClick={() => dialogRef.current?.showModal()}
                 >
-                  <span className="mono">+ Request an invite</span>
-                  <strong>Curious about the quiet plans?</strong>
-                  <span className="mono">Ask {displayName} ↗</span>
+                  <span className="mono">{t("personalPage.requestInvite")}</span>
+                  <strong>{t("personalPage.requestInviteQuestion")}</strong>
+                  <span className="mono">{t("personalPage.requestInviteCta", { name: displayName })}</span>
                 </button>
               )
             )}
 
             <div className={`${styles.boardSignoff} mono`}>
               <span>@{handle}</span>
-              <span>SYLON — See you later (or not)</span>
+              <span>{t("personalPage.boardSignoffTagline")}</span>
             </div>
           </div>
         )}
 
         {items.length > 0 && (
           <div className={styles.storyAction}>
-            <span className={`${styles.storyNote} mono`}>The whole plan · 1080 × 1920</span>
+            <span className={`${styles.storyNote} mono`}>{t("personalPage.storyNote")}</span>
             <ShareOverallButton
               displayName={displayName}
               items={items}
@@ -355,32 +359,32 @@ export function PersonalPageBody({
       <dialog ref={dialogRef}>
         <form className={styles.sheet} onSubmit={handleInviteSubmit}>
           <div className={styles.sheetHead}>
-            <span className="mono">Invitation request</span>
+            <span className="mono">{t("personalPage.inviteDialogTitle")}</span>
             <button
               type="button"
               className={styles.close}
-              aria-label="Close"
+              aria-label={t("personalPage.close")}
               onClick={() => dialogRef.current?.close()}
             >
               ×
             </button>
           </div>
-          <h2>Maybe together?</h2>
+          <h2>{t("personalPage.inviteHeading")}</h2>
           <div className={styles.field}>
             <label className="mono" htmlFor="invite-name">
-              Your name
+              {t("personalPage.yourName")}
             </label>
             <input
               id="invite-name"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={`The person ${displayName} knows`}
+              placeholder={t("personalPage.yourNamePlaceholder", { name: displayName })}
             />
           </div>
           <div className={styles.field}>
             <label className="mono" htmlFor="invite-email">
-              Your email
+              {t("personalPage.yourEmail")}
             </label>
             <input
               id="invite-email"
@@ -393,17 +397,17 @@ export function PersonalPageBody({
           </div>
           <div className={styles.field}>
             <label className="mono" htmlFor="invite-reason">
-              Which plan brought you here?
+              {t("personalPage.whichPlan")}
             </label>
             <select id="invite-reason" value={reason} onChange={(e) => setReason(e.target.value)}>
-              <option>Just curious</option>
-              <option>I want to join a trip</option>
-              <option>I have a better idea</option>
+              <option value={t("personalPage.reasonCurious")}>{t("personalPage.reasonCurious")}</option>
+              <option value={t("personalPage.reasonJoin")}>{t("personalPage.reasonJoin")}</option>
+              <option value={t("personalPage.reasonIdea")}>{t("personalPage.reasonIdea")}</option>
             </select>
           </div>
           {formError && <p className={styles.formError}>{formError}</p>}
           <button type="submit" className={styles.submit} disabled={isPending}>
-            {isPending ? "Sending…" : "Send the signal"}
+            {isPending ? t("personalPage.sending") : t("personalPage.sendSignal")}
           </button>
         </form>
       </dialog>

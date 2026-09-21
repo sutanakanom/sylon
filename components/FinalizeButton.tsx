@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { convertToTrip } from "@/app/actions/manifest";
+import { useT } from "./LocaleProvider";
 
 // variant="wide" matches the manifest v2 conversion card's full-width
 // button (styles.convertButton, greyed out via :disabled when the two
@@ -13,7 +14,7 @@ export function FinalizeButton({
   disabled,
   variant = "compact",
   className,
-  label = "Finalize → make it a Trip",
+  label,
 }: {
   manifestId: string;
   slug: string;
@@ -22,10 +23,12 @@ export function FinalizeButton({
   className?: string;
   label?: string;
 }) {
+  const { t } = useT();
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const wide = variant === "wide";
+  const resolvedLabel = label ?? t("manifestDetail.convertToTrip");
 
   return (
     <div className={wide ? "" : "flex flex-col items-end gap-2"}>
@@ -46,7 +49,7 @@ export function FinalizeButton({
             : "mono-label border-[1.5px] border-ink bg-acid px-5 py-3 text-[0.75rem] text-ink transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ink)] disabled:opacity-50")
         }
       >
-        {isPending ? "Finalizing…" : label}
+        {isPending ? t("manifestDetail.finalizing") : resolvedLabel}
       </button>
       {error && <p className="text-sm text-orange">{error}</p>}
     </div>

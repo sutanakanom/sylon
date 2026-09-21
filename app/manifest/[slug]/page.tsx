@@ -16,6 +16,8 @@ import {
   isFollowing,
   getFollowerCount,
 } from "@/app/actions/interactions";
+import { getLocale } from "@/lib/i18n/locale";
+import { t, tn } from "@/lib/i18n/dictionary";
 import { SiteShell } from "@/components/SiteShell";
 import { ManifestorPanel } from "@/components/ManifestorPanel";
 import { ChatFeed } from "@/components/ChatFeed";
@@ -39,22 +41,20 @@ export default async function ManifestDetailPage({
 
   if (!item || item.kind !== "manifest") notFound();
 
-  const member = await getCurrentMember();
+  const [member, locale] = await Promise.all([getCurrentMember(), getLocale()]);
 
   if (item.visibility === "invite-only" && !member) {
     return (
-      <SiteShell member={member} centerLabel="Invite-only">
+      <SiteShell member={member} centerLabel={t(locale, "tripDetail.invitedOnly")}>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-24 text-center">
-          <p className="mono-label text-[0.7rem] text-muted">Invite-only</p>
-          <h1 className="text-2xl font-extrabold uppercase">This one&apos;s private</h1>
-          <p className="max-w-sm text-sm text-muted">
-            Ask whoever shared this link with you for an invite, then sign in.
-          </p>
+          <p className="mono-label text-[0.7rem] text-muted">{t(locale, "tripDetail.invitedOnly")}</p>
+          <h1 className="text-2xl font-extrabold uppercase">{t(locale, "tripDetail.privateTitle")}</h1>
+          <p className="max-w-sm text-sm text-muted">{t(locale, "tripDetail.privateBody")}</p>
           <Link
             href="/sign-in"
             className="mono-label border-[1.5px] border-ink px-5 py-3 text-[0.75rem]"
           >
-            Sign in
+            {t(locale, "common.signIn")}
           </Link>
         </div>
       </SiteShell>
@@ -99,23 +99,27 @@ export default async function ManifestDetailPage({
   const datesKnown = Boolean(item.targetStartDate && item.targetEndDate);
   const anchors = [
     {
-      label: "Purpose",
-      value: item.purpose || "Not set yet",
+      label: t(locale, "manifestDetail.purpose"),
+      value: item.purpose || t(locale, "manifestDetail.notSetYet"),
       tag: item.purpose ? ("known" as const) : ("open" as const),
     },
     {
-      label: "Rough timing",
+      label: t(locale, "manifestDetail.roughTiming"),
       value: item.roughDate,
       tag: "rough" as const,
     },
     {
-      label: "Location",
-      value: locationKnown ? item.decidedCountry! : sortedVotes[0] ? `${sortedVotes[0].country} leading` : "Open",
+      label: t(locale, "manifestDetail.location"),
+      value: locationKnown
+        ? item.decidedCountry!
+        : sortedVotes[0]
+          ? `${sortedVotes[0].country} ${t(locale, "manifestDetail.leading")}`
+          : t(locale, "manifestDetail.open"),
       tag: locationKnown ? ("known" as const) : ("open" as const),
     },
     {
-      label: "Exact dates",
-      value: datesKnown ? `${item.targetStartDate} → ${item.targetEndDate}` : "Waiting to be decided",
+      label: t(locale, "manifestDetail.exactDates"),
+      value: datesKnown ? `${item.targetStartDate} → ${item.targetEndDate}` : t(locale, "manifestDetail.waitingToBeDecided"),
       tag: datesKnown ? ("known" as const) : ("open" as const),
     },
   ];
@@ -133,12 +137,12 @@ export default async function ManifestDetailPage({
       {/* Breadcrumb */}
       <div className={styles.breadcrumb}>
         <Link href={`/${item.ownerHandle}`} className={`${styles.breadcrumbBack} mono`}>
-          ← {ownerDisplay}&apos;s plans
+          ← {t(locale, "tripDetail.plansOf", { name: ownerDisplay })}
         </Link>
         <div className="flex items-center gap-3">
           {isHost && (
             <Link href={`/manifest/${slug}/edit`} className={`${styles.mini} mono underline underline-offset-2`}>
-              Edit
+              {t(locale, "manifestDetail.edit")}
             </Link>
           )}
           {member && <ShareStoryButton item={item} variant="subtle" />}
@@ -149,7 +153,10 @@ export default async function ManifestDetailPage({
       <section className={styles.detailHero}>
         <div className={styles.heroCopy}>
           <span className={`${styles.eyebrow} mono`}>
-            Manifesting · {progress.activeCount >= 2 ? "Gathering ideas" : "Just posted"}
+            {t(locale, "manifestDetail.manifesting")} ·{" "}
+            {progress.activeCount >= 2
+              ? t(locale, "manifestDetail.manifestingGatheringIdeas")
+              : t(locale, "manifestDetail.manifestingJustPosted")}
           </span>
           <h1 className={styles.heroTitleBig}>{item.title}</h1>
           <p className={styles.heroLede}>{item.summary}</p>
@@ -160,8 +167,8 @@ export default async function ManifestDetailPage({
               slug={item.slug}
               initialJoined={joined}
               signedIn={Boolean(member)}
-              joinLabel="Manifest with me +"
-              joinedLabel="You're manifesting this"
+              joinLabel={t(locale, "manifestDetail.manifestWithMe")}
+              joinedLabel={t(locale, "manifestDetail.youreManifestingThis")}
             />
             <FollowButton
               itemType="manifest"
@@ -169,8 +176,8 @@ export default async function ManifestDetailPage({
               slug={item.slug}
               initialFollowing={following}
               signedIn={Boolean(member)}
-              followLabel="Follow this idea"
-              followingLabel="Following this idea"
+              followLabel={t(locale, "manifestDetail.followThisIdea")}
+              followingLabel={t(locale, "manifestDetail.followingThisIdea")}
             />
           </div>
           <div className={styles.facesRow}>
@@ -183,14 +190,17 @@ export default async function ManifestDetailPage({
               {overflowCount > 0 && <span className={styles.faceAvatar}>+{overflowCount}</span>}
             </div>
             <small className="mono">
-              <b>{item.memberCount}</b> interested · {followerCount} following
+              <b>{item.memberCount}</b> {t(locale, "manifestDetail.interested")} · {followerCount}{" "}
+              {t(locale, "manifestDetail.following")}
             </small>
           </div>
         </div>
         <aside className={`${styles.heroPanel} ${styles.anchorPanel}`}>
           <div className={`${styles.anchorHead} mono`}>
-            <span>What we know</span>
-            <span>{String(setAnchors).padStart(2, "0")} / 04 anchors</span>
+            <span>{t(locale, "manifestDetail.whatWeKnow")}</span>
+            <span>
+              {String(setAnchors).padStart(2, "0")} / 04 {t(locale, "manifestDetail.anchorsSuffix")}
+            </span>
           </div>
           {anchors.map((a) => (
             <div key={a.label} className={styles.anchor}>
@@ -201,7 +211,11 @@ export default async function ManifestDetailPage({
                   a.tag === "known" ? styles.anchorKnown : a.tag === "open" ? styles.anchorOpen : ""
                 }`}
               >
-                {a.tag === "known" ? "Known" : a.tag === "rough" ? "Rough" : "Open"}
+                {a.tag === "known"
+                  ? t(locale, "manifestDetail.tagKnown")
+                  : a.tag === "rough"
+                    ? t(locale, "manifestDetail.tagRough")
+                    : t(locale, "manifestDetail.tagOpen")}
               </span>
             </div>
           ))}
@@ -211,9 +225,9 @@ export default async function ManifestDetailPage({
       {alreadyConverted && (
         <div className="border-b-[1.5px] border-ink bg-ink px-6 py-4 text-center text-paper md:px-10">
           <p className="mono-label text-[0.7rem]">
-            This became a real trip —{" "}
+            {t(locale, "manifestDetail.becameARealTrip")}{" "}
             <a href={`/trip/${item.slug}-trip`} className="underline underline-offset-2">
-              see it here
+              {t(locale, "manifestDetail.seeItHere")}
             </a>
             .
           </p>
@@ -223,28 +237,23 @@ export default async function ManifestDetailPage({
       {/* Workspace — shape the possibility */}
       <section className={styles.workspace}>
         <div className={styles.workspaceHeader}>
-          <span className="mono">Shape the possibility</span>
+          <span className="mono">{t(locale, "manifestDetail.shapeThePossibility")}</span>
           <h2>
-            What should
+            {t(locale, "manifestDetail.whatShouldWeDecideLine1")}
             <br />
-            we decide?
+            {t(locale, "manifestDetail.whatShouldWeDecideLine2")}
           </h2>
-          <p>
-            Your answers are signals, not commitments. {ownerDisplay} will summarize the
-            strongest direction before anything becomes final.
-          </p>
+          <p>{t(locale, "manifestDetail.signalsNotCommitments", { name: ownerDisplay })}</p>
         </div>
 
         <div className={styles.questionGrid}>
           {/* Vote card */}
           <article className={`${styles.questionCard} ${styles.questionCardFeature}`}>
             <div className={styles.qtop}>
-              <span className="mono">Open question · Vote</span>
-              <span className="mono">
-                {totalVotes} response{totalVotes === 1 ? "" : "s"}
-              </span>
+              <span className="mono">{t(locale, "manifestDetail.openQuestionVote")}</span>
+              <span className="mono">{tn(locale, totalVotes, { one: "response", other: "responses" }, "คำตอบ")}</span>
             </div>
-            <h3>Where should it happen?</h3>
+            <h3>{t(locale, "manifestDetail.whereShouldItHappen")}</h3>
             {item.countryVotes.length > 0 ? (
               <CountryVoteChoices
                 manifestId={item.id}
@@ -255,7 +264,7 @@ export default async function ManifestDetailPage({
               />
             ) : (
               <p className="text-sm" style={{ opacity: 0.7 }}>
-                No location options yet.
+                {t(locale, "manifestDetail.noLocationOptions")}
               </p>
             )}
           </article>
@@ -263,9 +272,9 @@ export default async function ManifestDetailPage({
           {/* Availability card */}
           <article className={styles.questionCard}>
             <div className={styles.qtop}>
-              <span className="mono">Open question · Availability</span>
+              <span className="mono">{t(locale, "manifestDetail.openQuestionAvailability")}</span>
             </div>
-            <h3>When could you go?</h3>
+            <h3>{t(locale, "manifestDetail.whenCouldYouGo")}</h3>
             <AvailabilityPicker
               manifestId={item.id}
               slug={item.slug}
@@ -278,12 +287,10 @@ export default async function ManifestDetailPage({
           {/* Brainstorm card */}
           <article className={styles.questionCard}>
             <div className={styles.qtop}>
-              <span className="mono">Brainstorm</span>
-              <span className="mono">
-                {ideaMessages.length} idea{ideaMessages.length === 1 ? "" : "s"}
-              </span>
+              <span className="mono">{t(locale, "manifestDetail.brainstorm")}</span>
+              <span className="mono">{tn(locale, ideaMessages.length, { one: "idea", other: "ideas" }, "ไอเดีย")}</span>
             </div>
-            <h3>What would make this worth the trip?</h3>
+            <h3>{t(locale, "manifestDetail.whatWouldMakeThisWorthIt")}</h3>
             <IdeaBrainstormCard
               manifestId={item.id}
               slug={item.slug}
@@ -296,10 +303,10 @@ export default async function ManifestDetailPage({
           {/* Summary card */}
           <article className={`${styles.questionCard} ${styles.questionCardSummary}`}>
             <div className={styles.qtop}>
-              <span className="mono">Latest summary · By {ownerDisplay}</span>
-              {item.creatorSummaryUpdatedAt && <span className="mono">Updated</span>}
+              <span className="mono">{t(locale, "manifestDetail.latestSummaryBy", { name: ownerDisplay })}</span>
+              {item.creatorSummaryUpdatedAt && <span className="mono">{t(locale, "manifestDetail.updated")}</span>}
             </div>
-            <h3>{item.creatorSummaryHeadline || "No take yet — check back soon."}</h3>
+            <h3>{item.creatorSummaryHeadline || t(locale, "manifestDetail.noTakeYet")}</h3>
             {item.creatorSummaryBody && <p style={{ opacity: 0.85 }}>{item.creatorSummaryBody}</p>}
             {item.creatorSummaryTags.length > 0 && (
               <div className={styles.summaryTags}>
@@ -310,7 +317,7 @@ export default async function ManifestDetailPage({
             )}
             {isHost && !item.creatorSummaryHeadline && (
               <Link href={`/manifest/${slug}/edit`} className={styles.submitSmall} style={{ marginTop: "auto" }}>
-                Write the summary
+                {t(locale, "manifestDetail.writeTheSummary")}
               </Link>
             )}
           </article>
@@ -320,30 +327,30 @@ export default async function ManifestDetailPage({
       {/* Conversion */}
       <section className={styles.conversion}>
         <div>
-          <span className="mono">Manifest progress</span>
+          <span className="mono">{t(locale, "manifestDetail.manifestProgress")}</span>
           <h2>
             {alreadyConverted ? (
-              "It's a trip now."
+              t(locale, "manifestDetail.itsATripNow")
             ) : canConvertManifest(item) ? (
               <>
-                Ready
+                {t(locale, "manifestDetail.readyLine1")}
                 <br />
-                when you are.
+                {t(locale, "manifestDetail.readyLine2")}
               </>
             ) : (
               <>
-                Not a trip.
+                {t(locale, "manifestDetail.notATripLine1")}
                 <br />
-                Not yet.
+                {t(locale, "manifestDetail.notATripLine2")}
               </>
             )}
           </h2>
           <p>
             {alreadyConverted
-              ? "This idea became a real trip — everything gathered here carried over."
+              ? t(locale, "manifestDetail.convertedBody")
               : canConvertManifest(item)
-              ? "A location and dates are set. Any manifestor can convert this into a trip when ready."
-              : "The purpose is clear, but the date and location still need a decision. Keep gathering signals until the idea is solid enough to act on."}
+                ? t(locale, "manifestDetail.readyBody")
+                : t(locale, "manifestDetail.notReadyBody")}
           </p>
         </div>
         <div className={styles.progressCard}>
@@ -351,9 +358,9 @@ export default async function ManifestDetailPage({
             <span className={styles.meterFill} style={{ width: `${progress.percent}%` }} />
           </div>
           <div className={`${styles.stages} mono`}>
-            {progress.stages.map((stage, i) => (
-              <b key={stage} className={i < progress.activeCount ? styles.stageOn : ""}>
-                {stage}
+            {progress.stageKeys.map((stageKey, i) => (
+              <b key={stageKey} className={i < progress.activeCount ? styles.stageOn : ""}>
+                {t(locale, stageKey)}
               </b>
             ))}
           </div>
@@ -365,13 +372,13 @@ export default async function ManifestDetailPage({
                 variant="wide"
                 disabled={!canConvert}
                 className={styles.convertButton}
-                label="Convert to trip"
+                label={t(locale, "manifestDetail.convertToTrip")}
               />
               {!canConvert && (
                 <small className={`${styles.convertNote} mono`}>
                   {!iAmManifestor
-                    ? "Only manifestors can convert this."
-                    : "Finalize a location and date first"}
+                    ? t(locale, "manifestDetail.onlyManifestorsCanConvert")
+                    : t(locale, "manifestDetail.finalizeFirst")}
                 </small>
               )}
             </>
@@ -391,7 +398,7 @@ export default async function ManifestDetailPage({
 
       {/* Full discussion */}
       <section className="mx-auto w-full max-w-2xl flex-1 px-6 py-10 md:px-10">
-        <h2 className="mb-8 text-lg font-extrabold uppercase">Everything said so far</h2>
+        <h2 className="mb-8 text-lg font-extrabold uppercase">{t(locale, "manifestDetail.everythingSaidSoFar")}</h2>
         <ChatFeed
           manifestId={item.id}
           slug={item.slug}

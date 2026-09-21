@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { submitSurvey, SurveyAnswers } from "@/app/actions/survey";
+import { useT } from "./LocaleProvider";
 
 export function SurveyForm({
   tripId,
@@ -12,6 +13,7 @@ export function SurveyForm({
   slug: string;
   initialAnswers: SurveyAnswers | null;
 }) {
+  const { t } = useT();
   const [inOrOut, setInOrOut] = useState<SurveyAnswers["inOrOut"]>(
     initialAnswers?.inOrOut ?? "in"
   );
@@ -20,6 +22,12 @@ export function SurveyForm({
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const OPTION_LABEL: Record<SurveyAnswers["inOrOut"], string> = {
+    in: t("survey.optionIn"),
+    maybe: t("survey.optionMaybe"),
+    out: t("survey.optionOut"),
+  };
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,7 +46,7 @@ export function SurveyForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5 border-[1.5px] border-ink p-5">
       <div>
-        <span className="mono-label text-[0.65rem] text-muted">Are you in?</span>
+        <span className="mono-label text-[0.65rem] text-muted">{t("survey.areYouIn")}</span>
         <div className="mt-2 flex gap-2">
           {(["in", "maybe", "out"] as const).map((option) => (
             <button
@@ -49,16 +57,14 @@ export function SurveyForm({
                 inOrOut === option ? "bg-acid text-ink" : "bg-transparent"
               }`}
             >
-              {option}
+              {OPTION_LABEL[option]}
             </button>
           ))}
         </div>
       </div>
 
       <label className="flex flex-col gap-2">
-        <span className="mono-label text-[0.65rem] text-muted">
-          Any date conflicts we should know about?
-        </span>
+        <span className="mono-label text-[0.65rem] text-muted">{t("survey.dateConflicts")}</span>
         <textarea
           value={conflicts}
           onChange={(e) => setConflicts(e.target.value)}
@@ -68,9 +74,7 @@ export function SurveyForm({
       </label>
 
       <label className="flex flex-col gap-2">
-        <span className="mono-label text-[0.65rem] text-muted">
-          Anything you need from the group? (budget, visa, etc.)
-        </span>
+        <span className="mono-label text-[0.65rem] text-muted">{t("survey.needsFromGroup")}</span>
         <textarea
           value={needs}
           onChange={(e) => setNeeds(e.target.value)}
@@ -85,9 +89,9 @@ export function SurveyForm({
           disabled={isPending}
           className="mono-label border-[1.5px] border-ink bg-ink px-4 py-2 text-[0.7rem] text-paper disabled:opacity-50"
         >
-          {isPending ? "Saving…" : "Save answers"}
+          {isPending ? t("survey.saving") : t("survey.saveAnswers")}
         </button>
-        {saved && <span className="text-sm text-muted">Saved.</span>}
+        {saved && <span className="text-sm text-muted">{t("survey.saved")}</span>}
         {error && <span className="text-sm text-orange">{error}</span>}
       </div>
     </form>

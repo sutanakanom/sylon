@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { setAvailability } from "@/app/actions/manifest";
+import { useT } from "./LocaleProvider";
 import styles from "@/app/SylonDesign.module.css";
 
 // A signal, not a commitment — members check the windows that could work
@@ -21,12 +22,13 @@ export function AvailabilityPicker({
   initialSelected: string[];
   signedIn: boolean;
 }) {
+  const { t } = useT();
   const [selected, setSelected] = useState<string[]>(initialSelected);
   const [saved, setSaved] = useState(true);
   const [isPending, startTransition] = useTransition();
 
   if (windowOptions.length === 0) {
-    return <p className="mt-6 text-sm text-muted">No windows set yet — ask the host to add some.</p>;
+    return <p className="mt-6 text-sm text-muted">{t("manifestDetail.noWindowsYet")}</p>;
   }
 
   if (!signedIn) {
@@ -38,7 +40,7 @@ export function AvailabilityPicker({
           </div>
         ))}
         <a href="/sign-in" className={`${styles.submitSmall}`} style={{ display: "inline-block" }}>
-          Sign in to answer
+          {t("manifestDetail.signInToAnswer")}
         </a>
       </div>
     );
@@ -68,7 +70,7 @@ export function AvailabilityPicker({
           })
         }
       >
-        {isPending ? "Saving…" : saved ? "Saved" : "Save availability"}
+        {isPending ? t("common.saving") : saved ? t("common.saved") : t("manifestDetail.saveAvailability")}
       </button>
     </div>
   );

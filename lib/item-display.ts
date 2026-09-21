@@ -3,27 +3,41 @@
 // names — matching the "rough view" rule for anything public/shareable.
 
 import { Item, Leg, Trip } from "./types";
+import { Locale, t, tn } from "./i18n/dictionary";
+
+// The site's playful stage label ("See You" / "Manifesting" / …) in
+// either language — the single source of truth for every place that
+// shows a status (StatusStamp, KindBadge's neighbor, the carousel, the
+// board, the IG-Story canvas). Canvas text (lib/story-canvas.ts) calls
+// this with no locale arg on purpose and stays English for now — see
+// docs/I18N.md.
+export function labelFor(item: Item, locale: Locale = "en"): string {
+  return item.kind === "trip"
+    ? t(locale, `status.trip.${item.status}`)
+    : t(locale, `status.manifest.${item.status}`);
+}
 
 // Full "where" line, including the vote count for a manifest — for a
 // single-line slot (the board banner's <em>, the story board's rows) that
 // has nowhere else to show the vote count.
-export function whereText(item: Item): string {
+export function whereText(item: Item, locale: Locale = "en"): string {
   if (item.kind === "trip") return item.countries.join(" + ");
   const total = item.countryVotes.reduce((sum, v) => sum + v.votes, 0);
-  if (total === 0) return item.countryVotes.map((v) => v.country).join(" or ");
+  if (total === 0) return item.countryVotes.map((v) => v.country).join(locale === "th" ? " หรือ " : " or ");
   const leader = item.countryVotes.slice().sort((a, b) => b.votes - a.votes)[0];
-  return `${leader.country} leading · ${total} vote${total === 1 ? "" : "s"} so far`;
+  const votes = tn(locale, total, { one: "vote", other: "votes" }, "โหวต");
+  return `${leader.country} ${t(locale, "itemDisplay.leading")} · ${votes} ${t(locale, "itemDisplay.soFar")}`;
 }
 
 // Just the place, no vote count — for a two-column layout (the carousel's
 // snapshot-foot) that already shows the vote count in its own slot via
 // activitySummary(), so whereText() there would repeat it.
-export function whereOnly(item: Item): string {
+export function whereOnly(item: Item, locale: Locale = "en"): string {
   if (item.kind === "trip") return item.countries.join(" + ");
   const total = item.countryVotes.reduce((sum, v) => sum + v.votes, 0);
-  if (total === 0) return item.countryVotes.map((v) => v.country).join(" or ");
+  if (total === 0) return item.countryVotes.map((v) => v.country).join(locale === "th" ? " หรือ " : " or ");
   const leader = item.countryVotes.slice().sort((a, b) => b.votes - a.votes)[0];
-  return `${leader.country} leading`;
+  return `${leader.country} ${t(locale, "itemDisplay.leading")}`;
 }
 
 export function totalVotes(item: Item): number {
@@ -43,20 +57,20 @@ export function voteShare(item: Item): number | null {
 // KindBadge pill would clash with a card's own background (a colored
 // carousel snapshot, board banner, or canvas row). Uses currentColor there
 // instead of a fixed color.
-export function kindLabel(item: Item): string {
-  return item.kind === "trip" ? "TRIP" : "MANIFEST";
+export function kindLabel(item: Item, locale: Locale = "en"): string {
+  return t(locale, item.kind === "trip" ? "common.trip" : "common.manifest").toUpperCase();
 }
 
 // A short "what's happening" line for a snapshot/banner's secondary slot —
 // member count for a trip, vote count for a manifest.
-export function activitySummary(item: Item): string {
+export function activitySummary(item: Item, locale: Locale = "en"): string {
   if (item.kind === "trip") {
     return item.memberCount === 0
-      ? "Be the first"
-      : `${item.memberCount} member${item.memberCount === 1 ? "" : "s"}`;
+      ? t(locale, "itemDisplay.beTheFirst")
+      : tn(locale, item.memberCount, { one: "member", other: "members" }, "สมาชิก");
   }
   const votes = totalVotes(item);
-  return votes === 0 ? "No votes yet" : `${votes} vote${votes === 1 ? "" : "s"}`;
+  return votes === 0 ? t(locale, "itemDisplay.noVotesYet") : tn(locale, votes, { one: "vote", other: "votes" }, "โหวต");
 }
 
 // --- Detail-page helpers (trip/manifest hero poster + timeline) --------
@@ -143,19 +157,27 @@ export function canConvertManifest(item: {
 // Taking shape (the host has decided a location), Trip (converted). The
 // meter fill is just stageIndex/3, no separate weighting — it's meant to
 // read as "how many of the four are lit," matching the mock's stage row.
-const MANIFEST_STAGES = ["Manifesting", "Gathering ideas", "Taking shape", "Trip"] as const;
+// Dictionary keys, not literal text — manifestStageProgress is a plain
+// (non-component) helper, so it can't call useT(); the caller translates
+// each key with t(locale, key).
+const MANIFEST_STAGE_KEYS = [
+  "manifestDetail.stageManifesting",
+  "manifestDetail.stageGatheringIdeas",
+  "manifestDetail.stageTakingShape",
+  "manifestDetail.stageTrip",
+] as const;
 
 export function manifestStageProgress(
   item: { decidedCountry: string | null; status: string },
   hasActivity: boolean
-): { stages: readonly string[]; activeCount: number; percent: number } {
+): { stageKeys: readonly string[]; activeCount: number; percent: number } {
   let activeCount = 1; // Manifesting is always on — it exists.
   if (hasActivity) activeCount = 2;
   if (item.decidedCountry) activeCount = 3;
   if (item.status === "converted") activeCount = 4;
   return {
-    stages: MANIFEST_STAGES,
+    stageKeys: MANIFEST_STAGE_KEYS,
     activeCount,
-    percent: Math.round((activeCount / MANIFEST_STAGES.length) * 100),
+    percent: Math.round((activeCount / MANIFEST_STAGE_KEYS.length) * 100),
   };
 }

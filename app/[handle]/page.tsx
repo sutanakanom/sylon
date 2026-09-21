@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { getPublicItems, handleExists } from "@/lib/data";
 import { getCurrentMember } from "@/lib/current-member";
+import { getLocale } from "@/lib/i18n/locale";
+import { t } from "@/lib/i18n/dictionary";
 import { SiteShell } from "@/components/SiteShell";
 import { PersonalPageBody } from "./PersonalPageBody";
 import styles from "../SylonDesign.module.css";
@@ -12,10 +14,11 @@ export default async function PersonalPage({
 }) {
   const { handle } = await params;
 
-  const [exists, items, member] = await Promise.all([
+  const [exists, items, member, locale] = await Promise.all([
     handleExists(handle),
     getPublicItems(handle),
     getCurrentMember(),
+    getLocale(),
   ]);
 
   if (!exists) notFound();
@@ -23,7 +26,7 @@ export default async function PersonalPage({
   const displayName = handle.charAt(0).toUpperCase() + handle.slice(1);
 
   return (
-    <SiteShell member={member} footerMeta={["See you later (or not)", `@${handle}`]}>
+    <SiteShell member={member} footerMeta={[t(locale, "footer.defaultMeta"), `@${handle}`]}>
       <main id="top" className={styles.heroPage}>
         <PersonalPageBody
           items={items}
@@ -36,14 +39,11 @@ export default async function PersonalPage({
         {/* Manifesto */}
         <section className={styles.manifesto}>
           <span className={`${styles.manifestoLabel} mono`}>
-            A note from future {displayName}
+            {t(locale, "personalPage.manifestoNoFrom", { name: displayName })}
             <br />
-            No. 01
+            {t(locale, "personalPage.manifestoNo01")}
           </span>
-          <blockquote>
-            Not every plan is a promise. Some are just a place we haven&apos;t been yet — and
-            an <em>open invitation.</em>
-          </blockquote>
+          <blockquote>{t(locale, "personalPage.manifestoBody")}</blockquote>
         </section>
       </main>
     </SiteShell>

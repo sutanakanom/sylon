@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { toggleFollow } from "@/app/actions/interactions";
+import { useT } from "./LocaleProvider";
 
 export function FollowButton({
   itemType,
@@ -9,8 +10,8 @@ export function FollowButton({
   slug,
   initialFollowing,
   signedIn,
-  followLabel = "Follow",
-  followingLabel = "Following",
+  followLabel,
+  followingLabel,
 }: {
   itemType: "trip" | "manifest";
   itemId: string;
@@ -20,8 +21,12 @@ export function FollowButton({
   followLabel?: string;
   followingLabel?: string;
 }) {
+  const { t } = useT();
   const [following, setFollowing] = useState(initialFollowing);
   const [isPending, startTransition] = useTransition();
+
+  const resolvedFollowLabel = followLabel ?? t("common.follow");
+  const resolvedFollowingLabel = followingLabel ?? t("common.following");
 
   if (!signedIn) {
     return (
@@ -29,7 +34,7 @@ export function FollowButton({
         href="/sign-in"
         className="mono-label border-[1.5px] border-ink px-4 py-2 text-[0.7rem] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ink)]"
       >
-        Sign in to follow
+        {t("common.signInToFollow")}
       </a>
     );
   }
@@ -47,7 +52,7 @@ export function FollowButton({
         following ? "bg-acid text-ink" : "bg-transparent"
       }`}
     >
-      {following ? followingLabel : followLabel}
+      {following ? resolvedFollowingLabel : resolvedFollowLabel}
     </button>
   );
 }

@@ -3,8 +3,10 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { requestCode, verifyCode } from "@/app/actions/auth";
+import { useT } from "@/components/LocaleProvider";
 
 export function SignInForm() {
+  const { t } = useT();
   const router = useRouter();
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
@@ -43,7 +45,7 @@ export function SignInForm() {
     return (
       <form onSubmit={handleRequestCode} className="flex flex-col gap-4">
         <label className="flex flex-col gap-2">
-          <span className="mono-label text-[0.7rem] text-muted">Your email</span>
+          <span className="mono-label text-[0.7rem] text-muted">{t("signIn.yourEmail")}</span>
           <input
             type="email"
             required
@@ -59,11 +61,9 @@ export function SignInForm() {
           disabled={isPending}
           className="mono-label border-[1.5px] border-ink bg-ink px-5 py-3 text-[0.75rem] text-paper transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ink)] disabled:opacity-50"
         >
-          {isPending ? "Sending…" : "Send me a code"}
+          {isPending ? t("signIn.sending") : t("signIn.sendCode")}
         </button>
-        <p className="text-xs leading-snug text-muted">
-          New here? The same code creates your account. Returning? It just signs you in.
-        </p>
+        <p className="text-xs leading-snug text-muted">{t("signIn.newHereHint")}</p>
       </form>
     );
   }
@@ -71,10 +71,10 @@ export function SignInForm() {
   return (
     <form onSubmit={handleVerifyCode} className="flex flex-col gap-4">
       <p className="text-sm text-muted">
-        We sent a code to <span className="text-ink">{email}</span>.
+        {t("signIn.weSentCodeTo")} <span className="text-ink">{email}</span>.
       </p>
       <label className="flex flex-col gap-2">
-        <span className="mono-label text-[0.7rem] text-muted">6-character code</span>
+        <span className="mono-label text-[0.7rem] text-muted">{t("signIn.codeLabel")}</span>
         <input
           type="text"
           required
@@ -92,14 +92,14 @@ export function SignInForm() {
         disabled={isPending}
         className="mono-label border-[1.5px] border-ink bg-acid px-5 py-3 text-[0.75rem] text-ink transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ink)] disabled:opacity-50"
       >
-        {isPending ? "Checking…" : "See you →"}
+        {isPending ? t("signIn.checking") : t("signIn.seeYou")}
       </button>
       <button
         type="button"
         onClick={() => setStep("email")}
         className="mono-label text-[0.7rem] text-muted underline underline-offset-2"
       >
-        Use a different email
+        {t("signIn.useDifferentEmail")}
       </button>
     </form>
   );

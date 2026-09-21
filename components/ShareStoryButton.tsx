@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Item } from "@/lib/types";
 import { drawItemStoryCard, shareOrDownloadImage } from "@/lib/story-canvas";
+import { useT } from "./LocaleProvider";
 
 // Renders a vertical 1080x1920 (9:16) card for Instagram Story sharing, for
 // a single trip or manifest's detail page.
@@ -14,6 +15,7 @@ export function ShareStoryButton({
   item: Item;
   variant?: "default" | "subtle";
 }) {
+  const { t } = useT();
   const [status, setStatus] = useState<"idle" | "working" | "done" | "error">("idle");
 
   async function handleShare() {
@@ -23,9 +25,13 @@ export function ShareStoryButton({
     setStatus(outcome === "failed" ? "error" : outcome === "cancelled" ? "idle" : "done");
   }
 
-  const buttonLabel = status === "working" ? "Making card…" : "Share to IG Story ↗";
+  const buttonLabel = status === "working" ? t("share.makingCard") : t("share.shareToStory");
   const statusLine =
-    status === "done" ? "Saved — open Instagram and add it to your Story." : status === "error" ? "Couldn't create the image — try again." : null;
+    status === "done"
+      ? t("share.savedOpenInstagram")
+      : status === "error"
+        ? t("share.couldNotCreateTryAgain")
+        : null;
 
   if (variant === "subtle") {
     return (

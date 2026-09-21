@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Comment } from "@/lib/types";
 import { postComment } from "@/app/actions/interactions";
+import { useT } from "./LocaleProvider";
 
 export function CommentThread({
   itemType,
@@ -17,6 +18,7 @@ export function CommentThread({
   initialComments: Comment[];
   currentMemberName: string | null;
 }) {
+  const { t, locale } = useT();
   const [comments, setComments] = useState(initialComments);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -53,24 +55,22 @@ export function CommentThread({
     return (
       <p className="text-sm text-muted">
         <a href="/sign-in" className="underline underline-offset-2">
-          Sign in
+          {t("comments.signInToJoin")}
         </a>{" "}
-        to see and join the conversation.
+        {t("comments.signInToSeeAndJoin")}
       </p>
     );
   }
 
   return (
     <div className="flex flex-col gap-4">
-      {comments.length === 0 && (
-        <p className="text-sm text-muted">No comments yet — say something.</p>
-      )}
+      {comments.length === 0 && <p className="text-sm text-muted">{t("comments.noneYet")}</p>}
       {comments.map((c) => (
         <div key={c.id} className="border-l-2 border-ink pl-3">
           <div className="flex items-baseline gap-2">
             <span className="text-sm font-bold uppercase">{c.memberName}</span>
             <span className="mono-label text-[0.6rem] text-muted">
-              {new Date(c.createdAt).toLocaleDateString(undefined, {
+              {new Date(c.createdAt).toLocaleDateString(locale === "th" ? "th-TH" : undefined, {
                 month: "short",
                 day: "numeric",
               })}
@@ -85,7 +85,7 @@ export function CommentThread({
           type="text"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="Add a comment…"
+          placeholder={t("comments.placeholder")}
           className="flex-1 border-[1.5px] border-ink bg-paper px-3 py-2 text-sm outline-none focus:shadow-[3px_3px_0_var(--ink)]"
         />
         <button
@@ -93,7 +93,7 @@ export function CommentThread({
           disabled={isPending || !draft.trim()}
           className="mono-label border-[1.5px] border-ink bg-ink px-4 py-2 text-[0.7rem] text-paper disabled:opacity-50"
         >
-          Post
+          {t("comments.post")}
         </button>
       </form>
       {error && <p className="text-sm text-orange">{error}</p>}

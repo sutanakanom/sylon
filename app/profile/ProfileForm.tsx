@@ -4,8 +4,10 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Member } from "@/lib/current-member";
 import { updateProfile } from "@/app/actions/profile";
+import { useT } from "@/components/LocaleProvider";
 
 export function ProfileForm({ member }: { member: Member }) {
+  const { t } = useT();
   const router = useRouter();
   const [preview, setPreview] = useState<string | null>(member.photoUrl);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +32,7 @@ export function ProfileForm({ member }: { member: Member }) {
         setError(result.error);
         return;
       }
-      setStatus("Saved.");
+      setStatus(t("profile.saved"));
       router.refresh();
     });
   }
@@ -51,7 +53,7 @@ export function ProfileForm({ member }: { member: Member }) {
           </div>
         )}
         <label className="flex flex-col gap-2">
-          <span className="mono-label text-[0.65rem] text-muted">Avatar photo (max 2MB)</span>
+          <span className="mono-label text-[0.65rem] text-muted">{t("profile.avatarPhoto")}</span>
           <input
             type="file"
             name="photo"
@@ -63,7 +65,7 @@ export function ProfileForm({ member }: { member: Member }) {
       </div>
 
       <label className="flex flex-col gap-2">
-        <span className="mono-label text-[0.7rem] text-muted">Display name</span>
+        <span className="mono-label text-[0.7rem] text-muted">{t("profile.displayName")}</span>
         <input
           type="text"
           name="displayName"
@@ -74,7 +76,7 @@ export function ProfileForm({ member }: { member: Member }) {
       </label>
 
       <label className="flex flex-col gap-2">
-        <span className="mono-label text-[0.7rem] text-muted">Instagram handle</span>
+        <span className="mono-label text-[0.7rem] text-muted">{t("profile.instagramHandle")}</span>
         <div className="flex items-center border-[1.5px] border-ink bg-paper focus-within:shadow-[4px_4px_0_var(--ink)]">
           <span className="pl-4 text-muted">@</span>
           <input
@@ -95,7 +97,7 @@ export function ProfileForm({ member }: { member: Member }) {
         disabled={isPending}
         className="mono-label self-start border-[1.5px] border-ink bg-acid px-6 py-3 text-[0.75rem] text-ink transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ink)] disabled:opacity-50"
       >
-        {isPending ? "Saving…" : "Save profile"}
+        {isPending ? t("profile.saving") : t("profile.saveProfile")}
       </button>
     </form>
   );

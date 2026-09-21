@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createTrip, createManifest } from "@/app/actions/items";
 import { TripStatus, Visibility, ChecklistItem, SignalItem } from "@/lib/types";
+import { useT } from "@/components/LocaleProvider";
 
 type Kind = "trip" | "manifest";
 type Leg = { place: string; startDate: string; endDate: string };
@@ -13,6 +14,7 @@ const inputClass =
 const labelClass = "mono-label text-[0.7rem] text-muted";
 
 export function NewItemForm() {
+  const { t } = useT();
   const router = useRouter();
   const [kind, setKind] = useState<Kind>("trip");
 
@@ -143,69 +145,67 @@ export function NewItemForm() {
               kind === k ? "bg-ink text-paper" : "bg-paper text-ink"
             }`}
           >
-            {k === "trip" ? "Trip" : "Manifest"}
+            {k === "trip" ? t("newItem.kindTrip") : t("newItem.kindManifest")}
           </button>
         ))}
       </div>
 
       <label className="flex flex-col gap-2">
-        <span className={labelClass}>Title</span>
+        <span className={labelClass}>{t("newItem.titleField")}</span>
         <input
           type="text"
           required
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder={kind === "trip" ? "Osaka in the fall" : "Somewhere warm in Feb?"}
+          placeholder={kind === "trip" ? t("newItem.titlePlaceholderTrip") : t("newItem.titlePlaceholderManifest")}
           className={inputClass}
         />
       </label>
 
       <label className="flex flex-col gap-2">
-        <span className={labelClass}>Rough date</span>
+        <span className={labelClass}>{t("newItem.roughDate")}</span>
         <input
           type="text"
           value={roughDate}
           onChange={(e) => setRoughDate(e.target.value)}
-          placeholder="Late Nov – early Dec"
+          placeholder={t("newItem.roughDatePlaceholder")}
           className={inputClass}
         />
       </label>
 
       <label className="flex flex-col gap-2">
-        <span className={labelClass}>
-          {kind === "trip" ? "Countries" : "Country options people can vote on"}
-        </span>
+        <span className={labelClass}>{kind === "trip" ? t("newItem.countriesTrip") : t("newItem.countriesManifest")}</span>
         <input
           type="text"
           value={countries}
           onChange={(e) => setCountries(e.target.value)}
-          placeholder="Japan, South Korea"
+          placeholder={t("newItem.countriesPlaceholder")}
           className={inputClass}
         />
-        <span className="text-xs text-muted">Comma-separated.</span>
+        <span className="text-xs text-muted">{t("common.commaSeparated")}</span>
       </label>
 
       <label className="flex flex-col gap-2">
-        <span className={labelClass}>Summary</span>
+        <span className={labelClass}>{t("newItem.summary")}</span>
         <textarea
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
           rows={3}
-          placeholder="What's the idea?"
+          placeholder={t("newItem.summaryPlaceholder")}
           className={inputClass}
         />
       </label>
 
       {kind === "trip" && (
         <div className="flex flex-col gap-3">
-          <span className={labelClass}>Calendar</span>
+          <span className={labelClass}>{t("newItem.calendar")}</span>
           {legs.map((leg, i) => (
             <div key={i} className="flex flex-col gap-2 border-[1.5px] border-ink p-4">
               <input
                 type="text"
                 value={leg.place}
                 onChange={(e) => updateLeg(i, "place", e.target.value)}
-                placeholder="Place"
+                placeholder={t("newItem.place")}
                 className={inputClass}
               />
               <div className="flex gap-2">
@@ -228,7 +228,7 @@ export function NewItemForm() {
                   onClick={() => removeLeg(i)}
                   className="mono-label self-start text-[0.6rem] text-muted underline underline-offset-2"
                 >
-                  Remove
+                  {t("common.remove")}
                 </button>
               )}
             </div>
@@ -238,7 +238,7 @@ export function NewItemForm() {
             onClick={addLeg}
             className="mono-label self-start border-[1.5px] border-ink px-3 py-2 text-[0.65rem]"
           >
-            + Add a leg
+            {t("newItem.addLeg")}
           </button>
         </div>
       )}
@@ -247,29 +247,29 @@ export function NewItemForm() {
         <>
           <div className="flex gap-4">
             <label className="flex flex-1 flex-col gap-2">
-              <span className={labelClass}>Going with</span>
+              <span className={labelClass}>{t("newItem.goingWith")}</span>
               <input
                 type="text"
                 value={companionName}
                 onChange={(e) => setCompanionName(e.target.value)}
-                placeholder="Mum (optional)"
+                placeholder={t("newItem.goingWithPlaceholder")}
                 className={inputClass}
               />
             </label>
             <label className="flex flex-1 flex-col gap-2">
-              <span className={labelClass}>Main event</span>
+              <span className={labelClass}>{t("newItem.mainEvent")}</span>
               <input
                 type="text"
                 value={mainEvent}
                 onChange={(e) => setMainEvent(e.target.value)}
-                placeholder="Disneyland 10K (optional)"
+                placeholder={t("newItem.mainEventPlaceholder")}
                 className={inputClass}
               />
             </label>
           </div>
 
           <label className="flex flex-col gap-2">
-            <span className={labelClass}>Ready meter (0–100, optional)</span>
+            <span className={labelClass}>{t("newItem.readyMeter")}</span>
             <input
               type="number"
               min={0}
@@ -282,7 +282,7 @@ export function NewItemForm() {
           </label>
 
           <div className="flex flex-col gap-3">
-            <span className={labelClass}>Before-we-go checklist (optional)</span>
+            <span className={labelClass}>{t("newItem.checklist")}</span>
             {checklist.length > 0 && (
               <ul className="flex flex-col gap-2">
                 {checklist.map((c, i) => (
@@ -296,7 +296,7 @@ export function NewItemForm() {
                       onClick={() => removeChecklistItem(i)}
                       className="mono-label text-[0.6rem] text-muted underline underline-offset-2"
                     >
-                      Remove
+                      {t("common.remove")}
                     </button>
                   </li>
                 ))}
@@ -307,7 +307,7 @@ export function NewItemForm() {
                 type="text"
                 value={checklistDraft}
                 onChange={(e) => setChecklistDraft(e.target.value)}
-                placeholder="Hotel near MTR"
+                placeholder={t("newItem.checklistPlaceholder")}
                 className={`${inputClass} flex-1`}
               />
               <button
@@ -315,7 +315,7 @@ export function NewItemForm() {
                 onClick={addChecklistItem}
                 className="mono-label border-[1.5px] border-ink px-4 text-[0.65rem]"
               >
-                Add
+                {t("common.add")}
               </button>
             </div>
           </div>
@@ -325,21 +325,19 @@ export function NewItemForm() {
       {kind === "manifest" && (
         <>
           <label className="flex flex-col gap-2">
-            <span className={labelClass}>Purpose (optional)</span>
+            <span className={labelClass}>{t("newItem.purpose")}</span>
             <input
               type="text"
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
-              placeholder="Radiohead concert"
+              placeholder={t("newItem.purposePlaceholder")}
               className={inputClass}
             />
-            <span className="text-xs text-muted">
-              The one thing that&apos;s already certain — shown as &quot;Known&quot; on the page.
-            </span>
+            <span className="text-xs text-muted">{t("newItem.purposeHint")}</span>
           </label>
 
           <label className="flex flex-col gap-2">
-            <span className={labelClass}>Reality fund (0–100, optional)</span>
+            <span className={labelClass}>{t("newItem.realityFund")}</span>
             <input
               type="number"
               min={0}
@@ -352,7 +350,7 @@ export function NewItemForm() {
           </label>
 
           <div className="flex flex-col gap-3">
-            <span className={labelClass}>Signs of life (optional)</span>
+            <span className={labelClass}>{t("newItem.signsOfLife")}</span>
             {signals.length > 0 && (
               <ul className="flex flex-col gap-2">
                 {signals.map((s, i) => (
@@ -364,7 +362,7 @@ export function NewItemForm() {
                         onClick={() => removeSignal(i)}
                         className="mono-label shrink-0 text-[0.6rem] text-muted underline underline-offset-2"
                       >
-                        Remove
+                        {t("common.remove")}
                       </button>
                     </div>
                     {s.body && <p className="mt-1 text-muted">{s.body}</p>}
@@ -377,14 +375,14 @@ export function NewItemForm() {
                 type="text"
                 value={signalTitleDraft}
                 onChange={(e) => setSignalTitleDraft(e.target.value)}
-                placeholder="The tour exists"
+                placeholder={t("newItem.signalTitlePlaceholder")}
                 className={inputClass}
               />
               <input
                 type="text"
                 value={signalBodyDraft}
                 onChange={(e) => setSignalBodyDraft(e.target.value)}
-                placeholder="Any 2027 announcement moves this from delusional to possible."
+                placeholder={t("newItem.signalBodyPlaceholder")}
                 className={inputClass}
               />
               <button
@@ -392,7 +390,7 @@ export function NewItemForm() {
                 onClick={addSignal}
                 className="mono-label self-start border-[1.5px] border-ink px-4 py-2 text-[0.65rem]"
               >
-                + Add a signal
+                {t("newItem.addSignal")}
               </button>
             </div>
           </div>
@@ -401,22 +399,22 @@ export function NewItemForm() {
 
       <div className="flex gap-4">
         <label className="flex flex-1 flex-col gap-2">
-          <span className={labelClass}>{kind === "trip" ? "Trip note (optional)" : "Manifest note (optional)"}</span>
+          <span className={labelClass}>{kind === "trip" ? t("newItem.noteTrip") : t("newItem.noteManifest")}</span>
           <input
             type="text"
             value={noteQuote}
             onChange={(e) => setNoteQuote(e.target.value)}
-            placeholder="A little quote for the side card"
+            placeholder={t("newItem.notePlaceholder")}
             className={inputClass}
           />
         </label>
         <label className="flex flex-1 flex-col gap-2">
-          <span className={labelClass}>— attributed to</span>
+          <span className={labelClass}>{t("newItem.attributedTo")}</span>
           <input
             type="text"
             value={noteAuthor}
             onChange={(e) => setNoteAuthor(e.target.value)}
-            placeholder="Future you"
+            placeholder={t("newItem.attributedToPlaceholder")}
             className={inputClass}
           />
         </label>
@@ -424,26 +422,26 @@ export function NewItemForm() {
 
       <div className="flex gap-4">
         <label className="flex flex-1 flex-col gap-2">
-          <span className={labelClass}>Visibility</span>
+          <span className={labelClass}>{t("newItem.visibility")}</span>
           <select
             value={visibility}
             onChange={(e) => setVisibility(e.target.value as Visibility)}
             className={inputClass}
           >
-            <option value="invite-only">Invite-only</option>
-            <option value="public">Public</option>
+            <option value="invite-only">{t("common.inviteOnly")}</option>
+            <option value="public">{t("common.public")}</option>
           </select>
         </label>
         {kind === "trip" && (
           <label className="flex flex-1 flex-col gap-2">
-            <span className={labelClass}>Status</span>
+            <span className={labelClass}>{t("newItem.status")}</span>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as TripStatus)}
               className={inputClass}
             >
-              <option value="planning">Planning</option>
-              <option value="confirmed">Confirmed</option>
+              <option value="planning">{t("newItem.statusPlanning")}</option>
+              <option value="confirmed">{t("newItem.statusConfirmed")}</option>
             </select>
           </label>
         )}
@@ -456,7 +454,7 @@ export function NewItemForm() {
         disabled={isPending}
         className="mono-label self-start border-[1.5px] border-ink bg-acid px-6 py-3 text-[0.75rem] text-ink transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ink)] disabled:opacity-50"
       >
-        {isPending ? "Publishing…" : `Publish ${kind === "trip" ? "trip" : "manifest"}`}
+        {isPending ? t("newItem.publishing") : kind === "trip" ? t("newItem.publishTrip") : t("newItem.publishManifest")}
       </button>
     </form>
   );

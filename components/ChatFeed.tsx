@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ChatMessage, ChatTag, CHAT_TAG_LABEL } from "@/lib/types";
+import { ChatMessage, ChatTag } from "@/lib/types";
 import { postChatMessage } from "@/app/actions/manifest";
+import { useT } from "./LocaleProvider";
 
 const TAGS: ChatTag[] = ["date_idea", "place_idea", "im_in", "note"];
 
@@ -11,6 +12,13 @@ const TAG_COLOR: Record<ChatTag, string> = {
   place_idea: "bg-acid text-ink",
   im_in: "bg-ink text-acid",
   note: "bg-paper text-muted",
+};
+
+const TAG_KEY: Record<ChatTag, string> = {
+  date_idea: "chatFeed.tagDateIdea",
+  place_idea: "chatFeed.tagPlaceIdea",
+  im_in: "chatFeed.tagImIn",
+  note: "chatFeed.tagNote",
 };
 
 export function ChatFeed({
@@ -24,6 +32,7 @@ export function ChatFeed({
   initialMessages: ChatMessage[];
   signedIn: boolean;
 }) {
+  const { t } = useT();
   const [messages, setMessages] = useState(initialMessages);
   const [draft, setDraft] = useState("");
   const [tag, setTag] = useState<ChatTag>("note");
@@ -34,9 +43,9 @@ export function ChatFeed({
     return (
       <p className="text-sm text-muted">
         <a href="/sign-in" className="underline underline-offset-2">
-          Sign in
+          {t("comments.signInToJoin")}
         </a>{" "}
-        to see and join the brainstorm.
+        {t("chatFeed.signInToSeeAndJoin")}
       </p>
     );
   }
@@ -70,9 +79,7 @@ export function ChatFeed({
 
   return (
     <div className="flex flex-col gap-4">
-      {messages.length === 0 && (
-        <p className="text-sm text-muted">No ideas yet — drop the first one.</p>
-      )}
+      {messages.length === 0 && <p className="text-sm text-muted">{t("chatFeed.noIdeasYet")}</p>}
       {messages.map((m) => (
         <div key={m.id} className="border-l-2 border-ink pl-3">
           <div className="flex flex-wrap items-center gap-2">
@@ -80,7 +87,7 @@ export function ChatFeed({
             <span
               className={`mono-label rounded-full border border-current px-2 py-0.5 text-[0.6rem] ${TAG_COLOR[m.tag]}`}
             >
-              {CHAT_TAG_LABEL[m.tag]}
+              {t(TAG_KEY[m.tag])}
             </span>
           </div>
           <p className="text-sm leading-snug">{m.body}</p>
@@ -89,16 +96,16 @@ export function ChatFeed({
 
       <form onSubmit={handleSubmit} className="mt-2 flex flex-col gap-2">
         <div className="flex flex-wrap gap-1.5">
-          {TAGS.map((t) => (
+          {TAGS.map((tagOption) => (
             <button
               type="button"
-              key={t}
-              onClick={() => setTag(t)}
+              key={tagOption}
+              onClick={() => setTag(tagOption)}
               className={`mono-label border-[1.5px] border-ink px-2.5 py-1 text-[0.65rem] ${
-                tag === t ? TAG_COLOR[t] : "bg-transparent"
+                tag === tagOption ? TAG_COLOR[tagOption] : "bg-transparent"
               }`}
             >
-              {CHAT_TAG_LABEL[t]}
+              {t(TAG_KEY[tagOption])}
             </button>
           ))}
         </div>
@@ -107,7 +114,7 @@ export function ChatFeed({
             type="text"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="Drop an idea…"
+            placeholder={t("chatFeed.dropAnIdea")}
             className="flex-1 border-[1.5px] border-ink bg-paper px-3 py-2 text-sm outline-none focus:shadow-[3px_3px_0_var(--ink)]"
           />
           <button
@@ -115,7 +122,7 @@ export function ChatFeed({
             disabled={isPending || !draft.trim()}
             className="mono-label border-[1.5px] border-ink bg-ink px-4 py-2 text-[0.7rem] text-paper disabled:opacity-50"
           >
-            Post
+            {t("common.post")}
           </button>
         </div>
       </form>

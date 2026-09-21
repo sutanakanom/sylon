@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Item } from "@/lib/types";
 import { drawItemStoryCard, drawOverviewStoryCard, shareOrDownloadImage } from "@/lib/story-canvas";
+import { useT } from "@/components/LocaleProvider";
 
 // "Capture or share this on story" — generates an IG-Story-ready image of
 // whichever carousel card is currently showing: the single item's own card
@@ -16,7 +17,7 @@ export function CaptureCardButton({
   displayName,
   items,
   className,
-  label = "Capture or share this on story ↗",
+  label,
   onToast,
 }: {
   activeItem: Item | null;
@@ -26,7 +27,9 @@ export function CaptureCardButton({
   label?: string;
   onToast?: (message: string) => void;
 }) {
+  const { t } = useT();
   const [working, setWorking] = useState(false);
+  const buttonLabel = label ?? t("personalPage.captureShare");
 
   async function handleCapture() {
     setWorking(true);
@@ -39,10 +42,10 @@ export function CaptureCardButton({
         : `${displayName.toLowerCase()}-sylon-atlas.png`;
       const shareTitle = activeItem ? activeItem.title : `${displayName}'s plans`;
       const outcome = await shareOrDownloadImage(blob, filename, shareTitle);
-      if (outcome === "downloaded") onToast?.("Story image downloaded");
-      if (outcome === "failed") onToast?.("Could not create the image — please try again");
+      if (outcome === "downloaded") onToast?.(t("share.storyDownloaded"));
+      if (outcome === "failed") onToast?.(t("share.couldNotCreate"));
     } catch {
-      onToast?.("Could not create the image — please try again");
+      onToast?.(t("share.couldNotCreate"));
     } finally {
       setWorking(false);
     }
@@ -50,7 +53,7 @@ export function CaptureCardButton({
 
   return (
     <button type="button" className={className} onClick={handleCapture} disabled={working}>
-      {working ? "Making card…" : label}
+      {working ? t("share.makingCard") : buttonLabel}
     </button>
   );
 }
