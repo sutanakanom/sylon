@@ -1,8 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublicItems, handleExists } from "@/lib/data";
 import { getCurrentMember } from "@/lib/current-member";
-import { signOut } from "@/app/actions/auth";
+import { SiteShell } from "@/components/SiteShell";
 import { PlansSection } from "./PlansSection";
 import styles from "../SylonDesign.module.css";
 
@@ -25,59 +24,15 @@ export default async function PersonalPage({
   const upcomingCount = items.filter(
     (i) => i.kind === "trip" && (i.status === "confirmed" || i.status === "planning")
   ).length;
-  const name = member?.displayName || member?.email.split("@")[0] || null;
 
   return (
-    <div className={styles.page}>
-      {/* Nav */}
-      <nav>
-        <Link href="/" className={styles.brand}>
-          <span className={styles.brandDot} />
-          SYLON
-        </Link>
-        <span className={`${styles.navLine} mono`}>See you later — or not.</span>
-        <div className={styles.navActions}>
-          {member ? (
-            <>
-              {member.isAdmin && (
-                <Link href="/admin" className={`${styles.signout} mono`}>
-                  Admin
-                </Link>
-              )}
-              <Link href="/profile" className={styles.profileChip} aria-label={`${name}'s profile`}>
-                {member.photoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={member.photoUrl} alt={name ?? ""} className={styles.avatar} />
-                ) : (
-                  <span className={styles.avatar} aria-hidden="true">
-                    {(name ?? "?").charAt(0).toUpperCase()}
-                  </span>
-                )}
-                <span className={styles.profileText}>
-                  <strong>{name}</strong>
-                  {member.instagramHandle && <span>@{member.instagramHandle}</span>}
-                </span>
-              </Link>
-              <form action={signOut}>
-                <button type="submit" className={styles.signout}>
-                  Sign out
-                </button>
-              </form>
-            </>
-          ) : (
-            <a href="/sign-in" className={styles.signIn}>
-              What is our password?
-            </a>
-          )}
-        </div>
-      </nav>
-
-      <main id="top">
+    <SiteShell member={member} footerMeta={["See you later (or not)", `@${handle}`]}>
+      <main id="top" className={styles.heroPage}>
         {/* Hero */}
         <section className={styles.profileHero}>
           <div>
             <div className={`${styles.kicker} mono`}>{displayName}&apos;s future atlas</div>
-            <h1>
+            <h1 className={styles.heroTitle}>
               See you
               <span className={styles.outline}>somewhere.</span>
             </h1>
@@ -138,15 +93,6 @@ export default async function PersonalPage({
           </blockquote>
         </section>
       </main>
-
-      <footer>
-        <div className={styles.footerBrand}>SYLON</div>
-        <div className={`${styles.footerMeta} mono`}>
-          See you later (or not)
-          <br />
-          @{handle}
-        </div>
-      </footer>
-    </div>
+    </SiteShell>
   );
 }
