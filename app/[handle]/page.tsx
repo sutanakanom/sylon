@@ -29,7 +29,7 @@ export default async function PersonalPage({
           items={items}
           displayName={displayName}
           handle={handle}
-          isAdmin={Boolean(member?.isAdmin)}
+          isOwner={member?.handle === handle}
           showInviteCta={!member}
         />
 

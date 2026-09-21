@@ -25,15 +25,15 @@ export function SiteNav({
       <div className={styles.navActions}>
         {member ? (
           <>
+            {member.handle && (
+              <Link href="/new" className={`${styles.signout} mono`}>
+                + Add a plan
+              </Link>
+            )}
             {member.isAdmin && (
-              <>
-                <Link href="/new" className={`${styles.signout} mono`}>
-                  + Add a plan
-                </Link>
-                <Link href="/admin" className={`${styles.signout} mono`}>
-                  Admin
-                </Link>
-              </>
+              <Link href="/admin" className={`${styles.signout} mono`}>
+                Admin
+              </Link>
             )}
             <Link href="/profile" className={styles.profileChip} aria-label={`${name}'s profile`}>
               {member.photoUrl ? (

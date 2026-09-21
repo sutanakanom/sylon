@@ -22,13 +22,13 @@ export function PersonalPageBody({
   items,
   displayName,
   handle,
-  isAdmin,
+  isOwner,
   showInviteCta,
 }: {
   items: Item[];
   displayName: string;
   handle: string;
-  isAdmin: boolean;
+  isOwner: boolean;
   showInviteCta: boolean;
 }) {
   const tripCount = items.filter((i) => i.kind === "trip").length;
@@ -311,7 +311,7 @@ export function PersonalPageBody({
               ))}
             </div>
 
-            {isAdmin ? (
+            {isOwner ? (
               <Link href="/new" className={styles.quietBanner}>
                 <span className="mono">+ Add a plan</span>
                 <strong>Something else on your mind?</strong>

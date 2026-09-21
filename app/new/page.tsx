@@ -5,7 +5,7 @@ import { NewItemForm } from "./NewItemForm";
 
 export default async function NewItemPage() {
   const member = await getCurrentMember();
-  if (!member?.isAdmin) redirect("/");
+  if (!member?.handle) redirect("/");
 
   return (
     <SiteShell member={member} centerLabel="New plan">

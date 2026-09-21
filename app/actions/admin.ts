@@ -16,6 +16,7 @@ export interface AdminMemberRow {
   id: string;
   email: string;
   displayName: string | null;
+  handle: string | null;
   deactivated: boolean;
   createdAt: string;
 }
@@ -79,16 +80,51 @@ export async function listMembers(): Promise<AdminMemberRow[]> {
 
   const { data } = await supabaseAdmin
     .from("members")
-    .select("id, email, display_name, deactivated, created_at")
+    .select("id, email, display_name, handle, deactivated, created_at")
     .order("created_at", { ascending: false });
 
   return (data ?? []).map((r) => ({
     id: r.id,
     email: r.email,
     displayName: r.display_name,
+    handle: r.handle,
     deactivated: r.deactivated,
     createdAt: r.created_at,
   }));
+}
+
+// Giving a member a handle is what makes them a page owner/host — it's
+// what /[handle] resolves to and what new trips/manifests they create get
+// filed under (see requireHost() in app/actions/items.ts). Separate from
+// isAdmin, which only gates /admin itself.
+export async function setMemberHandle(memberId: string, rawHandle: string): Promise<AdminActionResult> {
+  await requireAdmin();
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return { ok: false, error: "Not configured." };
+  }
+
+  const handle = rawHandle
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+  if (!handle) return { ok: false, error: "Give them a handle." };
+
+  const { data: existing } = await supabaseAdmin
+    .from("members")
+    .select("id")
+    .eq("handle", handle)
+    .maybeSingle();
+  if (existing && existing.id !== memberId) {
+    return { ok: false, error: "That handle's already taken." };
+  }
+
+  const { error } = await supabaseAdmin.from("members").update({ handle }).eq("id", memberId);
+  if (error) return { ok: false, error: "Couldn't save that handle. Try again." };
+
+  revalidatePath("/admin");
+  return { ok: true };
 }
 
 export type AdminActionResult = { ok: true } | { ok: false; error: string };

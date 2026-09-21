@@ -10,6 +10,7 @@ import {
   reactivateMember,
   approveInviteRequest,
   dismissInviteRequest,
+  setMemberHandle,
 } from "@/app/actions/admin";
 
 export function AdminPanel({
@@ -26,6 +27,7 @@ export function AdminPanel({
   const [status, setStatus] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [handleDrafts, setHandleDrafts] = useState<Record<string, string>>({});
 
   function handleApprove(request: AdminInviteRequestRow) {
     setError(null);
@@ -46,6 +48,7 @@ export function AdminPanel({
             id: `pending-${request.email}`,
             email: request.email,
             displayName: null,
+            handle: null,
             deactivated: false,
             createdAt: new Date().toISOString(),
           },
@@ -83,6 +86,7 @@ export function AdminPanel({
             id: `pending-${cleanEmail}`,
             email: cleanEmail,
             displayName: null,
+            handle: null,
             deactivated: false,
             createdAt: new Date().toISOString(),
           },
@@ -104,6 +108,30 @@ export function AdminPanel({
         return;
       }
       setStatus(`New code sent to ${memberEmail}.`);
+    });
+  }
+
+  function handleSetHandle(m: AdminMemberRow) {
+    const draft = (handleDrafts[m.id] ?? m.handle ?? "").trim();
+    if (!draft) return;
+    setError(null);
+    setStatus(null);
+    setBusyId(`handle-${m.id}`);
+    startTransition(async () => {
+      const result = await setMemberHandle(m.id, draft);
+      setBusyId(null);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      setMembers((prev) =>
+        prev.map((row) =>
+          row.id === m.id
+            ? { ...row, handle: draft.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/(^-|-$)/g, "") }
+            : row
+        )
+      );
+      setStatus(`${m.email} is now @${draft}.`);
     });
   }
 
@@ -208,8 +236,28 @@ export function AdminPanel({
               <p className="font-medium">{m.email}</p>
               <p className="mono-label text-[0.65rem] text-muted">
                 {m.displayName ?? "No display name yet"} ·{" "}
+                {m.handle ? `@${m.handle}` : "No handle — can't publish yet"} ·{" "}
                 {m.deactivated ? "Deactivated" : "Active"}
               </p>
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  type="text"
+                  value={handleDrafts[m.id] ?? m.handle ?? ""}
+                  onChange={(e) =>
+                    setHandleDrafts((prev) => ({ ...prev, [m.id]: e.target.value }))
+                  }
+                  placeholder="handle"
+                  className="border-[1.5px] border-ink bg-paper px-2 py-1 text-sm outline-none focus:shadow-[3px_3px_0_var(--ink)]"
+                />
+                <button
+                  type="button"
+                  disabled={isPending && busyId === `handle-${m.id}`}
+                  onClick={() => handleSetHandle(m)}
+                  className="mono-label border-[1.5px] border-ink px-3 py-1.5 text-[0.65rem] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0_var(--ink)] disabled:opacity-50"
+                >
+                  {busyId === `handle-${m.id}` && isPending ? "Saving…" : "Set handle"}
+                </button>
+              </div>
             </div>
             <div className="flex gap-2">
               <button

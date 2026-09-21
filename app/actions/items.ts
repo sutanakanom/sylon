@@ -33,14 +33,17 @@ async function uniqueSlug(base: string): Promise<string> {
   return `${base}-${randomBytes(3).toString("hex")}`;
 }
 
-// v1 has exactly one host (Kanom), and only the host/admin can add plans —
-// there's no per-host "owner" concept in the UI yet, just the owner_handle
-// column on each row (see supabase/step6-owner-handle.sql). Gating on
-// isAdmin rather than opening this to every signed-in member matches that:
-// visitors can join/comment/vote, only the host publishes new plans.
+// A member is a "host" (can publish trips/manifests) once they have a
+// handle — the slug their own personal page and their plans live under
+// (see supabase/step9-member-handle.sql). That's deliberately separate
+// from isAdmin: isAdmin is the system-management capability for /admin,
+// not "owns a page." Handles are assigned by an admin in /admin, so v1's
+// one host (Kanom) still needs that done once, but nothing here is
+// hardcoded to them anymore — whoever's signed in publishes under their
+// own handle. Visitors without a handle can still join/comment/vote.
 async function requireHost() {
   const member = await getCurrentMember();
-  if (!member?.isAdmin) throw new Error("Not authorized.");
+  if (!member?.handle) throw new Error("Not authorized.");
   return member;
 }
 
@@ -57,7 +60,7 @@ export interface CreateTripInput {
 }
 
 export async function createTrip(input: CreateTripInput): Promise<CreateItemResult> {
-  await requireHost();
+  const host = await requireHost();
   if (!isSupabaseAdminConfigured || !supabaseAdmin) {
     return { ok: false, error: "Not configured." };
   }
@@ -70,7 +73,7 @@ export async function createTrip(input: CreateTripInput): Promise<CreateItemResu
     title: input.title.trim(),
     status: input.status,
     visibility: input.visibility,
-    owner_handle: "kanom",
+    owner_handle: host.handle,
     rough_date: input.roughDate.trim() || "Sometime",
     countries: input.countries.map((c) => c.trim()).filter(Boolean),
     legs: input.legs.filter((l) => l.place.trim()),
@@ -95,7 +98,7 @@ export interface CreateManifestInput {
 }
 
 export async function createManifest(input: CreateManifestInput): Promise<CreateItemResult> {
-  await requireHost();
+  const host = await requireHost();
   if (!isSupabaseAdminConfigured || !supabaseAdmin) {
     return { ok: false, error: "Not configured." };
   }
@@ -108,7 +111,7 @@ export async function createManifest(input: CreateManifestInput): Promise<Create
     title: input.title.trim(),
     status: "open",
     visibility: input.visibility,
-    owner_handle: "kanom",
+    owner_handle: host.handle,
     rough_date: input.roughDate.trim() || "Sometime",
     country_votes: input.countryOptions
       .map((c) => c.trim())

@@ -9,6 +9,11 @@ export interface Member {
   photoUrl: string | null;
   instagramHandle: string | null;
   isAdmin: boolean;
+  // The slug this member's personal page lives at (/[handle]), and the
+  // owner_handle new trips/manifests they create are filed under. null
+  // until an admin assigns one in /admin — a member without a handle
+  // isn't a page owner/host yet, even if they're a system admin.
+  handle: string | null;
 }
 
 export async function getCurrentMember(): Promise<Member | null> {
@@ -17,7 +22,7 @@ export async function getCurrentMember(): Promise<Member | null> {
 
   const { data } = await supabaseAdmin
     .from("members")
-    .select("id, email, display_name, photo_url, instagram_handle, deactivated")
+    .select("id, email, display_name, photo_url, instagram_handle, handle, deactivated")
     .eq("id", memberId)
     .maybeSingle();
 
@@ -32,5 +37,6 @@ export async function getCurrentMember(): Promise<Member | null> {
     photoUrl: data.photo_url,
     instagramHandle: data.instagram_handle,
     isAdmin: isAdminEmail(data.email),
+    handle: data.handle,
   };
 }
