@@ -9,12 +9,16 @@ export function FollowButton({
   slug,
   initialFollowing,
   signedIn,
+  followLabel = "Follow",
+  followingLabel = "Following",
 }: {
   itemType: "trip" | "manifest";
   itemId: string;
   slug: string;
   initialFollowing: boolean;
   signedIn: boolean;
+  followLabel?: string;
+  followingLabel?: string;
 }) {
   const [following, setFollowing] = useState(initialFollowing);
   const [isPending, startTransition] = useTransition();
@@ -43,7 +47,7 @@ export function FollowButton({
         following ? "bg-acid text-ink" : "bg-transparent"
       }`}
     >
-      {following ? "Following" : "Follow"}
+      {following ? followingLabel : followLabel}
     </button>
   );
 }

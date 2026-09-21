@@ -124,3 +124,38 @@ export function legDateRange(leg: Leg): string {
   if (leg.startDate === leg.endDate) return formatDay(leg.startDate);
   return `${formatDay(leg.startDate)} – ${formatDay(leg.endDate)}`;
 }
+
+// Gating for the manifest v2 "convert to trip" button — plain sync
+// helper, kept out of app/actions/manifest.ts because a "use server" file
+// can only export async functions.
+export function canConvertManifest(item: {
+  decidedCountry: string | null;
+  targetStartDate: string | null;
+  targetEndDate: string | null;
+}): boolean {
+  return Boolean(item.decidedCountry && item.targetStartDate && item.targetEndDate);
+}
+
+// --- Manifest v2: convert-progress meter --------------------------------
+// Four stages mirroring the "What we know" anchors going from Open to
+// Known: Manifesting (always true — it exists), Gathering ideas (someone
+// has actually engaged — a vote, an idea, or an availability response),
+// Taking shape (the host has decided a location), Trip (converted). The
+// meter fill is just stageIndex/3, no separate weighting — it's meant to
+// read as "how many of the four are lit," matching the mock's stage row.
+const MANIFEST_STAGES = ["Manifesting", "Gathering ideas", "Taking shape", "Trip"] as const;
+
+export function manifestStageProgress(
+  item: { decidedCountry: string | null; status: string },
+  hasActivity: boolean
+): { stages: readonly string[]; activeCount: number; percent: number } {
+  let activeCount = 1; // Manifesting is always on — it exists.
+  if (hasActivity) activeCount = 2;
+  if (item.decidedCountry) activeCount = 3;
+  if (item.status === "converted") activeCount = 4;
+  return {
+    stages: MANIFEST_STAGES,
+    activeCount,
+    percent: Math.round((activeCount / MANIFEST_STAGES.length) * 100),
+  };
+}

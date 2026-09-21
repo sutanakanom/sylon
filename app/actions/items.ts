@@ -138,6 +138,7 @@ export async function toggleChecklistItem(
 
 export interface CreateManifestInput {
   title: string;
+  purpose: string;
   roughDate: string;
   countryOptions: string[];
   summary: string;
@@ -174,6 +175,7 @@ export async function createManifest(input: CreateManifestInput): Promise<Create
     reality_fund_percent: input.realityFundPercent,
     note_quote: input.noteQuote.trim() || null,
     note_author: input.noteAuthor.trim() || null,
+    purpose: input.purpose.trim() || null,
   });
 
   if (error) {
@@ -181,5 +183,101 @@ export async function createManifest(input: CreateManifestInput): Promise<Create
     return { ok: false, error: "Couldn't save that manifest. Try again." };
   }
 
+  return { ok: true, slug };
+}
+
+// A member can edit a specific item only if they own THAT item's page —
+// stricter than requireHost() (which only checks "has some handle"), so
+// one host can't edit another host's plan once multi-host is real.
+async function requireItemOwner(ownerHandle: string) {
+  const member = await getCurrentMember();
+  if (!member?.handle || member.handle !== ownerHandle) throw new Error("Not authorized.");
+  return member;
+}
+
+export interface UpdateManifestInput {
+  title: string;
+  purpose: string;
+  roughDate: string;
+  countryOptions: string[];
+  summary: string;
+  visibility: Visibility;
+  signals: SignalItem[];
+  realityFundPercent: number | null;
+  noteQuote: string;
+  noteAuthor: string;
+  availabilityWindows: string[];
+  decidedCountry: string;
+  targetStartDate: string;
+  targetEndDate: string;
+  creatorSummaryHeadline: string;
+  creatorSummaryBody: string;
+  creatorSummaryTags: string[];
+}
+
+export async function updateManifest(
+  manifestId: string,
+  slug: string,
+  input: UpdateManifestInput
+): Promise<CreateItemResult> {
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return { ok: false, error: "Not configured." };
+  }
+
+  const { data: existing } = await supabaseAdmin
+    .from("manifests")
+    .select("owner_handle, country_votes")
+    .eq("id", manifestId)
+    .maybeSingle();
+  if (!existing) return { ok: false, error: "Couldn't find that manifest." };
+
+  await requireItemOwner(existing.owner_handle);
+  if (!input.title.trim()) return { ok: false, error: "Give it a title." };
+
+  // Keep real vote counts for options that still exist; drop the rest —
+  // voteCountry() will re-tally from manifest_votes on the next vote
+  // regardless, this just keeps the display consistent right after a save.
+  const previousCounts = new Map<string, number>(
+    (existing.country_votes as { country: string; votes: number }[]).map((v) => [v.country, v.votes])
+  );
+  const cleanOptions = input.countryOptions.map((c) => c.trim()).filter(Boolean);
+  const countryVotes = cleanOptions.map((country) => ({
+    country,
+    votes: previousCounts.get(country) ?? 0,
+  }));
+
+  const decidedCountry = input.decidedCountry.trim();
+
+  const { error } = await supabaseAdmin
+    .from("manifests")
+    .update({
+      title: input.title.trim(),
+      purpose: input.purpose.trim() || null,
+      rough_date: input.roughDate.trim() || "Sometime",
+      country_votes: countryVotes,
+      summary: input.summary.trim(),
+      visibility: input.visibility,
+      signals: input.signals.filter((s) => s.title.trim()),
+      reality_fund_percent: input.realityFundPercent,
+      note_quote: input.noteQuote.trim() || null,
+      note_author: input.noteAuthor.trim() || null,
+      availability_windows: input.availabilityWindows.map((w) => w.trim()).filter(Boolean),
+      decided_country: decidedCountry || null,
+      target_start_date: input.targetStartDate.trim() || null,
+      target_end_date: input.targetEndDate.trim() || null,
+      creator_summary_headline: input.creatorSummaryHeadline.trim() || null,
+      creator_summary_body: input.creatorSummaryBody.trim() || null,
+      creator_summary_tags: input.creatorSummaryTags.map((t) => t.trim()).filter(Boolean),
+      creator_summary_updated_at: new Date().toISOString(),
+    })
+    .eq("id", manifestId);
+
+  if (error) {
+    console.error("updateManifest failed", error);
+    return { ok: false, error: "Couldn't save those changes. Try again." };
+  }
+
+  revalidatePath(`/manifest/${slug}`);
+  revalidatePath(`/manifest/${slug}/edit`);
   return { ok: true, slug };
 }

@@ -32,6 +32,7 @@ export function NewItemForm() {
   const [checklistDraft, setChecklistDraft] = useState("");
 
   // Manifest-only detail-page extras.
+  const [purpose, setPurpose] = useState("");
   const [realityFundPercent, setRealityFundPercent] = useState("");
   const [signals, setSignals] = useState<SignalItem[]>([]);
   const [signalTitleDraft, setSignalTitleDraft] = useState("");
@@ -109,6 +110,7 @@ export function NewItemForm() {
             })
           : await createManifest({
               title,
+              purpose,
               roughDate,
               countryOptions: countryList,
               summary,
@@ -322,6 +324,20 @@ export function NewItemForm() {
 
       {kind === "manifest" && (
         <>
+          <label className="flex flex-col gap-2">
+            <span className={labelClass}>Purpose (optional)</span>
+            <input
+              type="text"
+              value={purpose}
+              onChange={(e) => setPurpose(e.target.value)}
+              placeholder="Radiohead concert"
+              className={inputClass}
+            />
+            <span className="text-xs text-muted">
+              The one thing that&apos;s already certain — shown as &quot;Known&quot; on the page.
+            </span>
+          </label>
+
           <label className="flex flex-col gap-2">
             <span className={labelClass}>Reality fund (0–100, optional)</span>
             <input

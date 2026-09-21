@@ -95,6 +95,18 @@ export async function isFollowing(itemType: ItemType, itemId: string): Promise<b
   return Boolean(data);
 }
 
+export async function getFollowerCount(itemType: ItemType, itemId: string): Promise<number> {
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) return 0;
+
+  const { count } = await supabaseAdmin
+    .from("follows")
+    .select("id", { count: "exact", head: true })
+    .eq("item_type", itemType)
+    .eq("item_id", itemId);
+
+  return count ?? 0;
+}
+
 export type ToggleFollowResult = { ok: true; following: boolean } | { ok: false; error: string };
 
 export async function toggleFollow(

@@ -197,6 +197,189 @@ export async function voteCountry(
   return { ok: true, country };
 }
 
+// --- Availability (a signal, not a commitment) --------------------------
+
+export async function getMyAvailability(manifestId: string): Promise<string[]> {
+  const member = await getCurrentMember();
+  if (!member || !isSupabaseAdminConfigured || !supabaseAdmin) return [];
+
+  const { data } = await supabaseAdmin
+    .from("manifest_availability")
+    .select("windows")
+    .eq("manifest_id", manifestId)
+    .eq("member_id", member.id)
+    .maybeSingle();
+
+  return (data?.windows as string[] | undefined) ?? [];
+}
+
+export async function setAvailability(
+  manifestId: string,
+  slug: string,
+  windows: string[]
+): Promise<ActionResult> {
+  const member = await getCurrentMember();
+  if (!member) return { ok: false, error: "Sign in to save your availability." };
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return { ok: false, error: "Not wired up on this environment yet." };
+  }
+
+  const { error } = await supabaseAdmin
+    .from("manifest_availability")
+    .upsert(
+      { manifest_id: manifestId, member_id: member.id, windows, updated_at: new Date().toISOString() },
+      { onConflict: "manifest_id,member_id" }
+    );
+
+  if (error) {
+    console.error("setAvailability failed", error);
+    return { ok: false, error: "Couldn't save that. Try again." };
+  }
+
+  revalidatePath(`/manifest/${slug}`);
+  return { ok: true };
+}
+
+// --- Host-only anchors: decide the location, set target dates, write a
+// summary. Each moves a "What we know" anchor from Open to Known. -------
+
+export async function decideLocation(
+  manifestId: string,
+  slug: string,
+  country: string | null
+): Promise<ActionResult> {
+  const isHost = await isManifestHost(manifestId);
+  if (!isHost) return { ok: false, error: "Only the host can decide this." };
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return { ok: false, error: "Not wired up on this environment yet." };
+  }
+
+  await supabaseAdmin.from("manifests").update({ decided_country: country }).eq("id", manifestId);
+  revalidatePath(`/manifest/${slug}`);
+  return { ok: true };
+}
+
+export async function setTargetDates(
+  manifestId: string,
+  slug: string,
+  startDate: string | null,
+  endDate: string | null
+): Promise<ActionResult> {
+  const isHost = await isManifestHost(manifestId);
+  if (!isHost) return { ok: false, error: "Only the host can decide this." };
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return { ok: false, error: "Not wired up on this environment yet." };
+  }
+
+  await supabaseAdmin
+    .from("manifests")
+    .update({ target_start_date: startDate, target_end_date: endDate })
+    .eq("id", manifestId);
+  revalidatePath(`/manifest/${slug}`);
+  return { ok: true };
+}
+
+export async function setCreatorSummary(
+  manifestId: string,
+  slug: string,
+  headline: string,
+  body: string,
+  tags: string[]
+): Promise<ActionResult> {
+  const isHost = await isManifestHost(manifestId);
+  if (!isHost) return { ok: false, error: "Only the host can post a summary." };
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return { ok: false, error: "Not wired up on this environment yet." };
+  }
+
+  await supabaseAdmin
+    .from("manifests")
+    .update({
+      creator_summary_headline: headline.trim() || null,
+      creator_summary_body: body.trim() || null,
+      creator_summary_tags: tags.filter(Boolean),
+      creator_summary_updated_at: new Date().toISOString(),
+    })
+    .eq("id", manifestId);
+  revalidatePath(`/manifest/${slug}`);
+  return { ok: true };
+}
+
+// A "host" for these anchor decisions is whoever owns the page the
+// manifest lives on — not the isAdmin system flag (see
+// supabase/step9-member-handle.sql), and not the manifestor role either
+// (manifestors run the brainstorm/finalize; the host curates the
+// take-away). In practice v1's one host is usually also the manifestor,
+// but they're deliberately separate checks.
+async function isManifestHost(manifestId: string): Promise<boolean> {
+  const member = await getCurrentMember();
+  if (!member?.handle || !isSupabaseAdminConfigured || !supabaseAdmin) return false;
+
+  const { data } = await supabaseAdmin
+    .from("manifests")
+    .select("owner_handle")
+    .eq("id", manifestId)
+    .maybeSingle();
+
+  return data?.owner_handle === member.handle;
+}
+
+// --- Idea likes (brainstorm cards in the workspace) ---------------------
+
+export async function getIdeaLikes(
+  messageIds: string[]
+): Promise<Record<string, { count: number; likedByMe: boolean }>> {
+  if (messageIds.length === 0 || !isSupabaseAdminConfigured || !supabaseAdmin) return {};
+
+  const member = await getCurrentMember();
+  const { data } = await supabaseAdmin
+    .from("chat_message_likes")
+    .select("chat_message_id, member_id")
+    .in("chat_message_id", messageIds);
+
+  const result: Record<string, { count: number; likedByMe: boolean }> = {};
+  for (const id of messageIds) result[id] = { count: 0, likedByMe: false };
+  for (const row of data ?? []) {
+    const entry = result[row.chat_message_id];
+    if (!entry) continue;
+    entry.count += 1;
+    if (member && row.member_id === member.id) entry.likedByMe = true;
+  }
+  return result;
+}
+
+export type ToggleLikeResult = { ok: true; liked: boolean } | { ok: false; error: string };
+
+export async function toggleIdeaLike(
+  messageId: string,
+  slug: string
+): Promise<ToggleLikeResult> {
+  const member = await getCurrentMember();
+  if (!member) return { ok: false, error: "Sign in to like an idea." };
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return { ok: false, error: "Not wired up on this environment yet." };
+  }
+
+  const { data: existing } = await supabaseAdmin
+    .from("chat_message_likes")
+    .select("id")
+    .eq("chat_message_id", messageId)
+    .eq("member_id", member.id)
+    .maybeSingle();
+
+  if (existing) {
+    await supabaseAdmin.from("chat_message_likes").delete().eq("id", existing.id);
+    revalidatePath(`/manifest/${slug}`);
+    return { ok: true, liked: false };
+  }
+
+  await supabaseAdmin
+    .from("chat_message_likes")
+    .insert({ chat_message_id: messageId, member_id: member.id });
+  revalidatePath(`/manifest/${slug}`);
+  return { ok: true, liked: true };
+}
+
 // --- Chat feed ---------------------------------------------------------
 
 interface ChatRow {
@@ -263,9 +446,11 @@ export async function postChatMessage(
 }
 
 // --- Convert to Trip -----------------------------------------------------
-// Manifestor-only. Derives a first-pass Trip from the Manifest's own
-// fields (title, top-voted country, rough date) — editing the details
-// afterward is a later build step (Trip edit page isn't built yet).
+// Manifestor-only, and — per the collaborative-idea design — only once
+// the location is decided and target dates are set (the two "Open"
+// anchors that have to become "Known" first). Derives a first-pass Trip
+// from the Manifest's own fields; editing the details afterward uses the
+// Trip's own edit flow once one exists (still a later build step).
 
 export async function convertToTrip(manifestId: string, manifestSlug: string) {
   const isAlreadyManifestor = await isManifestor(manifestId);
@@ -286,9 +471,9 @@ export async function convertToTrip(manifestId: string, manifestSlug: string) {
     return { ok: false as const, error: "Couldn't find that manifest." };
   }
 
-  const topCountry = (manifestRow.country_votes as { country: string; votes: number }[])
-    .slice()
-    .sort((a, b) => b.votes - a.votes)[0];
+  if (!manifestRow.decided_country || !manifestRow.target_start_date || !manifestRow.target_end_date) {
+    return { ok: false as const, error: "Decide a location and target dates first." };
+  }
 
   const tripSlug = `${manifestRow.slug}-trip`;
 
@@ -299,9 +484,16 @@ export async function convertToTrip(manifestId: string, manifestSlug: string) {
       title: manifestRow.title,
       status: "planning",
       visibility: manifestRow.visibility,
+      owner_handle: manifestRow.owner_handle,
       rough_date: manifestRow.rough_date,
-      countries: topCountry ? [topCountry.country] : [],
-      legs: [],
+      countries: [manifestRow.decided_country],
+      legs: [
+        {
+          place: manifestRow.decided_country,
+          startDate: manifestRow.target_start_date,
+          endDate: manifestRow.target_end_date,
+        },
+      ],
       summary: manifestRow.summary,
       member_count: manifestRow.member_count,
     })

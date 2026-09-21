@@ -42,6 +42,15 @@ interface ManifestRow {
   reality_fund_percent: number | null;
   note_quote: string | null;
   note_author: string | null;
+  purpose: string | null;
+  decided_country: string | null;
+  target_start_date: string | null;
+  target_end_date: string | null;
+  availability_windows: string[] | null;
+  creator_summary_headline: string | null;
+  creator_summary_body: string | null;
+  creator_summary_tags: string[] | null;
+  creator_summary_updated_at: string | null;
 }
 
 function tripFromRow(row: TripRow): Trip {
@@ -84,6 +93,15 @@ function manifestFromRow(row: ManifestRow): Manifest {
     realityFundPercent: row.reality_fund_percent ?? null,
     noteQuote: row.note_quote ?? null,
     noteAuthor: row.note_author ?? null,
+    purpose: row.purpose ?? null,
+    decidedCountry: row.decided_country ?? null,
+    targetStartDate: row.target_start_date ?? null,
+    targetEndDate: row.target_end_date ?? null,
+    availabilityWindows: row.availability_windows ?? [],
+    creatorSummaryHeadline: row.creator_summary_headline ?? null,
+    creatorSummaryBody: row.creator_summary_body ?? null,
+    creatorSummaryTags: row.creator_summary_tags ?? [],
+    creatorSummaryUpdatedAt: row.creator_summary_updated_at ?? null,
   };
 }
 

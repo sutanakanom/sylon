@@ -9,12 +9,16 @@ export function JoinButton({
   slug,
   initialJoined,
   signedIn,
+  joinLabel = "Join this trip",
+  joinedLabel = "You're in",
 }: {
   itemType: "trip" | "manifest";
   itemId: string;
   slug: string;
   initialJoined: boolean;
   signedIn: boolean;
+  joinLabel?: string;
+  joinedLabel?: string;
 }) {
   const [joined, setJoined] = useState(initialJoined);
   const [isPending, startTransition] = useTransition();
@@ -33,7 +37,7 @@ export function JoinButton({
   if (joined) {
     return (
       <span className="mono-label border-[1.5px] border-ink bg-acid px-5 py-3 text-[0.75rem] text-ink">
-        You&apos;re in
+        {joinedLabel}
       </span>
     );
   }
@@ -49,7 +53,7 @@ export function JoinButton({
       disabled={isPending}
       className="mono-label border-[1.5px] border-ink bg-ink px-5 py-3 text-[0.75rem] text-paper transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ink)] disabled:opacity-50"
     >
-      {isPending ? "Joining…" : "Join this trip"}
+      {isPending ? "Joining…" : joinLabel}
     </button>
   );
 }

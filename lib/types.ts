@@ -71,11 +71,23 @@ export interface Manifest {
   countryVotes: { country: string; votes: number }[];
   summary: string;
   memberCount: number;
-  // Detail-page extras — all optional, all host-editable at creation.
+  // Detail-page extras — all optional, all host-editable.
   signals: SignalItem[]; // "signs of life" — how the maybe becomes real
   realityFundPercent: number | null;
   noteQuote: string | null;
   noteAuthor: string | null;
+  // Collaborative-idea fields — the "known/rough/open" anchors, the
+  // workspace (vote/availability/brainstorm/summary), and what gates
+  // convert-to-trip. All host-editable via /manifest/[slug]/edit.
+  purpose: string | null; // "What we know" — always Known once set
+  decidedCountry: string | null; // host locks the winning location — Known once set, Open until then
+  targetStartDate: string | null; // ISO date — Known once set, Open until then
+  targetEndDate: string | null;
+  availabilityWindows: string[]; // host-defined windows people can flag, e.g. "May – Aug 2027"
+  creatorSummaryHeadline: string | null;
+  creatorSummaryBody: string | null;
+  creatorSummaryTags: string[];
+  creatorSummaryUpdatedAt: string | null;
 }
 
 export type Item = Trip | Manifest;

@@ -1368,3 +1368,338 @@
     grid-template-columns: 60px 1fr;
   }
 }
+
+/* ---------------------------------------------------------------------
+   Manifest detail page v2 — the collaborative-idea design (known/rough/
+   open anchors, a vote/availability/brainstorm/summary workspace, and a
+   gated convert-to-trip). Reuses .detailHero/.heroCopy/.eyebrow/
+   .heroTitleBig/.heroLede/.breadcrumb from the trip/manifest v1 section
+   above; the pieces below are new to this layout. --------------------- */
+
+.facesRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.faces {
+  display: flex;
+}
+
+.faceAvatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  color: var(--paper);
+  border: 2px solid var(--paper);
+  margin-left: -8px;
+  font-size: 0.68rem;
+  font-family: "DM Mono", ui-monospace, monospace;
+}
+
+.faceAvatar:first-child {
+  margin-left: 0;
+}
+
+.anchorPanel {
+  padding: var(--gutter);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+}
+
+.anchorHead {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.62rem;
+  margin-bottom: 14px;
+}
+
+.anchor {
+  position: relative;
+  border: 1.5px solid var(--ink);
+  padding: 18px;
+  margin-top: -1.5px;
+  background: rgba(243, 240, 232, 0.25);
+}
+
+.anchor small {
+  display: block;
+  font-size: 0.56rem;
+  margin-bottom: 8px;
+}
+
+.anchor strong {
+  font-size: 1.15rem;
+  line-height: 1.15;
+}
+
+.anchorTag {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  font-size: 0.5rem;
+  padding: 4px 6px;
+  border: 1px solid currentColor;
+}
+
+.anchorKnown {
+  color: var(--ink);
+}
+
+.anchorOpen {
+  opacity: 0.75;
+}
+
+.workspace {
+  padding: 64px var(--gutter) 0;
+}
+
+.workspaceHeader {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 0.9fr;
+  gap: 26px;
+  align-items: end;
+  margin-bottom: 30px;
+}
+
+.workspaceHeader h2 {
+  font-size: clamp(2.4rem, 5vw, 4.6rem);
+  line-height: 0.88;
+  letter-spacing: -0.06em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.workspaceHeader p {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.workspaceHeader span {
+  font-size: 0.6rem;
+}
+
+.questionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.questionCard {
+  border: 1.5px solid var(--ink);
+  padding: 20px;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+}
+
+.questionCardFeature {
+  background: var(--acid);
+}
+
+.questionCardSummary {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.qtop {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.55rem;
+  color: var(--muted);
+}
+
+.questionCardSummary .qtop {
+  color: #aaa;
+}
+
+.questionCard h3 {
+  font-size: 1.65rem;
+  line-height: 1.05;
+  margin: 24px 0 18px;
+  max-width: 480px;
+}
+
+.availabilityOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid currentColor;
+  padding: 11px 0;
+  font-size: 0.9rem;
+}
+
+.submitSmall {
+  border: 1.5px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  padding: 9px 12px;
+  margin-top: 14px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.submitSmall:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.idea {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  border-top: 1px solid currentColor;
+  padding: 11px 0;
+}
+
+.idea p {
+  margin: 0;
+}
+
+.idea small {
+  display: block;
+  color: var(--muted);
+}
+
+.ideaLike {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-size: 0.75rem;
+}
+
+.summaryTags {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.summaryTags span {
+  border: 1px solid currentColor;
+  padding: 6px 8px;
+  font-size: 0.62rem;
+}
+
+.conversion {
+  border-top: 1.5px solid var(--ink);
+  margin-top: 60px;
+  padding: 56px var(--gutter) 70px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+}
+
+.conversion > div > span {
+  font-size: 0.6rem;
+}
+
+.conversion h2 {
+  font-size: clamp(2.4rem, 5vw, 4.6rem);
+  line-height: 0.88;
+  letter-spacing: -0.06em;
+  text-transform: uppercase;
+  margin: 8px 0 0;
+}
+
+.conversion > div > p {
+  color: var(--muted);
+  line-height: 1.5;
+  margin-top: 18px;
+  max-width: 520px;
+}
+
+.progressCard {
+  border: 1.5px solid var(--ink);
+  padding: 22px;
+}
+
+.meter {
+  height: 11px;
+  border: 1.5px solid var(--ink);
+  padding: 2px;
+}
+
+.meterFill {
+  display: block;
+  height: 100%;
+  background: var(--orange);
+}
+
+.stages {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  font-size: 0.5rem;
+  margin-top: 10px;
+}
+
+.stageOn {
+  color: var(--orange);
+}
+
+.convertButton {
+  width: 100%;
+  margin-top: 28px;
+  padding: 13px;
+  border: 1.5px solid var(--ink);
+  cursor: pointer;
+  background: var(--acid);
+  font-family: "DM Mono", ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: 0.75rem;
+}
+
+.convertButton:disabled {
+  background: #ddd9cf;
+  color: #8a877f;
+  cursor: default;
+  border-color: #8a877f;
+}
+
+.convertNote {
+  display: block;
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.55rem;
+  color: var(--muted);
+}
+
+@media (max-width: 850px) {
+  .anchorPanel {
+    border-left: 0;
+    border-top: 1.5px solid var(--ink);
+  }
+  .workspaceHeader {
+    grid-template-columns: 1fr;
+  }
+  .questionGrid,
+  .conversion {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .workspace {
+    padding-top: 44px;
+  }
+  .conversion {
+    gap: 30px;
+    padding-top: 40px;
+  }
+  .stages {
+    font-size: 0.43rem;
+  }
+}
