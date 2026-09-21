@@ -1,4 +1,4 @@
-import { Item, Trip, Manifest, Leg } from "./types";
+import { Item, Trip, Manifest, Leg, ChecklistItem, SignalItem } from "./types";
 import { seedItems } from "./seed-data";
 import { isSupabaseConfigured, supabase } from "./supabase";
 import { supabaseAdmin, isSupabaseAdminConfigured } from "./supabase-admin";
@@ -19,6 +19,12 @@ interface TripRow {
   legs: Leg[];
   summary: string;
   member_count: number;
+  companion_name: string | null;
+  main_event: string | null;
+  checklist: ChecklistItem[] | null;
+  readiness_percent: number | null;
+  note_quote: string | null;
+  note_author: string | null;
 }
 
 interface ManifestRow {
@@ -32,6 +38,10 @@ interface ManifestRow {
   country_votes: { country: string; votes: number }[];
   summary: string;
   member_count: number;
+  signals: SignalItem[] | null;
+  reality_fund_percent: number | null;
+  note_quote: string | null;
+  note_author: string | null;
 }
 
 function tripFromRow(row: TripRow): Trip {
@@ -48,6 +58,12 @@ function tripFromRow(row: TripRow): Trip {
     legs: row.legs,
     summary: row.summary,
     memberCount: row.member_count,
+    companionName: row.companion_name ?? null,
+    mainEvent: row.main_event ?? null,
+    checklist: row.checklist ?? [],
+    readinessPercent: row.readiness_percent ?? null,
+    noteQuote: row.note_quote ?? null,
+    noteAuthor: row.note_author ?? null,
   };
 }
 
@@ -64,6 +80,10 @@ function manifestFromRow(row: ManifestRow): Manifest {
     countryVotes: row.country_votes,
     summary: row.summary,
     memberCount: row.member_count,
+    signals: row.signals ?? [],
+    realityFundPercent: row.reality_fund_percent ?? null,
+    noteQuote: row.note_quote ?? null,
+    noteAuthor: row.note_author ?? null,
   };
 }
 

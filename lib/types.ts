@@ -27,6 +27,16 @@ export interface Leg {
   endDate: string; // ISO date
 }
 
+export interface ChecklistItem {
+  label: string;
+  done: boolean;
+}
+
+export interface SignalItem {
+  title: string;
+  body: string;
+}
+
 export interface Trip {
   id: string;
   slug: string;
@@ -40,6 +50,13 @@ export interface Trip {
   legs: Leg[];
   summary: string; // shown to visitors
   memberCount: number;
+  // Detail-page extras — all optional, all host-editable at creation.
+  companionName: string | null; // "Going with"
+  mainEvent: string | null;
+  checklist: ChecklistItem[]; // "before we go"
+  readinessPercent: number | null; // "ready meter"
+  noteQuote: string | null;
+  noteAuthor: string | null;
 }
 
 export interface Manifest {
@@ -54,6 +71,11 @@ export interface Manifest {
   countryVotes: { country: string; votes: number }[];
   summary: string;
   memberCount: number;
+  // Detail-page extras — all optional, all host-editable at creation.
+  signals: SignalItem[]; // "signs of life" — how the maybe becomes real
+  realityFundPercent: number | null;
+  noteQuote: string | null;
+  noteAuthor: string | null;
 }
 
 export type Item = Trip | Manifest;

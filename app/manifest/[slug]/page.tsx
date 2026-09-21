@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getItemBySlug } from "@/lib/data";
 import { getCurrentMember } from "@/lib/current-member";
-import { getManifestors, getChatMessages, isManifestor } from "@/app/actions/manifest";
+import { getManifestors, getChatMessages, isManifestor, getMyVote } from "@/app/actions/manifest";
 import { labelFor, StatusStamp } from "@/components/StatusStamp";
 import { KindBadge } from "@/components/KindBadge";
 import { SiteShell } from "@/components/SiteShell";
@@ -10,6 +10,9 @@ import { ManifestorPanel } from "@/components/ManifestorPanel";
 import { ChatFeed } from "@/components/ChatFeed";
 import { FinalizeButton } from "@/components/FinalizeButton";
 import { ShareStoryButton } from "@/components/ShareStoryButton";
+import { CountryVoteChoices } from "@/components/CountryVoteChoices";
+import { posterMark, whereOnly } from "@/lib/item-display";
+import styles from "../../SylonDesign.module.css";
 
 export default async function ManifestDetailPage({
   params,
@@ -43,32 +46,76 @@ export default async function ManifestDetailPage({
     );
   }
 
-  const [manifestors, messages, iAmManifestor] = await Promise.all([
+  const [manifestors, messages, iAmManifestor, myVote] = await Promise.all([
     getManifestors(item.id),
     getChatMessages(item.id),
     isManifestor(item.id),
+    member ? getMyVote(item.id) : Promise.resolve(null),
   ]);
 
   const label = labelFor(item);
   const alreadyConverted = item.status === "converted";
+  const totalVotes = item.countryVotes.reduce((sum, v) => sum + v.votes, 0);
+  const sortedVotes = item.countryVotes.slice().sort((a, b) => b.votes - a.votes);
+  const targetYear = item.roughDate.match(/\d{4}/)?.[0] ?? item.roughDate;
+  const ownerDisplay = item.ownerHandle.charAt(0).toUpperCase() + item.ownerHandle.slice(1);
 
   return (
     <SiteShell member={member} centerLabel={item.title}>
+      {/* Breadcrumb */}
+      <div className={styles.breadcrumb}>
+        <Link href={`/${item.ownerHandle}`} className={`${styles.breadcrumbBack} mono`}>
+          ← {ownerDisplay}&apos;s plans
+        </Link>
+        {member && <ShareStoryButton item={item} variant="subtle" />}
+      </div>
+
       {/* Hero */}
-      <section className="flex flex-col gap-6 border-b-[1.5px] border-ink px-6 py-12 md:flex-row md:items-center md:justify-between md:px-10">
-        <div>
-          <span className="mono-label text-[0.7rem] text-muted">{item.roughDate}</span>
-          <h1 className="mt-2 text-4xl font-extrabold uppercase leading-none md:text-6xl">
-            {item.title}
-          </h1>
+      <section className={styles.detailHero}>
+        <div className={styles.heroCopy}>
+          <span className={`${styles.eyebrow} mono`}>Manifesting</span>
+          <h1 className={styles.heroTitleBig}>{item.title}</h1>
+          <p className={styles.heroLede}>{item.summary}</p>
+          <div className={styles.heroActions}>
+            <KindBadge kind={item.kind} />
+            <StatusStamp item={item} size="md" />
+            {iAmManifestor && !alreadyConverted && (
+              <FinalizeButton manifestId={item.id} slug={item.slug} />
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <KindBadge kind={item.kind} />
-          <StatusStamp item={item} size="md" />
-          {iAmManifestor && !alreadyConverted && (
-            <FinalizeButton manifestId={item.id} slug={item.slug} />
-          )}
-        </div>
+        <aside className={`${styles.heroPanel} ${styles.posterManifest}`}>
+          <div className={styles.poster} data-mark="?">
+            <div className={`${styles.posterTop} mono`}>
+              <span>{item.roughDate}</span>
+              <span>
+                {item.memberCount} believer{item.memberCount === 1 ? "" : "s"}
+              </span>
+            </div>
+            <div className={styles.factGrid}>
+              <div className={styles.fact}>
+                <small className="mono">Status</small>
+                <strong>{label}</strong>
+              </div>
+              <div className={styles.fact}>
+                <small className="mono">Target year</small>
+                <strong>{targetYear}</strong>
+              </div>
+              <div className={styles.fact}>
+                <small className="mono">Dream A</small>
+                <strong>{sortedVotes[0]?.country ?? "—"}</strong>
+              </div>
+              <div className={styles.fact}>
+                <small className="mono">Dream B</small>
+                <strong>{sortedVotes[1]?.country ?? "—"}</strong>
+              </div>
+            </div>
+            <div className={`${styles.posterBottom} mono`}>
+              <span>{whereOnly(item)}</span>
+              <span>{item.visibility === "public" ? "Public" : "Invite-only"}</span>
+            </div>
+          </div>
+        </aside>
       </section>
 
       {alreadyConverted && (
@@ -83,28 +130,73 @@ export default async function ManifestDetailPage({
         </div>
       )}
 
-      {/* Detail blocks */}
-      <section className="grid grid-cols-1 gap-4 border-b-[1.5px] border-ink px-6 py-10 sm:grid-cols-2 md:px-10">
-        <div className="border-[1.5px] border-ink p-5">
-          <span className="mono-label text-[0.65rem] text-muted">Country votes</span>
-          <ul className="mt-3 flex flex-col gap-1">
-            {item.countryVotes.map((v) => (
-              <li key={v.country} className="text-sm">
-                <span className="font-bold">{v.country}</span> — {v.votes} vote
-                {v.votes === 1 ? "" : "s"}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="border-[1.5px] border-ink p-5">
-          <span className="mono-label text-[0.65rem] text-muted">Status</span>
-          <p className="mt-3 text-sm">{label}</p>
-          {member && (
-            <div className="mt-4">
-              <ShareStoryButton item={item} variant="subtle" />
+      {/* Signals + side cards */}
+      <section className={styles.contentGrid}>
+        <div>
+          <div className={`${styles.sectionLabel} mono`}>Signs of life</div>
+          <h2 className={styles.sectionTitle}>How a maybe becomes real.</h2>
+          {item.signals.length === 0 ? (
+            <p className="py-6 text-sm text-muted">No milestones set yet.</p>
+          ) : (
+            <div className={styles.signalList}>
+              {item.signals.map((signal, i) => (
+                <article key={i} className={styles.signalRow}>
+                  <b className="mono">{String(i + 1).padStart(2, "0")}</b>
+                  <div>
+                    <h3>{signal.title}</h3>
+                    <p>{signal.body}</p>
+                  </div>
+                </article>
+              ))}
             </div>
           )}
         </div>
+        <aside>
+          {item.countryVotes.length > 0 && (
+            <div className={`${styles.sideCard} ${styles.sideCardAcid}`}>
+              <span className={`${styles.mini} mono`}>Choose the universe</span>
+              <h3>Where should it happen?</h3>
+              <CountryVoteChoices
+                manifestId={item.id}
+                slug={item.slug}
+                options={item.countryVotes}
+                initialVote={myVote}
+                signedIn={Boolean(member)}
+              />
+            </div>
+          )}
+          {item.realityFundPercent !== null && (
+            <div className={styles.sideCard}>
+              <span className={`${styles.mini} mono`}>Reality fund</span>
+              <h3>Make the dream less theoretical.</h3>
+              <div className={styles.progressTrack}>
+                <span
+                  className={styles.progressFill}
+                  style={{ width: `${item.realityFundPercent}%` }}
+                />
+              </div>
+              <div className={`${styles.mini} mono`}>
+                {item.realityFundPercent}% saved · enough for optimism, not yet airfare
+              </div>
+            </div>
+          )}
+          {item.noteQuote && (
+            <div className={`${styles.sideCard} ${styles.sideCardDark}`}>
+              <span className={`${styles.mini} mono`}>Manifest note</span>
+              <h3>&ldquo;{item.noteQuote}&rdquo;</h3>
+              {item.noteAuthor && <span className={`${styles.mini} mono`}>— {item.noteAuthor}</span>}
+            </div>
+          )}
+          <div className={styles.sideCard}>
+            <span className={`${styles.mini} mono`}>Interested</span>
+            <p className="mt-3 text-sm">
+              {totalVotes} vote{totalVotes === 1 ? "" : "s"} · {item.memberCount} so far
+            </p>
+          </div>
+        </aside>
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 border-b-[1.5px] border-ink px-6 py-10 sm:grid-cols-2 md:px-10">
         <ManifestorPanel
           itemId={item.id}
           slug={item.slug}
@@ -112,10 +204,6 @@ export default async function ManifestDetailPage({
           currentMemberId={member?.id ?? null}
           signedIn={Boolean(member)}
         />
-        <div className="border-[1.5px] border-ink p-5">
-          <span className="mono-label text-[0.65rem] text-muted">Interested</span>
-          <p className="mt-3 text-sm">{item.memberCount} so far</p>
-        </div>
       </section>
 
       {/* Chat feed */}

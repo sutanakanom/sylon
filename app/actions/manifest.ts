@@ -127,6 +127,76 @@ export async function removeManifestor(
   return { ok: true };
 }
 
+// --- Country voting ------------------------------------------------------
+// One vote per member per manifest (manifest_votes has a unique
+// constraint on manifest_id+member_id), so voting again just changes
+// your vote. manifests.country_votes is kept as the display copy — after
+// every vote we recompute its counts from manifest_votes, so the options
+// list stays whatever the host set at creation, and existing reads
+// (getPublicItems/getItemBySlug) don't need to know votes moved to their
+// own table.
+
+export async function getMyVote(manifestId: string): Promise<string | null> {
+  const member = await getCurrentMember();
+  if (!member || !isSupabaseAdminConfigured || !supabaseAdmin) return null;
+
+  const { data } = await supabaseAdmin
+    .from("manifest_votes")
+    .select("country")
+    .eq("manifest_id", manifestId)
+    .eq("member_id", member.id)
+    .maybeSingle();
+
+  return data?.country ?? null;
+}
+
+export type VoteResult = { ok: true; country: string } | { ok: false; error: string };
+
+export async function voteCountry(
+  manifestId: string,
+  slug: string,
+  country: string
+): Promise<VoteResult> {
+  const member = await getCurrentMember();
+  if (!member) return { ok: false, error: "Sign in to vote." };
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return { ok: false, error: "Not wired up on this environment yet." };
+  }
+
+  const { error: voteError } = await supabaseAdmin
+    .from("manifest_votes")
+    .upsert(
+      { manifest_id: manifestId, member_id: member.id, country },
+      { onConflict: "manifest_id,member_id" }
+    );
+
+  if (voteError) {
+    console.error("voteCountry failed", voteError);
+    return { ok: false, error: "Couldn't save your vote. Try again." };
+  }
+
+  // Recompute counts for every option the host set up, from real votes.
+  const [{ data: manifestRow }, { data: allVotes }] = await Promise.all([
+    supabaseAdmin.from("manifests").select("country_votes").eq("id", manifestId).single(),
+    supabaseAdmin.from("manifest_votes").select("country").eq("manifest_id", manifestId),
+  ]);
+
+  if (manifestRow) {
+    const options = (manifestRow.country_votes as { country: string; votes: number }[]).map(
+      (v) => v.country
+    );
+    const counts = new Map<string, number>(options.map((c) => [c, 0]));
+    for (const vote of allVotes ?? []) {
+      counts.set(vote.country, (counts.get(vote.country) ?? 0) + 1);
+    }
+    const updatedVotes = options.map((c) => ({ country: c, votes: counts.get(c) ?? 0 }));
+    await supabaseAdmin.from("manifests").update({ country_votes: updatedVotes }).eq("id", manifestId);
+  }
+
+  revalidatePath(`/manifest/${slug}`);
+  return { ok: true, country };
+}
+
 // --- Chat feed ---------------------------------------------------------
 
 interface ChatRow {

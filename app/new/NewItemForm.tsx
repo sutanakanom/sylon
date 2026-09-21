@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createTrip, createManifest } from "@/app/actions/items";
-import { TripStatus, Visibility } from "@/lib/types";
+import { TripStatus, Visibility, ChecklistItem, SignalItem } from "@/lib/types";
 
 type Kind = "trip" | "manifest";
 type Leg = { place: string; startDate: string; endDate: string };
@@ -24,8 +24,49 @@ export function NewItemForm() {
   const [status, setStatus] = useState<TripStatus>("planning");
   const [legs, setLegs] = useState<Leg[]>([{ place: "", startDate: "", endDate: "" }]);
 
+  // Trip-only detail-page extras.
+  const [companionName, setCompanionName] = useState("");
+  const [mainEvent, setMainEvent] = useState("");
+  const [readinessPercent, setReadinessPercent] = useState("");
+  const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
+  const [checklistDraft, setChecklistDraft] = useState("");
+
+  // Manifest-only detail-page extras.
+  const [realityFundPercent, setRealityFundPercent] = useState("");
+  const [signals, setSignals] = useState<SignalItem[]>([]);
+  const [signalTitleDraft, setSignalTitleDraft] = useState("");
+  const [signalBodyDraft, setSignalBodyDraft] = useState("");
+
+  // Shared "note" card (trip note / manifest note).
+  const [noteQuote, setNoteQuote] = useState("");
+  const [noteAuthor, setNoteAuthor] = useState("");
+
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  function addChecklistItem() {
+    if (!checklistDraft.trim()) return;
+    setChecklist((prev) => [...prev, { label: checklistDraft.trim(), done: false }]);
+    setChecklistDraft("");
+  }
+
+  function removeChecklistItem(index: number) {
+    setChecklist((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function addSignal() {
+    if (!signalTitleDraft.trim()) return;
+    setSignals((prev) => [
+      ...prev,
+      { title: signalTitleDraft.trim(), body: signalBodyDraft.trim() },
+    ]);
+    setSignalTitleDraft("");
+    setSignalBodyDraft("");
+  }
+
+  function removeSignal(index: number) {
+    setSignals((prev) => prev.filter((_, i) => i !== index));
+  }
 
   function updateLeg(index: number, field: keyof Leg, value: string) {
     setLegs((prev) => prev.map((leg, i) => (i === index ? { ...leg, [field]: value } : leg)));
@@ -59,6 +100,12 @@ export function NewItemForm() {
               summary,
               visibility,
               status,
+              companionName,
+              mainEvent,
+              checklist,
+              readinessPercent: readinessPercent.trim() ? Number(readinessPercent) : null,
+              noteQuote,
+              noteAuthor,
             })
           : await createManifest({
               title,
@@ -66,6 +113,10 @@ export function NewItemForm() {
               countryOptions: countryList,
               summary,
               visibility,
+              signals,
+              realityFundPercent: realityFundPercent.trim() ? Number(realityFundPercent) : null,
+              noteQuote,
+              noteAuthor,
             });
 
       if (!result.ok) {
@@ -189,6 +240,171 @@ export function NewItemForm() {
           </button>
         </div>
       )}
+
+      {kind === "trip" && (
+        <>
+          <div className="flex gap-4">
+            <label className="flex flex-1 flex-col gap-2">
+              <span className={labelClass}>Going with</span>
+              <input
+                type="text"
+                value={companionName}
+                onChange={(e) => setCompanionName(e.target.value)}
+                placeholder="Mum (optional)"
+                className={inputClass}
+              />
+            </label>
+            <label className="flex flex-1 flex-col gap-2">
+              <span className={labelClass}>Main event</span>
+              <input
+                type="text"
+                value={mainEvent}
+                onChange={(e) => setMainEvent(e.target.value)}
+                placeholder="Disneyland 10K (optional)"
+                className={inputClass}
+              />
+            </label>
+          </div>
+
+          <label className="flex flex-col gap-2">
+            <span className={labelClass}>Ready meter (0–100, optional)</span>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={readinessPercent}
+              onChange={(e) => setReadinessPercent(e.target.value)}
+              placeholder="72"
+              className={inputClass}
+            />
+          </label>
+
+          <div className="flex flex-col gap-3">
+            <span className={labelClass}>Before-we-go checklist (optional)</span>
+            {checklist.length > 0 && (
+              <ul className="flex flex-col gap-2">
+                {checklist.map((c, i) => (
+                  <li
+                    key={i}
+                    className="flex items-center justify-between border-[1.5px] border-ink px-4 py-2 text-sm"
+                  >
+                    {c.label}
+                    <button
+                      type="button"
+                      onClick={() => removeChecklistItem(i)}
+                      className="mono-label text-[0.6rem] text-muted underline underline-offset-2"
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={checklistDraft}
+                onChange={(e) => setChecklistDraft(e.target.value)}
+                placeholder="Hotel near MTR"
+                className={`${inputClass} flex-1`}
+              />
+              <button
+                type="button"
+                onClick={addChecklistItem}
+                className="mono-label border-[1.5px] border-ink px-4 text-[0.65rem]"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {kind === "manifest" && (
+        <>
+          <label className="flex flex-col gap-2">
+            <span className={labelClass}>Reality fund (0–100, optional)</span>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={realityFundPercent}
+              onChange={(e) => setRealityFundPercent(e.target.value)}
+              placeholder="34"
+              className={inputClass}
+            />
+          </label>
+
+          <div className="flex flex-col gap-3">
+            <span className={labelClass}>Signs of life (optional)</span>
+            {signals.length > 0 && (
+              <ul className="flex flex-col gap-2">
+                {signals.map((s, i) => (
+                  <li key={i} className="border-[1.5px] border-ink p-4 text-sm">
+                    <div className="flex items-start justify-between gap-2">
+                      <strong>{s.title}</strong>
+                      <button
+                        type="button"
+                        onClick={() => removeSignal(i)}
+                        className="mono-label shrink-0 text-[0.6rem] text-muted underline underline-offset-2"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    {s.body && <p className="mt-1 text-muted">{s.body}</p>}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="flex flex-col gap-2 border-[1.5px] border-ink p-4">
+              <input
+                type="text"
+                value={signalTitleDraft}
+                onChange={(e) => setSignalTitleDraft(e.target.value)}
+                placeholder="The tour exists"
+                className={inputClass}
+              />
+              <input
+                type="text"
+                value={signalBodyDraft}
+                onChange={(e) => setSignalBodyDraft(e.target.value)}
+                placeholder="Any 2027 announcement moves this from delusional to possible."
+                className={inputClass}
+              />
+              <button
+                type="button"
+                onClick={addSignal}
+                className="mono-label self-start border-[1.5px] border-ink px-4 py-2 text-[0.65rem]"
+              >
+                + Add a signal
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      <div className="flex gap-4">
+        <label className="flex flex-1 flex-col gap-2">
+          <span className={labelClass}>{kind === "trip" ? "Trip note (optional)" : "Manifest note (optional)"}</span>
+          <input
+            type="text"
+            value={noteQuote}
+            onChange={(e) => setNoteQuote(e.target.value)}
+            placeholder="A little quote for the side card"
+            className={inputClass}
+          />
+        </label>
+        <label className="flex flex-1 flex-col gap-2">
+          <span className={labelClass}>— attributed to</span>
+          <input
+            type="text"
+            value={noteAuthor}
+            onChange={(e) => setNoteAuthor(e.target.value)}
+            placeholder="Future you"
+            className={inputClass}
+          />
+        </label>
+      </div>
 
       <div className="flex gap-4">
         <label className="flex flex-1 flex-col gap-2">

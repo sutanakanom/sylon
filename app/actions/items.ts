@@ -1,9 +1,10 @@
 "use server";
 
 import { randomBytes } from "crypto";
+import { revalidatePath } from "next/cache";
 import { supabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabase-admin";
 import { getCurrentMember } from "@/lib/current-member";
-import { TripStatus, Visibility } from "@/lib/types";
+import { TripStatus, Visibility, ChecklistItem, SignalItem } from "@/lib/types";
 
 function slugify(text: string): string {
   const base = text
@@ -57,6 +58,12 @@ export interface CreateTripInput {
   summary: string;
   visibility: Visibility;
   status: TripStatus;
+  companionName: string;
+  mainEvent: string;
+  checklist: ChecklistItem[];
+  readinessPercent: number | null;
+  noteQuote: string;
+  noteAuthor: string;
 }
 
 export async function createTrip(input: CreateTripInput): Promise<CreateItemResult> {
@@ -79,6 +86,12 @@ export async function createTrip(input: CreateTripInput): Promise<CreateItemResu
     legs: input.legs.filter((l) => l.place.trim()),
     summary: input.summary.trim(),
     member_count: 1,
+    companion_name: input.companionName.trim() || null,
+    main_event: input.mainEvent.trim() || null,
+    checklist: input.checklist.filter((c) => c.label.trim()),
+    readiness_percent: input.readinessPercent,
+    note_quote: input.noteQuote.trim() || null,
+    note_author: input.noteAuthor.trim() || null,
   });
 
   if (error) {
@@ -89,12 +102,50 @@ export async function createTrip(input: CreateTripInput): Promise<CreateItemResu
   return { ok: true, slug };
 }
 
+// Lets the host check items off their own trip's "before we go" list
+// straight from the detail page, without a separate edit page.
+export async function toggleChecklistItem(
+  tripId: string,
+  slug: string,
+  index: number
+): Promise<CreateItemResult> {
+  const host = await requireHost();
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return { ok: false, error: "Not configured." };
+  }
+
+  const { data: tripRow } = await supabaseAdmin
+    .from("trips")
+    .select("checklist, owner_handle")
+    .eq("id", tripId)
+    .maybeSingle();
+
+  if (!tripRow || tripRow.owner_handle !== host.handle) {
+    return { ok: false, error: "Not authorized." };
+  }
+
+  const checklist = (tripRow.checklist as { label: string; done: boolean }[]) ?? [];
+  if (!checklist[index]) return { ok: false, error: "Couldn't find that item." };
+
+  checklist[index] = { ...checklist[index], done: !checklist[index].done };
+
+  const { error } = await supabaseAdmin.from("trips").update({ checklist }).eq("id", tripId);
+  if (error) return { ok: false, error: "Couldn't save that. Try again." };
+
+  revalidatePath(`/trip/${slug}`);
+  return { ok: true, slug };
+}
+
 export interface CreateManifestInput {
   title: string;
   roughDate: string;
   countryOptions: string[];
   summary: string;
   visibility: Visibility;
+  signals: SignalItem[];
+  realityFundPercent: number | null;
+  noteQuote: string;
+  noteAuthor: string;
 }
 
 export async function createManifest(input: CreateManifestInput): Promise<CreateItemResult> {
@@ -119,6 +170,10 @@ export async function createManifest(input: CreateManifestInput): Promise<Create
       .map((country) => ({ country, votes: 0 })),
     summary: input.summary.trim(),
     member_count: 1,
+    signals: input.signals.filter((s) => s.title.trim()),
+    reality_fund_percent: input.realityFundPercent,
+    note_quote: input.noteQuote.trim() || null,
+    note_author: input.noteAuthor.trim() || null,
   });
 
   if (error) {
