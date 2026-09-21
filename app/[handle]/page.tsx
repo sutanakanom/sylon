@@ -4,7 +4,7 @@ import { getPublicItems, handleExists } from "@/lib/data";
 import { getCurrentMember } from "@/lib/current-member";
 import { signOut } from "@/app/actions/auth";
 import { PlansSection } from "./PlansSection";
-import styles from "./PersonalPage.module.css";
+import styles from "../SylonDesign.module.css";
 
 export default async function PersonalPage({
   params,

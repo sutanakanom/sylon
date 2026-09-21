@@ -323,6 +323,23 @@
   transform: translate(-2px, -2px);
 }
 
+/* Primary CTA button — landing page hero, and anywhere else that wants
+   the acid-filled equivalent of .share/.invite's outline style. */
+.cta {
+  display: inline-block;
+  border: 1.5px solid var(--ink);
+  background: var(--acid);
+  padding: 16px 24px;
+  font-size: 0.75rem;
+  text-decoration: none;
+  color: var(--ink);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.cta:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
 /* Plan cards */
 .plans {
   display: grid;

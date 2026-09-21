@@ -6,7 +6,7 @@ import { Item } from "@/lib/types";
 import { labelFor } from "@/components/StatusStamp";
 import { ShareOverallButton } from "@/components/ShareOverallButton";
 import { requestInviteAccess } from "@/app/actions/invite-request";
-import styles from "./PersonalPage.module.css";
+import styles from "../SylonDesign.module.css";
 
 type FilterKey = "all" | "confirmed" | "planning" | "manifest";
 
