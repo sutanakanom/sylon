@@ -161,12 +161,24 @@ export async function getItemBySlug(slug: string): Promise<Item | null> {
   return null;
 }
 
-// Checks whether a handle actually has a page (at least one item owned by
-// it) — used by /[handle] to 404 for anything that isn't a real host.
+// Checks whether a handle actually has a page — used by /[handle] to 404
+// for anything that isn't a real host. A host is anyone with that handle
+// on their members row (see lib/handles.ts), whether or not they've
+// published a trip/manifest yet; a page shouldn't 404 on its own owner
+// just because "Nothing public yet" is the whole story so far. Also true
+// if the handle merely has items filed under it (covers any handle set
+// directly on a trip/manifest with no matching members row).
 export async function handleExists(ownerHandle: string): Promise<boolean> {
   if (!isSupabaseAdminConfigured || !supabaseAdmin) {
     return seedItems.some((item) => item.ownerHandle === ownerHandle);
   }
+
+  const { data: member } = await supabaseAdmin
+    .from("members")
+    .select("id")
+    .eq("handle", ownerHandle)
+    .maybeSingle();
+  if (member) return true;
 
   const { count: tripCount } = await supabaseAdmin
     .from("trips")
