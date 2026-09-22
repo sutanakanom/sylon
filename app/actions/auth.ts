@@ -3,6 +3,7 @@
 import { supabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabase-admin";
 import { createSession, destroySession } from "@/lib/session";
 import { generateAndSendInviteCode } from "@/lib/invite-codes";
+import { handleFromEmail, pickAvailableHandle } from "@/lib/handles";
 
 export type RequestCodeResult = { ok: true } | { ok: false; error: string };
 
@@ -99,9 +100,16 @@ export async function verifyCode(email: string, code: string): Promise<VerifyCod
   if (existingMember?.id) {
     memberId = existingMember.id;
   } else {
+    // Everyone who signs in for the first time becomes a host, not just
+    // Kanom — SYLON opened up to other hosts (see requireHost() in
+    // app/actions/items.ts), so a brand-new member needs a handle right
+    // away, not a manual "Set handle" click in /admin first. Derived from
+    // the email's local part; an admin can still change it in /admin.
+    const handle = await pickAvailableHandle(supabaseAdmin, handleFromEmail(cleanEmail));
+
     const { data: newMember, error: memberError } = await supabaseAdmin
       .from("members")
-      .insert({ email: cleanEmail })
+      .insert({ email: cleanEmail, handle })
       .select("id")
       .single();
 
