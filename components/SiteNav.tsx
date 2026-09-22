@@ -33,9 +33,14 @@ export function SiteNav({
         {member ? (
           <>
             {member.handle && (
-              <Link href="/new" className={`${styles.signout} mono`}>
-                {t("nav.addPlan")}
-              </Link>
+              <>
+                <Link href={`/${member.handle}`} className={`${styles.signout} mono`}>
+                  {t("nav.myPage")}
+                </Link>
+                <Link href="/new" className={`${styles.signout} mono`}>
+                  {t("nav.addPlan")}
+                </Link>
+              </>
             )}
             {member.isAdmin && (
               <Link href="/admin" className={`${styles.signout} mono`}>

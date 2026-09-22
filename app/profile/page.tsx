@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentMember } from "@/lib/current-member";
 import { getLocale } from "@/lib/i18n/locale";
@@ -13,7 +14,15 @@ export default async function ProfilePage() {
     <SiteShell member={member} centerLabel={t(locale, "profile.centerLabel")}>
       <div className="mx-auto w-full max-w-md flex-1 px-6 py-12 md:px-0">
         <h1 className="mb-2 text-4xl font-extrabold uppercase leading-none">{t(locale, "profile.title")}</h1>
-        <p className="mb-10 text-sm leading-snug text-muted">{t(locale, "profile.subtitle")}</p>
+        <p className="mb-4 text-sm leading-snug text-muted">{t(locale, "profile.subtitle")}</p>
+        {member.handle && (
+          <Link
+            href={`/${member.handle}`}
+            className="mb-10 inline-block text-sm font-medium text-ink underline underline-offset-2"
+          >
+            {t(locale, "profile.viewYourPage")}
+          </Link>
+        )}
         <ProfileForm member={member} />
       </div>
     </SiteShell>

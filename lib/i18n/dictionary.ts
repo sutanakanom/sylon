@@ -58,6 +58,7 @@ export const dictionary = {
   }),
 
   nav: dict({
+    myPage: { en: "My page", th: "หน้าของฉัน" },
     addPlan: { en: "+ Add a plan", th: "+ เพิ่มแผน" },
     admin: { en: "Admin", th: "ผู้ดูแลระบบ" },
     signOut: { en: "Sign out", th: "ออกจากระบบ" },
@@ -220,6 +221,7 @@ export const dictionary = {
     centerLabel: { en: "Your profile", th: "โปรไฟล์ของคุณ" },
     title: { en: "Profile", th: "โปรไฟล์" },
     subtitle: { en: "Shown on your page and next to your comments — never your email.", th: "แสดงบนหน้าของคุณและข้างคอมเมนต์ — ไม่แสดงอีเมลของคุณ" },
+    viewYourPage: { en: "View your page ↗", th: "ดูหน้าของคุณ ↗" },
     avatarPhoto: { en: "Avatar photo (max 2MB)", th: "รูปโปรไฟล์ (สูงสุด 2MB)" },
     displayName: { en: "Display name", th: "ชื่อที่แสดง" },
     instagramHandle: { en: "Instagram handle", th: "ยูสเซอร์เนม Instagram" },
