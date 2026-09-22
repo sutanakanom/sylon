@@ -4,17 +4,15 @@ import { useState } from "react";
 import { Item } from "@/lib/types";
 import { drawItemStoryCard, shareOrDownloadImage } from "@/lib/story-canvas";
 import { useT } from "./LocaleProvider";
+import { InstagramIcon } from "./InstagramIcon";
+import styles from "@/app/SylonDesign.module.css";
 
-// Renders a vertical 1080x1920 (9:16) card for Instagram Story sharing, for
-// a single trip or manifest's detail page.
+// Icon-only "share this trip/manifest as an IG Story" button — renders a
+// vertical 1080x1920 (9:16) card for the single item and hands it to the
+// OS share sheet (or downloads it). Used on both trip and manifest detail
+// pages, visible to any signed-in member (not just the owner).
 
-export function ShareStoryButton({
-  item,
-  variant = "default",
-}: {
-  item: Item;
-  variant?: "default" | "subtle";
-}) {
+export function ShareStoryButton({ item }: { item: Item }) {
   const { t } = useT();
   const [status, setStatus] = useState<"idle" | "working" | "done" | "error">("idle");
 
@@ -33,29 +31,16 @@ export function ShareStoryButton({
         ? t("share.couldNotCreateTryAgain")
         : null;
 
-  if (variant === "subtle") {
-    return (
-      <div className="flex flex-col items-start gap-1">
-        <button
-          onClick={handleShare}
-          disabled={status === "working"}
-          className="mono-label text-[0.65rem] text-muted underline underline-offset-2 disabled:opacity-50"
-        >
-          {buttonLabel}
-        </button>
-        {statusLine && <span className="mono-label text-[0.6rem] text-muted">{statusLine}</span>}
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col items-end gap-1">
       <button
+        type="button"
         onClick={handleShare}
         disabled={status === "working"}
-        className="mono-label border-[1.5px] border-ink px-4 py-2 text-[0.7rem] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0_var(--ink)] disabled:opacity-50"
+        className={styles.iconButton}
+        aria-label={buttonLabel}
       >
-        {buttonLabel}
+        <InstagramIcon />
       </button>
       {statusLine && <span className="mono-label text-[0.6rem] text-muted">{statusLine}</span>}
     </div>

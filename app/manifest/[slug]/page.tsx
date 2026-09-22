@@ -145,7 +145,7 @@ export default async function ManifestDetailPage({
               {t(locale, "manifestDetail.edit")}
             </Link>
           )}
-          {member && <ShareStoryButton item={item} variant="subtle" />}
+          {member && <ShareStoryButton item={item} />}
         </div>
       </div>
 

@@ -79,7 +79,7 @@ export default async function TripDetailPage({
               {t(locale, "tripDetail.edit")}
             </Link>
           )}
-          {member && <ShareStoryButton item={item} variant="subtle" />}
+          {member && <ShareStoryButton item={item} />}
         </div>
       </div>
 

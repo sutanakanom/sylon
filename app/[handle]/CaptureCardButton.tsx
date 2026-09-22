@@ -2,16 +2,16 @@
 
 import { useState } from "react";
 import { Item } from "@/lib/types";
-import { drawItemStoryCard, drawOverviewStoryCard, shareOrDownloadImage } from "@/lib/story-canvas";
+import { drawItemStoryCard, drawWholePlanStoryCard, shareOrDownloadImage } from "@/lib/story-canvas";
 import { useT } from "@/components/LocaleProvider";
 import { InstagramIcon } from "@/components/InstagramIcon";
 
-// "Capture or share this on story" — generates an IG-Story-ready image of
-// whichever carousel card is currently showing: the single item's own card
-// design (reused from the trip/manifest detail pages) when a plan is
-// active, or a simple overview list when the summary card is active. A
-// placeholder design for now — the personal page's own dedicated capture
-// design is a later pass.
+// "Share this" — generates an IG-Story-ready image of whichever carousel
+// card is currently showing: the single item's own card design (reused
+// from the trip/manifest detail pages) when a plan is active, or the
+// same whole-plan board design used by the "Share the whole plan" button
+// when the aggregate "summary" card is active — one consistent aggregate
+// design instead of two different ones.
 
 export function CaptureCardButton({
   activeItem,
@@ -39,7 +39,7 @@ export function CaptureCardButton({
     try {
       const blob = activeItem
         ? await drawItemStoryCard(activeItem)
-        : await drawOverviewStoryCard(displayName, items);
+        : await drawWholePlanStoryCard(displayName, items);
       const filename = activeItem
         ? `${activeItem.slug}-sylon-story.png`
         : `${displayName.toLowerCase()}-sylon-atlas.png`;
