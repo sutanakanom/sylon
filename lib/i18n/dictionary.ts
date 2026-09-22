@@ -58,7 +58,7 @@ export const dictionary = {
   }),
 
   nav: dict({
-    myPage: { en: "My page", th: "หน้าของฉัน" },
+    myPage: { en: "My plan", th: "แผนของฉัน" },
     addPlan: { en: "+ Add a plan", th: "+ เพิ่มแผน" },
     admin: { en: "Admin", th: "ผู้ดูแลระบบ" },
     signOut: { en: "Sign out", th: "ออกจากระบบ" },
