@@ -195,6 +195,70 @@ async function requireItemOwner(ownerHandle: string) {
   return member;
 }
 
+export interface UpdateTripInput {
+  title: string;
+  roughDate: string;
+  countries: string[];
+  legs: { place: string; startDate: string; endDate: string }[];
+  summary: string;
+  visibility: Visibility;
+  status: TripStatus;
+  companionName: string;
+  mainEvent: string;
+  checklist: ChecklistItem[];
+  readinessPercent: number | null;
+  noteQuote: string;
+  noteAuthor: string;
+}
+
+export async function updateTrip(
+  tripId: string,
+  slug: string,
+  input: UpdateTripInput
+): Promise<CreateItemResult> {
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return { ok: false, error: "Not configured." };
+  }
+
+  const { data: existing } = await supabaseAdmin
+    .from("trips")
+    .select("owner_handle")
+    .eq("id", tripId)
+    .maybeSingle();
+  if (!existing) return { ok: false, error: "Couldn't find that trip." };
+
+  await requireItemOwner(existing.owner_handle);
+  if (!input.title.trim()) return { ok: false, error: "Give it a title." };
+
+  const { error } = await supabaseAdmin
+    .from("trips")
+    .update({
+      title: input.title.trim(),
+      status: input.status,
+      visibility: input.visibility,
+      rough_date: input.roughDate.trim() || "Sometime",
+      countries: input.countries.map((c) => c.trim()).filter(Boolean),
+      legs: input.legs.filter((l) => l.place.trim()),
+      summary: input.summary.trim(),
+      companion_name: input.companionName.trim() || null,
+      main_event: input.mainEvent.trim() || null,
+      checklist: input.checklist.filter((c) => c.label.trim()),
+      readiness_percent: input.readinessPercent,
+      note_quote: input.noteQuote.trim() || null,
+      note_author: input.noteAuthor.trim() || null,
+    })
+    .eq("id", tripId);
+
+  if (error) {
+    console.error("updateTrip failed", error);
+    return { ok: false, error: "Couldn't save those changes. Try again." };
+  }
+
+  revalidatePath(`/trip/${slug}`);
+  revalidatePath(`/trip/${slug}/edit`);
+  return { ok: true, slug };
+}
+
 export interface UpdateManifestInput {
   title: string;
   purpose: string;

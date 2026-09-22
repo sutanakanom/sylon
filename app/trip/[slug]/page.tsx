@@ -73,7 +73,14 @@ export default async function TripDetailPage({
         <Link href={`/${item.ownerHandle}`} className={`${styles.breadcrumbBack} mono`}>
           ← {t(locale, "tripDetail.plansOf", { name: ownerDisplay })}
         </Link>
-        {member && <ShareStoryButton item={item} variant="subtle" />}
+        <div className="flex items-center gap-3">
+          {isOwner && (
+            <Link href={`/trip/${slug}/edit`} className={`${styles.mini} mono underline underline-offset-2`}>
+              {t(locale, "tripDetail.edit")}
+            </Link>
+          )}
+          {member && <ShareStoryButton item={item} variant="subtle" />}
+        </div>
       </div>
 
       {/* Hero */}
