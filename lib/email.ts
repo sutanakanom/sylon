@@ -2,10 +2,10 @@ import { Resend } from "resend";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
-// Resend's shared onboarding sender — works immediately, no domain setup.
-// Swap for a verified sylater.app address once a domain is added in
-// Resend's dashboard (Domains → Add Domain).
-const FROM = "SYLON <onboarding@resend.dev>";
+// sylater.app is verified in Resend (Domains → Add Domain) — sends from
+// here reach real recipients, unlike the onboarding@resend.dev sandbox
+// sender, which only delivers to the Resend account's own email.
+const FROM = "SYLON <hello@sylater.app>";
 
 export async function sendInviteCodeEmail(email: string, code: string) {
   if (!resend) {
