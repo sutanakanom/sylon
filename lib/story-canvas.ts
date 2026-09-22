@@ -348,8 +348,8 @@ async function drawManifestStoryCard(item: Manifest): Promise<Blob | null> {
   ctx.fillStyle = INK;
   ctx.font = "800 88px Manrope";
   ctx.fillText(line1, x, headlineY);
-  ctx.fillText("BOOKED", x, headlineY + 96);
-  ctx.fillText("& BUSY", x, headlineY + 192);
+  ctx.fillText("CALLING", x, headlineY + 96);
+  ctx.fillText("THIS IN", x, headlineY + 192);
 
   drawBadgeCircle(ctx, ORANGE, manifestBadgeLines(item), 880, headlineY + 150);
 
