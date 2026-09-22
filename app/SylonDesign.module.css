@@ -156,9 +156,9 @@
   min-height: 510px;
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
-  gap: clamp(24px, 5vw, 80px);
+  gap: clamp(20px, 4vw, 56px);
   align-items: end;
-  padding: clamp(54px, 9vh, 110px) 0 48px;
+  padding: clamp(36px, 6vh, 76px) 0 36px;
   border-bottom: 1px solid var(--line);
   position: relative;
   overflow: hidden;
@@ -973,7 +973,7 @@
   }
   .profileHero {
     min-height: auto;
-    padding: 30px 0 26px;
+    padding: 20px 0 20px;
   }
   .heroTitle {
     margin: 14px 0 16px;
@@ -1155,7 +1155,7 @@
   border-bottom: 1.5px solid var(--ink);
 }
 
-.heroCopy {
+.detailHeroCopy {
   padding: clamp(36px, 6vw, 72px) clamp(20px, 4vw, 60px) 44px var(--gutter);
   display: flex;
   flex-direction: column;
@@ -1524,7 +1524,7 @@
 }
 
 @media (max-width: 560px) {
-  .heroCopy {
+  .detailHeroCopy {
     padding: 28px var(--gutter) 32px;
   }
   .factGrid {
@@ -1550,7 +1550,7 @@
 /* ---------------------------------------------------------------------
    Manifest detail page v2 — the collaborative-idea design (known/rough/
    open anchors, a vote/availability/brainstorm/summary workspace, and a
-   gated convert-to-trip). Reuses .detailHero/.heroCopy/.eyebrow/
+   gated convert-to-trip). Reuses .detailHero/.detailHeroCopy/.eyebrow/
    .heroTitleBig/.heroLede/.breadcrumb from the trip/manifest v1 section
    above; the pieces below are new to this layout. --------------------- */
 

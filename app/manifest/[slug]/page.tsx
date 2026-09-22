@@ -151,7 +151,7 @@ export default async function ManifestDetailPage({
 
       {/* Hero */}
       <section className={styles.detailHero}>
-        <div className={styles.heroCopy}>
+        <div className={styles.detailHeroCopy}>
           <span className={`${styles.eyebrow} mono`}>
             {t(locale, "manifestDetail.manifesting")} ·{" "}
             {progress.activeCount >= 2

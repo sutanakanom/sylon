@@ -85,7 +85,7 @@ export default async function TripDetailPage({
 
       {/* Hero */}
       <section className={styles.detailHero}>
-        <div className={styles.heroCopy}>
+        <div className={styles.detailHeroCopy}>
           <span className={`${styles.eyebrow} mono`}>
             {label} {t(locale, "tripDetail.tripSuffix")}
           </span>
