@@ -251,6 +251,32 @@
   font-size: 0.58rem;
 }
 
+/* Landing hero without the passport card — single column, two CTAs. */
+.profileHeroSolo {
+  grid-template-columns: minmax(0, 1fr);
+}
+.ctaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 32px;
+}
+.ctaSecondary {
+  display: inline-block;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  padding: 16px 24px;
+  font-size: 0.75rem;
+  text-decoration: none;
+  color: var(--ink);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.ctaSecondary:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 6px 6px 0 var(--ink);
+  background: var(--acid);
+}
+
 /* Ticker */
 .ticker {
   margin: 0 calc(var(--gutter) * -1);
@@ -303,6 +329,51 @@
   background: var(--acid);
   box-shadow: 4px 4px 0 var(--ink);
   transform: translate(-2px, -2px);
+}
+
+/* Small square icon buttons — replace the old long text-label share/story
+   buttons so an IG icon can sit without taking up much space. */
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.iconButton:hover {
+  background: var(--acid);
+  box-shadow: 4px 4px 0 var(--ink);
+  transform: translate(-2px, -2px);
+}
+.iconButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+}
+.iconButton svg {
+  width: 20px;
+  height: 20px;
+}
+.iconButtonDark {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: 4px 4px 0 var(--acid);
+}
+.iconButtonDark:hover {
+  background: var(--ink);
+  box-shadow: 6px 6px 0 var(--acid);
+}
+.mobileShare .iconButton {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: 4px 4px 0 var(--acid);
 }
 
 /* Primary CTA button — landing page hero, and anywhere else that wants
@@ -546,6 +617,89 @@
 .bannerArrow {
   font-size: 1.7rem;
 }
+
+/* Grouped board: "Actually Happening" (trips) / "Not Decided Yet, loudly
+   hoped for" (manifests) — each section uses ONE uniform card color, with
+   a StatusStamp badge carrying the actual status label. */
+.boardGroup {
+  margin-top: 40px;
+}
+.boardGroup:first-child {
+  margin-top: 0;
+}
+.boardGroupHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 12px;
+}
+.boardGroupHead h3 {
+  font-size: clamp(1.3rem, 2.6vw, 1.85rem);
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.boardGroupHead span {
+  font-size: 0.6rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.boardGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.boardCard {
+  min-height: 124px;
+  border: 1.5px solid var(--ink);
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  color: var(--ink);
+  text-decoration: none;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.boardCard:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.boardCardHappening {
+  background: var(--acid);
+}
+.boardCardHoped {
+  background: var(--paper);
+  border-style: dashed;
+}
+.boardCardMain {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.boardCardMain small {
+  font-size: 0.56rem;
+  opacity: 0.72;
+}
+.boardCardMain strong {
+  font-size: clamp(1.1rem, 1.8vw, 1.55rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+.boardCardMain em {
+  font-style: normal;
+  font-size: 0.68rem;
+  opacity: 0.78;
+}
+.boardEmptyGroup {
+  font-size: 0.62rem;
+  color: var(--muted);
+  border: 1.5px dashed var(--line);
+  padding: 16px;
+  text-align: center;
+}
 .quietBanner {
   width: 100%;
   margin-top: 10px;
@@ -777,6 +931,9 @@
   .planBoard {
     grid-template-columns: 1fr;
   }
+  .boardGrid {
+    grid-template-columns: 1fr;
+  }
   .manifesto {
     grid-template-columns: 1fr;
   }
@@ -796,10 +953,11 @@
   }
   .profileHero {
     min-height: auto;
-    padding: 56px 0 38px;
+    padding: 30px 0 26px;
   }
   .heroTitle {
-    font-size: clamp(4rem, 22vw, 7rem);
+    margin: 14px 0 16px;
+    font-size: clamp(2.6rem, 12.5vw, 4rem);
   }
   .outline {
     margin-left: 0;
@@ -855,15 +1013,10 @@
   }
   .mobileShare {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 24px 0 0;
-  }
-  .mobileShare .share {
-    background: var(--ink);
-    color: var(--paper);
-    width: 100%;
-    padding: 13px 14px;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 0 0;
   }
   .mobileShare span {
     font-size: 0.55rem;
@@ -871,7 +1024,17 @@
   }
   .collectionHead {
     grid-template-columns: 1fr;
-    padding-top: 55px;
+    padding-top: 40px;
+  }
+  .boardGroup {
+    margin-top: 26px;
+  }
+  .boardGroupHead {
+    margin-bottom: 8px;
+  }
+  .boardCard {
+    min-height: 96px;
+    padding: 11px 12px;
   }
   .boardShell {
     padding: 10px;
@@ -919,15 +1082,10 @@
   }
   .storyAction {
     margin-top: 24px;
-    display: grid;
-    gap: 10px;
+    justify-content: space-between;
   }
   .storyNote {
     font-size: 0.55rem;
-  }
-  .storyButton {
-    width: 100%;
-    padding: 13px 14px;
   }
   .manifesto {
     margin-top: 30px;

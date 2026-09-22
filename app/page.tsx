@@ -16,7 +16,7 @@ export default async function LandingPage() {
     <SiteShell member={member}>
       <main id="top" className={styles.heroPage}>
         {/* Hero */}
-        <section className={styles.profileHero}>
+        <section className={`${styles.profileHero} ${styles.profileHeroSolo}`}>
           <div>
             <div className={`${styles.kicker} mono`}>{t(locale, "landing.kicker")}</div>
             <h1 className={styles.heroTitle}>
@@ -27,21 +27,15 @@ export default async function LandingPage() {
               <span className={`${styles.introNumber} mono`}>01</span>
               <p>{t(locale, "landing.intro")}</p>
             </div>
-            <div style={{ marginTop: "32px" }}>
-              <Link href="/kanom" className={styles.cta}>
+            <div className={styles.ctaRow}>
+              <Link href="/sign-up" className={styles.cta}>
+                {t(locale, "landing.signUp")}
+              </Link>
+              <Link href="/kanom" className={styles.ctaSecondary}>
                 {t(locale, "landing.seeKanomsPlans")}
               </Link>
             </div>
           </div>
-          <aside className={styles.passport} aria-label="About SYLON">
-            <span className={`${styles.passportLabel} mono`}>{t(locale, "landing.firstStop")}</span>
-            <span className={styles.passportCount}>K.</span>
-            <span className={styles.passportCopy}>{t(locale, "landing.passportCopy")}</span>
-            <div className={`${styles.passportMeta} mono`}>
-              <span>{t(locale, "landing.bangkokBased")}</span>
-              <span>{t(locale, "landing.since2026")}</span>
-            </div>
-          </aside>
         </section>
 
         {/* Manifesto */}

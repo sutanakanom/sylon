@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Item } from "@/lib/types";
 import { drawItemStoryCard, drawOverviewStoryCard, shareOrDownloadImage } from "@/lib/story-canvas";
 import { useT } from "@/components/LocaleProvider";
+import { InstagramIcon } from "@/components/InstagramIcon";
 
 // "Capture or share this on story" — generates an IG-Story-ready image of
 // whichever carousel card is currently showing: the single item's own card
@@ -18,6 +19,7 @@ export function CaptureCardButton({
   items,
   className,
   label,
+  iconOnly,
   onToast,
 }: {
   activeItem: Item | null;
@@ -25,6 +27,7 @@ export function CaptureCardButton({
   items: Item[];
   className?: string;
   label?: string;
+  iconOnly?: boolean;
   onToast?: (message: string) => void;
 }) {
   const { t } = useT();
@@ -52,8 +55,14 @@ export function CaptureCardButton({
   }
 
   return (
-    <button type="button" className={className} onClick={handleCapture} disabled={working}>
-      {working ? t("share.makingCard") : buttonLabel}
+    <button
+      type="button"
+      className={className}
+      onClick={handleCapture}
+      disabled={working}
+      aria-label={iconOnly ? buttonLabel : undefined}
+    >
+      {iconOnly ? <InstagramIcon /> : working ? t("share.makingCard") : buttonLabel}
     </button>
   );
 }

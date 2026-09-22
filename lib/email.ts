@@ -62,3 +62,32 @@ export async function sendInviteRequestNotification(
 
   return { sent: true };
 }
+
+export async function sendSignupRequestNotification(
+  adminEmails: string[],
+  request: { email: string }
+) {
+  if (!resend || adminEmails.length === 0) {
+    console.warn(
+      `RESEND_API_KEY or ADMIN_EMAILS not set — would have notified admins of signup request from ${request.email}`
+    );
+    return { sent: false };
+  }
+
+  await resend.emails.send({
+    from: FROM,
+    to: adminEmails,
+    replyTo: request.email,
+    subject: `SYLON: ${request.email} wants to sign up`,
+    text: `${request.email} signed up on the landing page.\n\nHead to sylater.app/admin to approve or decline.`,
+    html: `
+      <div style="font-family: monospace; background:#F3F0E8; color:#11110F; padding: 32px;">
+        <p style="text-transform:uppercase; letter-spacing:0.08em; font-size:12px; color:#716F68;">New signup request</p>
+        <p style="font-size:20px; font-weight:700; margin: 8px 0 24px;">${request.email}</p>
+        <p style="font-size:14px; color:#716F68;">Approve or decline from sylater.app/admin</p>
+      </div>
+    `,
+  });
+
+  return { sent: true };
+}

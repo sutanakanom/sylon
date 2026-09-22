@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { Item } from "@/lib/types";
-import { labelFor } from "@/components/StatusStamp";
+import { labelFor, StatusStamp } from "@/components/StatusStamp";
 import { ShareOverallButton } from "@/components/ShareOverallButton";
 import { CaptureCardButton } from "./CaptureCardButton";
 import { requestInviteAccess } from "@/app/actions/invite-request";
@@ -17,7 +17,6 @@ import styles from "../SylonDesign.module.css";
 // the carousel, dialog and toast all need client-side state.
 
 const SNAPSHOT_COLORS = [styles.darkCard, styles.acidCard, styles.orangeCard, styles.paperCard];
-const BANNER_COLORS = [styles.bannerDark, styles.bannerAcid, styles.bannerOrange, styles.bannerPaper];
 
 export function PersonalPageBody({
   items,
@@ -33,8 +32,10 @@ export function PersonalPageBody({
   showInviteCta: boolean;
 }) {
   const { t, tn, locale } = useT();
-  const tripCount = items.filter((i) => i.kind === "trip").length;
-  const manifestCount = items.filter((i) => i.kind === "manifest").length;
+  const trips = items.filter((i) => i.kind === "trip");
+  const manifests = items.filter((i) => i.kind === "manifest");
+  const tripCount = trips.length;
+  const manifestCount = manifests.length;
 
   // --- Carousel -----------------------------------------------------
   const trackRef = useRef<HTMLDivElement>(null);
@@ -161,8 +162,9 @@ export function PersonalPageBody({
                 activeItem={activeItem}
                 displayName={displayName}
                 items={items}
-                className={`${styles.share} mono`}
+                className={styles.iconButton}
                 label={captureShareLabel}
+                iconOnly
                 onToast={showToast}
               />
               <span className="mono">{t("personalPage.captureHintDesktop")}</span>
@@ -270,8 +272,9 @@ export function PersonalPageBody({
               activeItem={activeItem}
               displayName={displayName}
               items={items}
-              className={`${styles.share} mono`}
+              className={styles.iconButton}
               label={captureShareLabel}
+              iconOnly
               onToast={showToast}
             />
             <span className="mono">{t("personalPage.captureHintMobile")}</span>
@@ -293,26 +296,59 @@ export function PersonalPageBody({
               <span>{t("personalPage.departures", { name: displayName })}</span>
               <span>{t("personalPage.bangkokWherever")}</span>
             </div>
-            <div className={styles.planBoard}>
-              {items.map((item, index) => (
-                <Link
-                  key={item.id}
-                  href={`/${item.kind === "trip" ? "trip" : "manifest"}/${item.slug}`}
-                  className={`${styles.planBanner} ${BANNER_COLORS[index % BANNER_COLORS.length]}`}
-                >
-                  <span className={`${styles.bannerNo} mono`}>{String(index + 1).padStart(2, "0")}</span>
-                  <span className={styles.bannerMain}>
-                    <small className="mono">
-                      {kindLabel(item, locale)} · {labelFor(item, locale)} · {item.roughDate}
-                    </small>
-                    <strong>{item.title}</strong>
-                    <em>{whereText(item, locale)}</em>
-                  </span>
-                  <span className={styles.bannerArrow} aria-hidden="true">
-                    ↗
-                  </span>
-                </Link>
-              ))}
+
+            <div className={styles.boardGroup}>
+              <div className={styles.boardGroupHead}>
+                <h3>{t("personalPage.actuallyHappening")}</h3>
+                <span className="mono">{tn(tripCount, { one: "trip", other: "trips" }, "ทริป")}</span>
+              </div>
+              {trips.length === 0 ? (
+                <p className={`${styles.boardEmptyGroup} mono`}>{t("personalPage.noTripsYet")}</p>
+              ) : (
+                <div className={styles.boardGrid}>
+                  {trips.map((item) => (
+                    <Link
+                      key={item.id}
+                      href={`/trip/${item.slug}`}
+                      className={`${styles.boardCard} ${styles.boardCardHappening}`}
+                    >
+                      <span className={styles.boardCardMain}>
+                        <small className="mono">{item.roughDate}</small>
+                        <strong>{item.title}</strong>
+                        <em>{whereText(item, locale)}</em>
+                      </span>
+                      <StatusStamp item={item} size="sm" />
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className={styles.boardGroup}>
+              <div className={styles.boardGroupHead}>
+                <h3>{t("personalPage.notDecidedYet")}</h3>
+                <span className="mono">{tn(manifestCount, { one: "manifest", other: "manifests" }, "แมนิเฟสต์")}</span>
+              </div>
+              {manifests.length === 0 ? (
+                <p className={`${styles.boardEmptyGroup} mono`}>{t("personalPage.noManifestsYet")}</p>
+              ) : (
+                <div className={styles.boardGrid}>
+                  {manifests.map((item) => (
+                    <Link
+                      key={item.id}
+                      href={`/manifest/${item.slug}`}
+                      className={`${styles.boardCard} ${styles.boardCardHoped}`}
+                    >
+                      <span className={styles.boardCardMain}>
+                        <small className="mono">{item.roughDate}</small>
+                        <strong>{item.title}</strong>
+                        <em>{whereText(item, locale)}</em>
+                      </span>
+                      <StatusStamp item={item} size="sm" />
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
 
             {isOwner ? (
@@ -348,7 +384,8 @@ export function PersonalPageBody({
             <ShareOverallButton
               displayName={displayName}
               items={items}
-              className={`${styles.storyButton} mono`}
+              className={`${styles.iconButton} ${styles.iconButtonDark}`}
+              iconOnly
               onToast={showToast}
             />
           </div>

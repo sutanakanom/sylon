@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getCurrentMember } from "@/lib/current-member";
-import { listMembers, listInviteRequests } from "@/app/actions/admin";
+import { listMembers, listInviteRequests, listSignupRequests } from "@/app/actions/admin";
 import { SiteShell } from "@/components/SiteShell";
 import { AdminPanel } from "./AdminPanel";
 
@@ -8,7 +8,11 @@ export default async function AdminPage() {
   const member = await getCurrentMember();
   if (!member?.isAdmin) notFound();
 
-  const [members, requests] = await Promise.all([listMembers(), listInviteRequests()]);
+  const [members, requests, signupRequests] = await Promise.all([
+    listMembers(),
+    listInviteRequests(),
+    listSignupRequests(),
+  ]);
 
   return (
     <SiteShell member={member} centerLabel="Admin">
@@ -17,7 +21,11 @@ export default async function AdminPage() {
         <p className="mb-10 text-sm leading-snug text-muted">
           Invite someone by email, send a fresh code, or turn off an account&apos;s access.
         </p>
-        <AdminPanel initialMembers={members} initialRequests={requests} />
+        <AdminPanel
+          initialMembers={members}
+          initialRequests={requests}
+          initialSignupRequests={signupRequests}
+        />
       </div>
     </SiteShell>
   );

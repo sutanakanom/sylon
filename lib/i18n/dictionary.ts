@@ -94,6 +94,7 @@ export const dictionary = {
       th: "พื้นที่สำหรับแชร์ทริปที่กำลังวางแผนจริงจัง — และทริปที่ยังเป็นแค่ \"อาจจะ\"",
     },
     seeKanomsPlans: { en: "See Kanom's plans ↗", th: "ดูแผนของ Kanom ↗" },
+    signUp: { en: "Sign up", th: "สมัครสมาชิก" },
     firstStop: { en: "First stop", th: "จุดแรก" },
     passportCopy: {
       en: "Kanom's the only host here so far — more may join later.",
@@ -131,6 +132,10 @@ export const dictionary = {
       th: "หน้าจอเดียว รวมทุก \"อาจจะ\" บันทึก ส่งต่อ หรือใส่ลง IG Story ได้เลย",
     },
     nothingPublicYet: { en: "Nothing public yet — check back soon.", th: "ยังไม่มีแผนสาธารณะ — กลับมาดูใหม่เร็ว ๆ นี้" },
+    actuallyHappening: { en: "Actually happening", th: "กำลังเกิดขึ้นจริง" },
+    notDecidedYet: { en: "Not decided yet, loudly hoped for", th: "ยังไม่ตัดสินใจ แต่หวังไว้ดัง ๆ" },
+    noTripsYet: { en: "No trips confirmed yet.", th: "ยังไม่มีทริปที่ยืนยันแล้ว" },
+    noManifestsYet: { en: "No manifests yet.", th: "ยังไม่มีแมนิเฟสต์" },
     departures: { en: "{name}'s departures", th: "เที่ยวบินของ {name}" },
     bangkokWherever: { en: "Bangkok → wherever", th: "กรุงเทพฯ → ที่ไหนก็ได้" },
     addPlan: { en: "+ Add a plan", th: "+ เพิ่มแผน" },
@@ -191,6 +196,24 @@ export const dictionary = {
     checking: { en: "Checking…", th: "กำลังตรวจสอบ…" },
     seeYou: { en: "See you →", th: "แล้วเจอกัน →" },
     useDifferentEmail: { en: "Use a different email", th: "ใช้อีเมลอื่น" },
+  }),
+
+  signUp: dict({
+    title: { en: "Sign up", th: "สมัครสมาชิก" },
+    subtitle: {
+      en: "Leave your email — Kanom reviews every request personally before an account is created.",
+      th: "ฝากอีเมลไว้ — Kanom จะตรวจสอบทุกคำขอด้วยตัวเองก่อนสร้างบัญชีให้คุณ",
+    },
+    yourEmail: { en: "Your email", th: "อีเมลของคุณ" },
+    submit: { en: "Request access", th: "ขอสิทธิ์เข้าใช้งาน" },
+    sending: { en: "Sending…", th: "กำลังส่ง…" },
+    successTitle: { en: "Signal sent.", th: "ส่งสัญญาณแล้ว" },
+    successBody: {
+      en: "Kanom will review your request and follow up by email if it's a match.",
+      th: "Kanom จะตรวจสอบคำขอของคุณ และจะติดต่อกลับทางอีเมลหากเหมาะสม",
+    },
+    alreadyHaveCode: { en: "Already have a code?", th: "มีรหัสอยู่แล้วใช่ไหม?" },
+    signInLink: { en: "Sign in →", th: "เข้าสู่ระบบ →" },
   }),
 
   profile: dict({

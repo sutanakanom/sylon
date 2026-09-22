@@ -29,6 +29,12 @@ export interface AdminInviteRequestRow {
   createdAt: string;
 }
 
+export interface AdminSignupRequestRow {
+  id: string;
+  email: string;
+  createdAt: string;
+}
+
 export async function listInviteRequests(): Promise<AdminInviteRequestRow[]> {
   await requireAdmin();
   if (!isSupabaseAdminConfigured || !supabaseAdmin) return [];
@@ -70,6 +76,49 @@ export async function dismissInviteRequest(requestId: string): Promise<AdminActi
     return { ok: false, error: "Not configured." };
   }
   await supabaseAdmin.from("invite_requests").update({ handled: true }).eq("id", requestId);
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+export async function listSignupRequests(): Promise<AdminSignupRequestRow[]> {
+  await requireAdmin();
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) return [];
+
+  const { data } = await supabaseAdmin
+    .from("signup_requests")
+    .select("id, email, created_at")
+    .eq("handled", false)
+    .order("created_at", { ascending: false });
+
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    email: r.email,
+    createdAt: r.created_at,
+  }));
+}
+
+// Same one-click "approve" pattern as approveInviteRequest — sends the
+// invite code and marks the request handled in one step.
+export async function approveSignupRequest(requestId: string, email: string): Promise<AdminActionResult> {
+  await requireAdmin();
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return { ok: false, error: "Not configured." };
+  }
+
+  const result = await generateAndSendInviteCode(email.trim().toLowerCase());
+  if (result.ok) {
+    await supabaseAdmin.from("signup_requests").update({ handled: true }).eq("id", requestId);
+  }
+  revalidatePath("/admin");
+  return result;
+}
+
+export async function dismissSignupRequest(requestId: string): Promise<AdminActionResult> {
+  await requireAdmin();
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return { ok: false, error: "Not configured." };
+  }
+  await supabaseAdmin.from("signup_requests").update({ handled: true }).eq("id", requestId);
   revalidatePath("/admin");
   return { ok: true };
 }
