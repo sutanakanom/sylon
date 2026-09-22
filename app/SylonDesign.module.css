@@ -70,7 +70,10 @@
   justify-self: end;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 14px;
+  row-gap: 6px;
 }
 .profileChip {
   display: flex;
@@ -117,6 +120,16 @@
   font-size: 0.62rem;
   color: var(--muted);
   cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* Functional nav links (My Plan / + Add a Plan / Admin) — same look as
+   .signout but never hidden on mobile the way .signout's "Sign out" text
+   is, since these are the only way to reach those pages. */
+.navLink {
+  padding: 7px 0;
+  font-size: 0.62rem;
+  color: var(--muted);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -941,7 +954,14 @@
 
 @media (max-width: 640px) {
   .shell nav {
-    height: 68px;
+    height: auto;
+    min-height: 68px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .navActions {
+    gap: 10px;
+    row-gap: 8px;
   }
   .profileText,
   .signout {

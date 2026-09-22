@@ -34,16 +34,16 @@ export function SiteNav({
           <>
             {member.handle && (
               <>
-                <Link href={`/${member.handle}`} className={`${styles.signout} mono`}>
+                <Link href={`/${member.handle}`} className={`${styles.navLink} mono`}>
                   {t("nav.myPage")}
                 </Link>
-                <Link href="/new" className={`${styles.signout} mono`}>
+                <Link href="/new" className={`${styles.navLink} mono`}>
                   {t("nav.addPlan")}
                 </Link>
               </>
             )}
             {member.isAdmin && (
-              <Link href="/admin" className={`${styles.signout} mono`}>
+              <Link href="/admin" className={`${styles.navLink} mono`}>
                 {t("nav.admin")}
               </Link>
             )}
