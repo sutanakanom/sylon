@@ -166,28 +166,6 @@ export default async function TripDetailPage({
           </div>
         </div>
         <aside>
-          {item.readinessPercent !== null && (
-            <div className={`${styles.sideCard} ${styles.sideCardAcid}`}>
-              <span className={`${styles.mini} mono`}>{t(locale, "tripDetail.readyMeter")}</span>
-              <h3>
-                {item.readinessPercent >= 80
-                  ? t(locale, "tripDetail.mostlySorted")
-                  : item.readinessPercent >= 40
-                    ? t(locale, "tripDetail.mostlyRealSlightlyChaotic")
-                    : t(locale, "tripDetail.stillADream")}
-              </h3>
-              <div className={styles.progressTrack}>
-                <span className={styles.progressFill} style={{ width: `${item.readinessPercent}%` }} />
-              </div>
-              <div className={`${styles.mini} mono`}>
-                {t(locale, "tripDetail.sortedFutureProblem", {
-                  sorted: item.readinessPercent,
-                  left: 100 - item.readinessPercent,
-                  name: ownerDisplay,
-                })}
-              </div>
-            </div>
-          )}
           {item.checklist.length > 0 && (
             <div className={styles.sideCard}>
               <span className={`${styles.mini} mono`}>{t(locale, "tripDetail.beforeWeGo")}</span>

@@ -75,7 +75,7 @@ export function activitySummary(item: Item, locale: Locale = "en"): string {
 
 // --- Detail-page helpers (trip/manifest hero poster + timeline) --------
 
-const MONTHS = [
+export const MONTHS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
@@ -90,16 +90,42 @@ function formatDayWithYear(isoDate: string): string {
   return `${formatDay(isoDate)} ${year}`;
 }
 
-// "28 Nov — 04 Dec 2026" from the trip's full leg list, earliest start to
-// latest end. Falls back to the rough date when there are no legs yet.
-export function formatDateRange(item: Trip): string {
-  if (item.legs.length === 0) return item.roughDate;
-  const starts = item.legs.map((l) => l.startDate).sort();
-  const ends = item.legs.map((l) => l.endDate).sort();
+// "28 Nov — 04 Dec 2026" from a plain list of {startDate, endDate} —
+// earliest start to latest end. Used both for the trip detail page (via
+// formatDateRange below) and server-side when a create/edit action needs
+// to derive a rough_date string straight from submitted legs, without a
+// full Trip object.
+export function formatLegsDateRange(legs: { startDate: string; endDate: string }[]): string {
+  if (legs.length === 0) return "";
+  const starts = legs.map((l) => l.startDate).sort();
+  const ends = legs.map((l) => l.endDate).sort();
   const start = starts[0];
   const end = ends[ends.length - 1];
   if (start === end) return formatDayWithYear(start);
   return `${formatDay(start)} — ${formatDayWithYear(end)}`;
+}
+
+// Same, for a trip already loaded from the database — falls back to the
+// stored rough date when there are no legs yet.
+export function formatDateRange(item: Trip): string {
+  if (item.legs.length === 0) return item.roughDate;
+  return formatLegsDateRange(item.legs);
+}
+
+// Unique, in-order country list straight from a trip's legs — the trip's
+// "countries" field is now always derived from this rather than typed in
+// separately.
+export function countriesFromLegs(legs: { country: string }[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const leg of legs) {
+    const country = leg.country.trim();
+    if (country && !seen.has(country)) {
+      seen.add(country);
+      result.push(country);
+    }
+  }
+  return result;
 }
 
 // "Hong Kong → Shenzhen" — the leg places in order, for the poster's

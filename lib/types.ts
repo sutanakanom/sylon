@@ -23,6 +23,7 @@ export const MANIFEST_LABEL: Record<ManifestStatus, string> = {
 
 export interface Leg {
   place: string;
+  country: string;
   startDate: string; // ISO date
   endDate: string; // ISO date
 }

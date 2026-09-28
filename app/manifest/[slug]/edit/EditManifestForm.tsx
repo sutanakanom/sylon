@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { updateManifest } from "@/app/actions/items";
+import { updateManifest, deleteManifest } from "@/app/actions/items";
 import { Manifest, SignalItem, Visibility } from "@/lib/types";
 import { useT } from "@/components/LocaleProvider";
 
@@ -43,6 +43,7 @@ export function EditManifestForm({ item }: { item: Manifest }) {
 
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [isDeleting, startDeleteTransition] = useTransition();
 
   function addSignal() {
     if (!signalTitleDraft.trim()) return;
@@ -101,6 +102,20 @@ export function EditManifestForm({ item }: { item: Manifest }) {
       }
 
       router.push(`/manifest/${result.slug}`);
+      router.refresh();
+    });
+  }
+
+  function handleDelete() {
+    if (!window.confirm(t("manifestEdit.deleteConfirm"))) return;
+    setError(null);
+    startDeleteTransition(async () => {
+      const result = await deleteManifest(item.id, item.slug);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      router.push(`/${item.ownerHandle}`);
       router.refresh();
     });
   }
@@ -393,6 +408,14 @@ export function EditManifestForm({ item }: { item: Manifest }) {
           className="mono-label border-[1.5px] border-ink px-6 py-3 text-[0.75rem]"
         >
           {t("manifestEdit.cancel")}
+        </button>
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="mono-label ml-auto border-[1.5px] border-ink px-6 py-3 text-[0.75rem] text-orange disabled:opacity-50"
+        >
+          {isDeleting ? t("manifestEdit.deleting") : t("manifestEdit.delete")}
         </button>
       </div>
     </form>

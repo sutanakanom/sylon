@@ -490,6 +490,7 @@ export async function convertToTrip(manifestId: string, manifestSlug: string) {
       legs: [
         {
           place: manifestRow.decided_country,
+          country: manifestRow.decided_country,
           startDate: manifestRow.target_start_date,
           endDate: manifestRow.target_end_date,
         },

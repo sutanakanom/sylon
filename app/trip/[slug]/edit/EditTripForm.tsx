@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { updateTrip } from "@/app/actions/items";
+import { updateTrip, deleteTrip } from "@/app/actions/items";
 import { ChecklistItem, Leg, Trip, TripStatus, Visibility } from "@/lib/types";
 import { useT } from "@/components/LocaleProvider";
 
@@ -15,22 +15,18 @@ export function EditTripForm({ item }: { item: Trip }) {
   const { t } = useT();
 
   const [title, setTitle] = useState(item.title);
-  const [roughDate, setRoughDate] = useState(item.roughDate);
-  const [countries, setCountries] = useState(item.countries.join(", "));
   const [summary, setSummary] = useState(item.summary);
   const [visibility, setVisibility] = useState<Visibility>(item.visibility);
   const [status, setStatus] = useState<TripStatus>(item.status);
 
   const [legs, setLegs] = useState<Leg[]>(item.legs);
   const [legPlaceDraft, setLegPlaceDraft] = useState("");
+  const [legCountryDraft, setLegCountryDraft] = useState("");
   const [legStartDraft, setLegStartDraft] = useState("");
   const [legEndDraft, setLegEndDraft] = useState("");
 
   const [companionName, setCompanionName] = useState(item.companionName ?? "");
   const [mainEvent, setMainEvent] = useState(item.mainEvent ?? "");
-  const [readinessPercent, setReadinessPercent] = useState(
-    item.readinessPercent !== null ? String(item.readinessPercent) : ""
-  );
 
   const [checklist, setChecklist] = useState<ChecklistItem[]>(item.checklist);
   const [checklistDraft, setChecklistDraft] = useState("");
@@ -40,14 +36,21 @@ export function EditTripForm({ item }: { item: Trip }) {
 
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [isDeleting, startDeleteTransition] = useTransition();
 
   function addLeg() {
-    if (!legPlaceDraft.trim()) return;
+    if (!legPlaceDraft.trim() || !legCountryDraft.trim()) return;
     setLegs((prev) => [
       ...prev,
-      { place: legPlaceDraft.trim(), startDate: legStartDraft, endDate: legEndDraft },
+      {
+        place: legPlaceDraft.trim(),
+        country: legCountryDraft.trim(),
+        startDate: legStartDraft,
+        endDate: legEndDraft,
+      },
     ]);
     setLegPlaceDraft("");
+    setLegCountryDraft("");
     setLegStartDraft("");
     setLegEndDraft("");
   }
@@ -71,15 +74,8 @@ export function EditTripForm({ item }: { item: Trip }) {
     setError(null);
 
     startTransition(async () => {
-      const countryList = countries
-        .split(",")
-        .map((c) => c.trim())
-        .filter(Boolean);
-
       const result = await updateTrip(item.id, item.slug, {
         title,
-        roughDate,
-        countries: countryList,
         legs,
         summary,
         visibility,
@@ -87,7 +83,6 @@ export function EditTripForm({ item }: { item: Trip }) {
         companionName,
         mainEvent,
         checklist,
-        readinessPercent: readinessPercent.trim() ? Number(readinessPercent) : null,
         noteQuote,
         noteAuthor,
       });
@@ -98,6 +93,20 @@ export function EditTripForm({ item }: { item: Trip }) {
       }
 
       router.push(`/trip/${result.slug}`);
+      router.refresh();
+    });
+  }
+
+  function handleDelete() {
+    if (!window.confirm(t("tripEdit.deleteConfirm"))) return;
+    setError(null);
+    startDeleteTransition(async () => {
+      const result = await deleteTrip(item.id, item.slug);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      router.push(`/${item.ownerHandle}`);
       router.refresh();
     });
   }
@@ -113,27 +122,6 @@ export function EditTripForm({ item }: { item: Trip }) {
           onChange={(e) => setTitle(e.target.value)}
           className={inputClass}
         />
-      </label>
-
-      <label className="flex flex-col gap-2">
-        <span className={labelClass}>{t("tripEdit.roughTiming")}</span>
-        <input
-          type="text"
-          value={roughDate}
-          onChange={(e) => setRoughDate(e.target.value)}
-          className={inputClass}
-        />
-      </label>
-
-      <label className="flex flex-col gap-2">
-        <span className={labelClass}>{t("tripEdit.countries")}</span>
-        <input
-          type="text"
-          value={countries}
-          onChange={(e) => setCountries(e.target.value)}
-          className={inputClass}
-        />
-        <span className="text-xs text-muted">{t("tripEdit.countriesHint")}</span>
       </label>
 
       <label className="flex flex-col gap-2">
@@ -184,6 +172,7 @@ export function EditTripForm({ item }: { item: Trip }) {
               >
                 <div>
                   <strong>{leg.place}</strong>
+                  {leg.country && <span className="ml-2 text-muted">{leg.country}</span>}
                   {(leg.startDate || leg.endDate) && (
                     <span className="ml-2 text-muted">
                       {leg.startDate} → {leg.endDate}
@@ -202,13 +191,22 @@ export function EditTripForm({ item }: { item: Trip }) {
           </ul>
         )}
         <div className="flex flex-col gap-2 border-[1.5px] border-ink p-4">
-          <input
-            type="text"
-            value={legPlaceDraft}
-            onChange={(e) => setLegPlaceDraft(e.target.value)}
-            placeholder={t("tripEdit.legPlacePlaceholder")}
-            className={inputClass}
-          />
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={legPlaceDraft}
+              onChange={(e) => setLegPlaceDraft(e.target.value)}
+              placeholder={t("tripEdit.legPlacePlaceholder")}
+              className={`${inputClass} flex-1`}
+            />
+            <input
+              type="text"
+              value={legCountryDraft}
+              onChange={(e) => setLegCountryDraft(e.target.value)}
+              placeholder={t("tripEdit.legCountryPlaceholder")}
+              className={`${inputClass} flex-1`}
+            />
+          </div>
           <div className="flex gap-2">
             <input
               type="date"
@@ -256,17 +254,6 @@ export function EditTripForm({ item }: { item: Trip }) {
               />
             </label>
           </div>
-          <label className="flex flex-col gap-2">
-            <span className={labelClass}>{t("tripEdit.readyMeter")}</span>
-            <input
-              type="number"
-              min={0}
-              max={100}
-              value={readinessPercent}
-              onChange={(e) => setReadinessPercent(e.target.value)}
-              className={inputClass}
-            />
-          </label>
         </div>
       </div>
 
@@ -349,6 +336,14 @@ export function EditTripForm({ item }: { item: Trip }) {
           className="mono-label border-[1.5px] border-ink px-6 py-3 text-[0.75rem]"
         >
           {t("tripEdit.cancel")}
+        </button>
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="mono-label ml-auto border-[1.5px] border-ink px-6 py-3 text-[0.75rem] text-orange disabled:opacity-50"
+        >
+          {isDeleting ? t("tripEdit.deleting") : t("tripEdit.delete")}
         </button>
       </div>
     </form>

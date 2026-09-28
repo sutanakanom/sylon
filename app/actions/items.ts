@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { supabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabase-admin";
 import { getCurrentMember } from "@/lib/current-member";
 import { TripStatus, Visibility, ChecklistItem, SignalItem } from "@/lib/types";
+import { formatLegsDateRange, countriesFromLegs, MONTHS } from "@/lib/item-display";
 
 function slugify(text: string): string {
   const base = text
@@ -50,18 +51,28 @@ async function requireHost() {
 
 export type CreateItemResult = { ok: true; slug: string } | { ok: false; error: string };
 
+export interface TripLegInput {
+  place: string;
+  country: string;
+  startDate: string;
+  endDate: string;
+}
+
+// A leg only counts once every field on it is filled in — a half-typed
+// stop shouldn't silently make it into countries/rough_date.
+function validLegs(legs: TripLegInput[]): TripLegInput[] {
+  return legs.filter((l) => l.place.trim() && l.country.trim() && l.startDate && l.endDate);
+}
+
 export interface CreateTripInput {
   title: string;
-  roughDate: string;
-  countries: string[];
-  legs: { place: string; startDate: string; endDate: string }[];
+  legs: TripLegInput[];
   summary: string;
   visibility: Visibility;
   status: TripStatus;
   companionName: string;
   mainEvent: string;
   checklist: ChecklistItem[];
-  readinessPercent: number | null;
   noteQuote: string;
   noteAuthor: string;
 }
@@ -73,6 +84,11 @@ export async function createTrip(input: CreateTripInput): Promise<CreateItemResu
   }
   if (!input.title.trim()) return { ok: false, error: "Give it a title." };
 
+  const legs = validLegs(input.legs);
+  if (legs.length === 0) {
+    return { ok: false, error: "Add at least one stop with a place, country and dates." };
+  }
+
   const slug = await uniqueSlug(slugify(input.title));
 
   const { error } = await supabaseAdmin.from("trips").insert({
@@ -81,15 +97,15 @@ export async function createTrip(input: CreateTripInput): Promise<CreateItemResu
     status: input.status,
     visibility: input.visibility,
     owner_handle: host.handle,
-    rough_date: input.roughDate.trim() || "Sometime",
-    countries: input.countries.map((c) => c.trim()).filter(Boolean),
-    legs: input.legs.filter((l) => l.place.trim()),
+    rough_date: formatLegsDateRange(legs) || "Sometime",
+    countries: countriesFromLegs(legs),
+    legs,
     summary: input.summary.trim(),
     member_count: 1,
     companion_name: input.companionName.trim() || null,
     main_event: input.mainEvent.trim() || null,
     checklist: input.checklist.filter((c) => c.label.trim()),
-    readiness_percent: input.readinessPercent,
+    readiness_percent: null,
     note_quote: input.noteQuote.trim() || null,
     note_author: input.noteAuthor.trim() || null,
   });
@@ -136,10 +152,16 @@ export async function toggleChecklistItem(
   return { ok: true, slug };
 }
 
+export type ManifestDateMode = "exact" | "rough";
+
 export interface CreateManifestInput {
   title: string;
   purpose: string;
-  roughDate: string;
+  dateMode: ManifestDateMode;
+  startDate: string; // used when dateMode === "exact"
+  endDate: string;
+  roughMonth: string; // "1".."12", or "" for "any month" — used when dateMode === "rough"
+  roughYear: string;
   countryOptions: string[];
   summary: string;
   visibility: Visibility;
@@ -147,6 +169,35 @@ export interface CreateManifestInput {
   realityFundPercent: number | null;
   noteQuote: string;
   noteAuthor: string;
+}
+
+// Turns the date-mode fields into the rough_date text shown to visitors,
+// plus (when the dates are exact) the target_start_date/target_end_date
+// that gate "Convert to trip." A rough month+year with no exact dates
+// leaves both target dates unset — that's still Open, not Known.
+function resolveManifestDates(input: CreateManifestInput): {
+  roughDate: string;
+  targetStartDate: string | null;
+  targetEndDate: string | null;
+} {
+  if (input.dateMode === "exact" && input.startDate && input.endDate) {
+    return {
+      roughDate: formatLegsDateRange([{ startDate: input.startDate, endDate: input.endDate }]),
+      targetStartDate: input.startDate,
+      targetEndDate: input.endDate,
+    };
+  }
+
+  const year = input.roughYear.trim();
+  const monthIndex = input.roughMonth ? Number(input.roughMonth) : null;
+  let roughDate = "Sometime";
+  if (monthIndex && monthIndex >= 1 && monthIndex <= 12 && year) {
+    roughDate = `${MONTHS[monthIndex - 1]} ${year}`;
+  } else if (year) {
+    roughDate = year;
+  }
+
+  return { roughDate, targetStartDate: null, targetEndDate: null };
 }
 
 export async function createManifest(input: CreateManifestInput): Promise<CreateItemResult> {
@@ -157,6 +208,7 @@ export async function createManifest(input: CreateManifestInput): Promise<Create
   if (!input.title.trim()) return { ok: false, error: "Give it a title." };
 
   const slug = await uniqueSlug(slugify(input.title));
+  const { roughDate, targetStartDate, targetEndDate } = resolveManifestDates(input);
 
   const { error } = await supabaseAdmin.from("manifests").insert({
     slug,
@@ -164,7 +216,7 @@ export async function createManifest(input: CreateManifestInput): Promise<Create
     status: "open",
     visibility: input.visibility,
     owner_handle: host.handle,
-    rough_date: input.roughDate.trim() || "Sometime",
+    rough_date: roughDate,
     country_votes: input.countryOptions
       .map((c) => c.trim())
       .filter(Boolean)
@@ -176,6 +228,8 @@ export async function createManifest(input: CreateManifestInput): Promise<Create
     note_quote: input.noteQuote.trim() || null,
     note_author: input.noteAuthor.trim() || null,
     purpose: input.purpose.trim() || null,
+    target_start_date: targetStartDate,
+    target_end_date: targetEndDate,
   });
 
   if (error) {
@@ -197,16 +251,13 @@ async function requireItemOwner(ownerHandle: string) {
 
 export interface UpdateTripInput {
   title: string;
-  roughDate: string;
-  countries: string[];
-  legs: { place: string; startDate: string; endDate: string }[];
+  legs: TripLegInput[];
   summary: string;
   visibility: Visibility;
   status: TripStatus;
   companionName: string;
   mainEvent: string;
   checklist: ChecklistItem[];
-  readinessPercent: number | null;
   noteQuote: string;
   noteAuthor: string;
 }
@@ -230,20 +281,24 @@ export async function updateTrip(
   await requireItemOwner(existing.owner_handle);
   if (!input.title.trim()) return { ok: false, error: "Give it a title." };
 
+  const legs = validLegs(input.legs);
+  if (legs.length === 0) {
+    return { ok: false, error: "Add at least one stop with a place, country and dates." };
+  }
+
   const { error } = await supabaseAdmin
     .from("trips")
     .update({
       title: input.title.trim(),
       status: input.status,
       visibility: input.visibility,
-      rough_date: input.roughDate.trim() || "Sometime",
-      countries: input.countries.map((c) => c.trim()).filter(Boolean),
-      legs: input.legs.filter((l) => l.place.trim()),
+      rough_date: formatLegsDateRange(legs) || "Sometime",
+      countries: countriesFromLegs(legs),
+      legs,
       summary: input.summary.trim(),
       companion_name: input.companionName.trim() || null,
       main_event: input.mainEvent.trim() || null,
       checklist: input.checklist.filter((c) => c.label.trim()),
-      readiness_percent: input.readinessPercent,
       note_quote: input.noteQuote.trim() || null,
       note_author: input.noteAuthor.trim() || null,
     })
@@ -257,6 +312,39 @@ export async function updateTrip(
   revalidatePath(`/trip/${slug}`);
   revalidatePath(`/trip/${slug}/edit`);
   return { ok: true, slug };
+}
+
+// Soft delete: sets deleted_at instead of removing the row, so nothing
+// downstream (comments, participants, chat, votes) needs cascade
+// handling. lib/data.ts filters deleted_at is null everywhere it reads
+// trips/manifests, so a deleted item simply stops showing up anywhere.
+export async function deleteTrip(tripId: string, slug: string): Promise<CreateItemResult> {
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return { ok: false, error: "Not configured." };
+  }
+
+  const { data: existing } = await supabaseAdmin
+    .from("trips")
+    .select("owner_handle")
+    .eq("id", tripId)
+    .maybeSingle();
+  if (!existing) return { ok: false, error: "Couldn't find that trip." };
+
+  const host = await requireItemOwner(existing.owner_handle);
+
+  const { error } = await supabaseAdmin
+    .from("trips")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", tripId);
+
+  if (error) {
+    console.error("deleteTrip failed", error);
+    return { ok: false, error: "Couldn't delete that. Try again." };
+  }
+
+  revalidatePath(`/trip/${slug}`);
+  revalidatePath(`/${host.handle}`);
+  return { ok: true, slug: host.handle ?? "" };
 }
 
 export interface UpdateManifestInput {
@@ -344,4 +432,33 @@ export async function updateManifest(
   revalidatePath(`/manifest/${slug}`);
   revalidatePath(`/manifest/${slug}/edit`);
   return { ok: true, slug };
+}
+
+export async function deleteManifest(manifestId: string, slug: string): Promise<CreateItemResult> {
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return { ok: false, error: "Not configured." };
+  }
+
+  const { data: existing } = await supabaseAdmin
+    .from("manifests")
+    .select("owner_handle")
+    .eq("id", manifestId)
+    .maybeSingle();
+  if (!existing) return { ok: false, error: "Couldn't find that manifest." };
+
+  const host = await requireItemOwner(existing.owner_handle);
+
+  const { error } = await supabaseAdmin
+    .from("manifests")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", manifestId);
+
+  if (error) {
+    console.error("deleteManifest failed", error);
+    return { ok: false, error: "Couldn't delete that. Try again." };
+  }
+
+  revalidatePath(`/manifest/${slug}`);
+  revalidatePath(`/${host.handle}`);
+  return { ok: true, slug: host.handle ?? "" };
 }

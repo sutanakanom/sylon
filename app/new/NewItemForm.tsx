@@ -7,7 +7,12 @@ import { TripStatus, Visibility, ChecklistItem, SignalItem } from "@/lib/types";
 import { useT } from "@/components/LocaleProvider";
 
 type Kind = "trip" | "manifest";
-type Leg = { place: string; startDate: string; endDate: string };
+type Leg = { place: string; country: string; startDate: string; endDate: string };
+type DateMode = "exact" | "rough";
+
+const MONTH_OPTIONS = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
 
 const inputClass =
   "border-[1.5px] border-ink bg-paper px-4 py-3 text-base outline-none focus:shadow-[4px_4px_0_var(--ink)]";
@@ -19,19 +24,24 @@ export function NewItemForm() {
   const [kind, setKind] = useState<Kind>("trip");
 
   const [title, setTitle] = useState("");
-  const [roughDate, setRoughDate] = useState("");
-  const [countries, setCountries] = useState(""); // comma-separated
+  const [countries, setCountries] = useState(""); // manifest only, comma-separated
   const [summary, setSummary] = useState("");
   const [visibility, setVisibility] = useState<Visibility>("invite-only");
   const [status, setStatus] = useState<TripStatus>("planning");
-  const [legs, setLegs] = useState<Leg[]>([{ place: "", startDate: "", endDate: "" }]);
+  const [legs, setLegs] = useState<Leg[]>([{ place: "", country: "", startDate: "", endDate: "" }]);
 
   // Trip-only detail-page extras.
   const [companionName, setCompanionName] = useState("");
   const [mainEvent, setMainEvent] = useState("");
-  const [readinessPercent, setReadinessPercent] = useState("");
   const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
   const [checklistDraft, setChecklistDraft] = useState("");
+
+  // Manifest-only: date entry (exact range, or just a rough month/year).
+  const [dateMode, setDateMode] = useState<DateMode>("rough");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [roughMonth, setRoughMonth] = useState("");
+  const [roughYear, setRoughYear] = useState("");
 
   // Manifest-only detail-page extras.
   const [purpose, setPurpose] = useState("");
@@ -76,7 +86,7 @@ export function NewItemForm() {
   }
 
   function addLeg() {
-    setLegs((prev) => [...prev, { place: "", startDate: "", endDate: "" }]);
+    setLegs((prev) => [...prev, { place: "", country: "", startDate: "", endDate: "" }]);
   }
 
   function removeLeg(index: number) {
@@ -93,12 +103,15 @@ export function NewItemForm() {
         .map((c) => c.trim())
         .filter(Boolean);
 
+      if (kind === "trip" && !legs.some((l) => l.place.trim() && l.country.trim() && l.startDate && l.endDate)) {
+        setError(t("newItem.noStopError"));
+        return;
+      }
+
       const result =
         kind === "trip"
           ? await createTrip({
               title,
-              roughDate,
-              countries: countryList,
               legs,
               summary,
               visibility,
@@ -106,14 +119,17 @@ export function NewItemForm() {
               companionName,
               mainEvent,
               checklist,
-              readinessPercent: readinessPercent.trim() ? Number(readinessPercent) : null,
               noteQuote,
               noteAuthor,
             })
           : await createManifest({
               title,
               purpose,
-              roughDate,
+              dateMode,
+              startDate,
+              endDate,
+              roughMonth,
+              roughYear,
               countryOptions: countryList,
               summary,
               visibility,
@@ -162,28 +178,19 @@ export function NewItemForm() {
         />
       </label>
 
-      <label className="flex flex-col gap-2">
-        <span className={labelClass}>{t("newItem.roughDate")}</span>
-        <input
-          type="text"
-          value={roughDate}
-          onChange={(e) => setRoughDate(e.target.value)}
-          placeholder={t("newItem.roughDatePlaceholder")}
-          className={inputClass}
-        />
-      </label>
-
-      <label className="flex flex-col gap-2">
-        <span className={labelClass}>{kind === "trip" ? t("newItem.countriesTrip") : t("newItem.countriesManifest")}</span>
-        <input
-          type="text"
-          value={countries}
-          onChange={(e) => setCountries(e.target.value)}
-          placeholder={t("newItem.countriesPlaceholder")}
-          className={inputClass}
-        />
-        <span className="text-xs text-muted">{t("common.commaSeparated")}</span>
-      </label>
+      {kind === "manifest" && (
+        <label className="flex flex-col gap-2">
+          <span className={labelClass}>{t("newItem.countries")}</span>
+          <input
+            type="text"
+            value={countries}
+            onChange={(e) => setCountries(e.target.value)}
+            placeholder={t("newItem.countriesPlaceholder")}
+            className={inputClass}
+          />
+          <span className="text-xs text-muted">{t("common.commaSeparated")}</span>
+        </label>
+      )}
 
       <label className="flex flex-col gap-2">
         <span className={labelClass}>{t("newItem.summary")}</span>
@@ -201,13 +208,22 @@ export function NewItemForm() {
           <span className={labelClass}>{t("newItem.calendar")}</span>
           {legs.map((leg, i) => (
             <div key={i} className="flex flex-col gap-2 border-[1.5px] border-ink p-4">
-              <input
-                type="text"
-                value={leg.place}
-                onChange={(e) => updateLeg(i, "place", e.target.value)}
-                placeholder={t("newItem.place")}
-                className={inputClass}
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={leg.place}
+                  onChange={(e) => updateLeg(i, "place", e.target.value)}
+                  placeholder={t("newItem.place")}
+                  className={`${inputClass} flex-1`}
+                />
+                <input
+                  type="text"
+                  value={leg.country}
+                  onChange={(e) => updateLeg(i, "country", e.target.value)}
+                  placeholder={t("newItem.legCountryPlaceholder")}
+                  className={`${inputClass} flex-1`}
+                />
+              </div>
               <div className="flex gap-2">
                 <input
                   type="date"
@@ -268,19 +284,6 @@ export function NewItemForm() {
             </label>
           </div>
 
-          <label className="flex flex-col gap-2">
-            <span className={labelClass}>{t("newItem.readyMeter")}</span>
-            <input
-              type="number"
-              min={0}
-              max={100}
-              value={readinessPercent}
-              onChange={(e) => setReadinessPercent(e.target.value)}
-              placeholder="72"
-              className={inputClass}
-            />
-          </label>
-
           <div className="flex flex-col gap-3">
             <span className={labelClass}>{t("newItem.checklist")}</span>
             {checklist.length > 0 && (
@@ -324,6 +327,74 @@ export function NewItemForm() {
 
       {kind === "manifest" && (
         <>
+          <div className="flex flex-col gap-3">
+            <span className={labelClass}>{t("newItem.dateMode")}</span>
+            <div className="flex gap-2">
+              {(["rough", "exact"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setDateMode(mode)}
+                  className={`mono-label flex-1 border-[1.5px] border-ink px-4 py-3 text-[0.75rem] transition-colors ${
+                    dateMode === mode ? "bg-ink text-paper" : "bg-paper text-ink"
+                  }`}
+                >
+                  {mode === "exact" ? t("newItem.dateModeExact") : t("newItem.dateModeRough")}
+                </button>
+              ))}
+            </div>
+            {dateMode === "exact" ? (
+              <div className="flex gap-2">
+                <label className="flex flex-1 flex-col gap-2">
+                  <span className={labelClass}>{t("newItem.startDate")}</span>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className={inputClass}
+                  />
+                </label>
+                <label className="flex flex-1 flex-col gap-2">
+                  <span className={labelClass}>{t("newItem.endDate")}</span>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className={inputClass}
+                  />
+                </label>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <label className="flex flex-1 flex-col gap-2">
+                  <span className={labelClass}>{t("newItem.roughMonth")}</span>
+                  <select
+                    value={roughMonth}
+                    onChange={(e) => setRoughMonth(e.target.value)}
+                    className={inputClass}
+                  >
+                    <option value="">{t("newItem.anyMonth")}</option>
+                    {MONTH_OPTIONS.map((label, i) => (
+                      <option key={label} value={String(i + 1)}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="flex flex-1 flex-col gap-2">
+                  <span className={labelClass}>{t("newItem.roughYear")}</span>
+                  <input
+                    type="text"
+                    value={roughYear}
+                    onChange={(e) => setRoughYear(e.target.value)}
+                    placeholder={t("newItem.roughYearPlaceholder")}
+                    className={inputClass}
+                  />
+                </label>
+              </div>
+            )}
+          </div>
+
           <label className="flex flex-col gap-2">
             <span className={labelClass}>{t("newItem.purpose")}</span>
             <input

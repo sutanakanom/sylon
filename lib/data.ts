@@ -118,12 +118,18 @@ export async function getPublicItems(ownerHandle: string): Promise<Item[]> {
   }
 
   const [{ data: trips }, { data: manifests }] = await Promise.all([
-    supabase.from("trips").select("*").eq("visibility", "public").eq("owner_handle", ownerHandle),
+    supabase
+      .from("trips")
+      .select("*")
+      .eq("visibility", "public")
+      .eq("owner_handle", ownerHandle)
+      .is("deleted_at", null),
     supabase
       .from("manifests")
       .select("*")
       .eq("visibility", "public")
-      .eq("owner_handle", ownerHandle),
+      .eq("owner_handle", ownerHandle)
+      .is("deleted_at", null),
   ]);
 
   const tripItems: Trip[] = (trips ?? []).map((row) => tripFromRow(row as TripRow));
@@ -148,6 +154,7 @@ export async function getItemBySlug(slug: string): Promise<Item | null> {
     .from("trips")
     .select("*")
     .eq("slug", slug)
+    .is("deleted_at", null)
     .maybeSingle();
   if (tripRow) return tripFromRow(tripRow as TripRow);
 
@@ -155,6 +162,7 @@ export async function getItemBySlug(slug: string): Promise<Item | null> {
     .from("manifests")
     .select("*")
     .eq("slug", slug)
+    .is("deleted_at", null)
     .maybeSingle();
   if (manifestRow) return manifestFromRow(manifestRow as ManifestRow);
 
@@ -183,12 +191,14 @@ export async function handleExists(ownerHandle: string): Promise<boolean> {
   const { count: tripCount } = await supabaseAdmin
     .from("trips")
     .select("id", { count: "exact", head: true })
-    .eq("owner_handle", ownerHandle);
+    .eq("owner_handle", ownerHandle)
+    .is("deleted_at", null);
   if (tripCount && tripCount > 0) return true;
 
   const { count: manifestCount } = await supabaseAdmin
     .from("manifests")
     .select("id", { count: "exact", head: true })
-    .eq("owner_handle", ownerHandle);
+    .eq("owner_handle", ownerHandle)
+    .is("deleted_at", null);
   return Boolean(manifestCount && manifestCount > 0);
 }
