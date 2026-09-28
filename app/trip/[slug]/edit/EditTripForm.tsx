@@ -341,7 +341,7 @@ export function EditTripForm({ item }: { item: Trip }) {
           type="button"
           onClick={handleDelete}
           disabled={isDeleting}
-          className="mono-label ml-auto border-[1.5px] border-ink px-6 py-3 text-[0.75rem] text-orange disabled:opacity-50"
+          className="mono-label ml-auto border-[1.5px] border-ink px-6 py-3 text-[0.75rem] text-danger disabled:opacity-50"
         >
           {isDeleting ? t("tripEdit.deleting") : t("tripEdit.delete")}
         </button>

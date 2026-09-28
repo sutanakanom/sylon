@@ -734,6 +734,9 @@
 .quietBanner .mono {
   font-size: 0.59rem;
 }
+.showOnNarrow {
+  display: none;
+}
 .quietBanner:hover {
   border-style: solid;
   background: var(--ink);
@@ -1099,6 +1102,12 @@
   }
   .quietBanner .mono:last-child {
     grid-row: 2;
+  }
+  .hideOnNarrow {
+    display: none;
+  }
+  .showOnNarrow {
+    display: inline;
   }
   .storyAction {
     margin-top: 24px;

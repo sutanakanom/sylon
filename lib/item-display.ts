@@ -90,11 +90,11 @@ function formatDayWithYear(isoDate: string): string {
   return `${formatDay(isoDate)} ${year}`;
 }
 
-// "28 Nov — 04 Dec 2026" from a plain list of {startDate, endDate} —
+// "28 Nov – 04 Dec 2026" from a plain list of {startDate, endDate} —
 // earliest start to latest end. Used both for the trip detail page (via
 // formatDateRange below) and server-side when a create/edit action needs
 // to derive a rough_date string straight from submitted legs, without a
-// full Trip object.
+// full Trip object. En dash to match legDateRange()'s per-leg rows below.
 export function formatLegsDateRange(legs: { startDate: string; endDate: string }[]): string {
   if (legs.length === 0) return "";
   const starts = legs.map((l) => l.startDate).sort();
@@ -102,7 +102,7 @@ export function formatLegsDateRange(legs: { startDate: string; endDate: string }
   const start = starts[0];
   const end = ends[ends.length - 1];
   if (start === end) return formatDayWithYear(start);
-  return `${formatDay(start)} — ${formatDayWithYear(end)}`;
+  return `${formatDay(start)} – ${formatDayWithYear(end)}`;
 }
 
 // Same, for a trip already loaded from the database — falls back to the

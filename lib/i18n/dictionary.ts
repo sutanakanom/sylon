@@ -140,6 +140,7 @@ export const dictionary = {
     departures: { en: "{name}'s departures", th: "เที่ยวบินของ {name}" },
     bangkokWherever: { en: "Bangkok → wherever", th: "กรุงเทพฯ → ที่ไหนก็ได้" },
     addPlan: { en: "+ Add a plan", th: "+ เพิ่มแผน" },
+    addPlanShort: { en: "+ Add", th: "+ เพิ่ม" },
     addPlanQuestion: { en: "Something else on your mind?", th: "มีแผนอื่นในใจอีกไหม?" },
     addPlanCta: { en: "Trip or manifest ↗", th: "ทริปหรือแมนิเฟสต์ ↗" },
     requestInvite: { en: "+ Request an invite", th: "+ ขอคำเชิญ" },
@@ -437,7 +438,7 @@ export const dictionary = {
 
   manifestors: dict({
     nobodyClaimed: { en: "Nobody's claimed this one yet.", th: "ยังไม่มีใครรับผิดชอบเรื่องนี้เลย" },
-    illManifestThis: { en: "I'll manifest this", th: "ฉันจะสร้างฝันนี้เอง" },
+    illManifestThis: { en: "Claim this manifest", th: "รับผิดชอบแมนิเฟสต์นี้" },
     equalPower: { en: "Manifestors — equal power", th: "ผู้ร่วมสร้างฝัน — สิทธิ์เท่าเทียมกัน" },
     remove: { en: "remove", th: "ลบ" },
     nominateByEmail: { en: "Nominate by email", th: "เสนอชื่อด้วยอีเมล" },

@@ -5,6 +5,7 @@
   --paper: #f3f0e8;
   --acid: #d8ff43;
   --orange: #ff6b35;
+  --danger: #d4351c;
   --muted: #716f68;
   --footer-grey: #a6a49d;
   --line: rgba(17, 17, 15, 0.18);
@@ -15,6 +16,7 @@
   --color-paper: var(--paper);
   --color-acid: var(--acid);
   --color-orange: var(--orange);
+  --color-danger: var(--danger);
   --color-muted: var(--muted);
   --color-footer-grey: var(--footer-grey);
   --color-line: var(--line);

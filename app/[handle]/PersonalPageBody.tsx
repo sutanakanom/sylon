@@ -196,12 +196,8 @@ export function PersonalPageBody({
                   {t("personalPage.waiting")}
                 </h2>
                 <div className={`${styles.summaryStats} mono`}>
-                  <span>
-                    <b>{tripCount}</b> {tn(tripCount, { one: "trip", other: "trips" }, "ทริป")}
-                  </span>
-                  <span>
-                    <b>{manifestCount}</b> {tn(manifestCount, { one: "manifest", other: "manifests" }, "แมนิเฟสต์")}
-                  </span>
+                  <span>{tn(tripCount, { one: "trip", other: "trips" }, "ทริป")}</span>
+                  <span>{tn(manifestCount, { one: "manifest", other: "manifests" }, "แมนิเฟสต์")}</span>
                 </div>
               </article>
 
@@ -353,7 +349,10 @@ export function PersonalPageBody({
 
             {isOwner ? (
               <Link href="/new" className={styles.quietBanner}>
-                <span className="mono">{t("personalPage.addPlan")}</span>
+                <span className="mono">
+                  <span className={styles.hideOnNarrow}>{t("personalPage.addPlan")}</span>
+                  <span className={styles.showOnNarrow}>{t("personalPage.addPlanShort")}</span>
+                </span>
                 <strong>{t("personalPage.addPlanQuestion")}</strong>
                 <span className="mono">{t("personalPage.addPlanCta")}</span>
               </Link>

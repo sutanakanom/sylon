@@ -153,7 +153,7 @@ export default async function ManifestDetailPage({
       <section className={styles.detailHero}>
         <div className={styles.detailHeroCopy}>
           <span className={`${styles.eyebrow} mono`}>
-            {t(locale, "manifestDetail.manifesting")} ·{" "}
+            {t(locale, "common.manifest")} ·{" "}
             {progress.activeCount >= 2
               ? t(locale, "manifestDetail.manifestingGatheringIdeas")
               : t(locale, "manifestDetail.manifestingJustPosted")}
@@ -398,7 +398,18 @@ export default async function ManifestDetailPage({
 
       {/* Full discussion */}
       <section className="mx-auto w-full max-w-2xl flex-1 px-6 py-10 md:px-10">
-        <h2 className="mb-8 text-lg font-extrabold uppercase">{t(locale, "manifestDetail.everythingSaidSoFar")}</h2>
+        <div className="mb-8 flex items-center justify-between">
+          <h2 className="text-lg font-extrabold uppercase">{t(locale, "manifestDetail.everythingSaidSoFar")}</h2>
+          <FollowButton
+            itemType="manifest"
+            itemId={item.id}
+            slug={item.slug}
+            initialFollowing={following}
+            signedIn={Boolean(member)}
+            followLabel={t(locale, "manifestDetail.followThisIdea")}
+            followingLabel={t(locale, "manifestDetail.followingThisIdea")}
+          />
+        </div>
         <ChatFeed
           manifestId={item.id}
           slug={item.slug}

@@ -221,7 +221,7 @@ export function AdminPanel({
                   type="button"
                   disabled={isPending && busyId === r.id}
                   onClick={() => handleApprove(r)}
-                  className="mono-label border-[1.5px] border-ink bg-paper px-3 py-2 text-[0.65rem] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0_var(--ink)] disabled:opacity-50"
+                  className="mono-label border-[1.5px] border-ink bg-ink px-3 py-2 text-[0.65rem] text-paper transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0_var(--ink)] disabled:opacity-50"
                 >
                   {busyId === r.id && isPending ? "…" : "Send invite"}
                 </button>
@@ -255,7 +255,7 @@ export function AdminPanel({
                   type="button"
                   disabled={isPending && busyId === r.id}
                   onClick={() => handleApproveSignup(r)}
-                  className="mono-label border-[1.5px] border-ink bg-paper px-3 py-2 text-[0.65rem] transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0_var(--ink)] disabled:opacity-50"
+                  className="mono-label border-[1.5px] border-ink bg-ink px-3 py-2 text-[0.65rem] text-paper transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0_var(--ink)] disabled:opacity-50"
                 >
                   {busyId === r.id && isPending ? "…" : "Approve"}
                 </button>
