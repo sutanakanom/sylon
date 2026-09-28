@@ -140,6 +140,34 @@ export async function getPublicItems(ownerHandle: string): Promise<Item[]> {
   return [...tripItems, ...manifestItems];
 }
 
+// A host looking at their own personal page should see everything they've
+// published — public AND invite-only — not just the public subset a
+// visitor gets from getPublicItems(). Uses the admin client (bypasses RLS)
+// since an anon-key read of invite-only rows would otherwise come back
+// empty. Only call this once the caller has confirmed the viewer actually
+// owns this handle.
+export async function getOwnerItems(ownerHandle: string): Promise<Item[]> {
+  if (!isSupabaseAdminConfigured || !supabaseAdmin) {
+    return seedItems.filter((item) => item.ownerHandle === ownerHandle);
+  }
+
+  const [{ data: trips }, { data: manifests }] = await Promise.all([
+    supabaseAdmin.from("trips").select("*").eq("owner_handle", ownerHandle).is("deleted_at", null),
+    supabaseAdmin
+      .from("manifests")
+      .select("*")
+      .eq("owner_handle", ownerHandle)
+      .is("deleted_at", null),
+  ]);
+
+  const tripItems: Trip[] = (trips ?? []).map((row) => tripFromRow(row as TripRow));
+  const manifestItems: Manifest[] = (manifests ?? []).map((row) =>
+    manifestFromRow(row as ManifestRow)
+  );
+
+  return [...tripItems, ...manifestItems];
+}
+
 // Fetches one Trip or Manifest by slug regardless of visibility — the
 // page that calls this decides what a visitor is allowed to see (public
 // items show full detail to anyone; invite-only items require a signed-in

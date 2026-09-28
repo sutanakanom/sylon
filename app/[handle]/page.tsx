@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getPublicItems, handleExists } from "@/lib/data";
+import { getPublicItems, getOwnerItems, handleExists } from "@/lib/data";
 import { getCurrentMember } from "@/lib/current-member";
 import { getLocale } from "@/lib/i18n/locale";
 import { t } from "@/lib/i18n/dictionary";
@@ -14,14 +14,18 @@ export default async function PersonalPage({
 }) {
   const { handle } = await params;
 
-  const [exists, items, member, locale] = await Promise.all([
+  const [exists, member, locale] = await Promise.all([
     handleExists(handle),
-    getPublicItems(handle),
     getCurrentMember(),
     getLocale(),
   ]);
 
   if (!exists) notFound();
+
+  // The host sees everything they've published on their own page,
+  // invite-only included — a visitor still only sees the public subset.
+  const isOwner = member?.handle === handle;
+  const items = isOwner ? await getOwnerItems(handle) : await getPublicItems(handle);
 
   const displayName = handle.charAt(0).toUpperCase() + handle.slice(1);
 
@@ -32,7 +36,7 @@ export default async function PersonalPage({
           items={items}
           displayName={displayName}
           handle={handle}
-          isOwner={member?.handle === handle}
+          isOwner={isOwner}
           showInviteCta={!member}
         />
 
